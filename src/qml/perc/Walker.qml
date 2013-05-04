@@ -4,15 +4,15 @@ Rectangle {
     property int row: -1
     property int col: -1
 
-    width: 5
-    height: 5
+    width: 10
+    height: 10
     color: "#F03B20"
 
     onColChanged: {
-        x = col * 10 + 5 / 2
+        x = col * 10 + (10 - width) / 2
     }
     onRowChanged: {
-        y = row * 10 + 5 / 2
+        y = row * 10 + (10 - width) / 2
     }
 
     Behavior on x {

@@ -5,12 +5,11 @@
 
 #include <QObject>
 #include <QMetaType>
+#include <QVariant>
+#include <QVariantList>
 
 #include <armadillo>
 #include <iostream>
-
-using namespace arma;
-using namespace std;
 
 class PercolationSystem : public QObject
 {
@@ -21,8 +20,8 @@ public:
     PercolationSystem(QObject* parent = 0);
 //    void setPercolationSystemGraphics(PercolationSystemGraphics* graphics);
 
-    const umat &occupationMatrix();
-    const mat& probabilityMatrix();
+    const arma::umat &occupationMatrix();
+    const arma::mat& probabilityMatrix();
     int nRows() const
     {
         return m_nRows;
@@ -40,6 +39,9 @@ public:
     Q_INVOKABLE uint area(int row, int col);
     Q_INVOKABLE uint maxLabel();
     Q_INVOKABLE uint maxArea();
+    Q_INVOKABLE double maxFlow();
+    Q_INVOKABLE double pressure(int row, int col);
+    Q_INVOKABLE double flow(int row, int col);
 public slots:
     void initialize(int nRows, int nCols, double p);
 signals:
@@ -51,22 +53,25 @@ protected:
     // functions
     void generateLabelMatrix();
     void generateAreaMatrix();
+    void generatePressureAndFlowMatrices();
 
     // members
     int m_nRows;
     int m_nCols;
 
-    mat m_valueMatrix;
-    umat m_occupationMatrix;
-    umat m_labelMatrix;
-    umat m_areaMatrix;
+    arma::mat m_valueMatrix;
+    arma::umat m_occupationMatrix;
+    arma::umat m_labelMatrix;
+    arma::umat m_areaMatrix;
+    arma::mat m_pressureMatrix;
+    arma::mat m_flowMatrix;
 };
 
-inline const umat& PercolationSystem::occupationMatrix() {
+inline const arma::umat& PercolationSystem::occupationMatrix() {
     return m_occupationMatrix;
 }
 
-inline const mat& PercolationSystem::probabilityMatrix() {
+inline const arma::mat& PercolationSystem::probabilityMatrix() {
     return m_valueMatrix;
 }
 

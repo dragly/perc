@@ -5,6 +5,7 @@ function populate() {
 //    var nRows = percolationSystem.nRows;
 //    var nCols = percolationSystem.nCols;
 //    sites = new Array(percolationSystem.nRows * percolationSystem.nCols)
+//    console.log("Setting up matrix in QML")
 //    var component = Qt.createComponent("PercolationSite.qml")
 //    for(var i = 0; i < percolationSystem.nRows; i++) {
 //        for(var j = 0; j < percolationSystem.nCols; j++) {
@@ -25,6 +26,7 @@ function populate() {
 }
 
 function createRandomWalker() {
+    console.log("Creating random walker")
     var component = Qt.createComponent("RandomWalker.qml")
     var found = false;
     var nAttempts = 0;
@@ -51,7 +53,12 @@ function createRandomWalker() {
     }
 }
 
-function createDirectionWalker() {
+function createDirectionWalker(type) {
+    if(type === undefined) {
+        type = "left"
+    }
+
+    console.log("Creating direction walker")
     var component = Qt.createComponent("DirectionWalker.qml")
     var found = false;
     var nAttempts = 0;
@@ -79,7 +86,7 @@ function createDirectionWalker() {
                 occupiedNeighbors += 1
             }
             if(occupiedNeighbors < 2) { // only one way out - otherwise we might get stuck
-                var walker = component.createObject(percolationMatrix);
+                var walker = component.createObject(percolationMatrix, {type: type});
                 if(walker === null) {
                     console.log("ERROR! Could not create PercolationSite!")
                     return false;

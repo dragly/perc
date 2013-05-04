@@ -3,21 +3,15 @@ import com.dragly.perc 1.0
 
 import "logic.js" as Logic
 
-Rectangle {
+Item {
     id: sceneRoot
     width: 200
     height: 300
-    color: "yellow"
-    Rectangle {
-        x: 20
-        y: 30
-        color: "red"
-        width: 100
-        height: 100
-    }
 
     PercolationMatrix {
         id: percolationMatrix
+        nRows: 120
+        nCols: 120
     }
 
     PercolationSystem {
@@ -35,9 +29,11 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        percolationSystem.initialize(200,200,0.6)
-        Logic.populate()
-        Logic.createRandomWalker()
-        Logic.createDirectionWalker(0)
+        percolationSystem.initialize(percolationMatrix.nRows,percolationMatrix.nCols,0.6)
+        for(var i = 0; i < 5; i++) {
+            Logic.createRandomWalker()
+            Logic.createDirectionWalker("left")
+            Logic.createDirectionWalker("right")
+        }
     }
 }

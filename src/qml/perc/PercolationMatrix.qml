@@ -4,14 +4,17 @@ Rectangle {
     property int nRows: 0
     property int nCols: 0
 
-    width: 1000
-    height: 1000
-    color: "pink"
+    width: nRows * 10
+    height: nCols * 10
 
     Canvas {
         anchors.fill: parent
         onPaint: {
+            console.log("Painting matrix")
+//            console.log("Paint requested!")
             var ctx = getContext("2d");
+            var index = 0;
+            var maxArea = percolationSystem.maxArea();
             for(var i = 0; i < percolationSystem.nRows; i++) {
                 for(var j = 0; j < percolationSystem.nCols; j++) {
 //                    var site = component.createObject(percolationMatrix);
@@ -27,13 +30,13 @@ Rectangle {
 //                    site.label = percolationSystem.label(i,j)
 //                    site.area = percolationSystem.area(i,j)
                     if(percolationSystem.isOccupied(i,j)) {
-                        ctx.fillStyle = "#fff000";
+                        var areaRatio = percolationSystem.area(i,j) / maxArea;
+                        ctx.fillStyle = Qt.rgba(0.1, areaRatio / 2 + 0.4, 0.9, 1);
                     } else {
-                        ctx.fillStyle = "#000fff";
+                        ctx.fillStyle = "#084081";
                     }
-                    ctx.fillRect(i*10,j*10,10,10);
-                    ctx.fillStyle = "#ffffff";
-                    ctx.fillRect(20,10,10,10);
+                    ctx.fillRect(j*10,i*10,10,10);
+                    index += 1;
                 }
             }
         }

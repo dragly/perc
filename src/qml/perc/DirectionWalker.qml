@@ -3,6 +3,7 @@ import QtQuick 2.0
 Walker {
     property string type: "left"
     property int direction: 0
+    color: (type === "left" ? "red" : "orange")
     onTypeChanged: {
         if(type !== "left" && type !== "right") {
             console.log("ERROR! Type of walker must be left/right.")

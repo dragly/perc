@@ -1,6 +1,7 @@
 import QtQuick 2.0
 
 Walker {
+    color: "yellow"
     function move() {
         var randomIndex = parseInt(Math.random() * 4)
         var found = false
