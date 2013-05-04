@@ -2,26 +2,26 @@ var sites;
 var walkers = [];
 
 function populate() {
-    var nRows = percolationSystem.nRows;
-    var nCols = percolationSystem.nCols;
-    sites = new Array(percolationSystem.nRows * percolationSystem.nCols)
-    var component = Qt.createComponent("PercolationSite.qml")
-    for(var i = 0; i < percolationSystem.nRows; i++) {
-        for(var j = 0; j < percolationSystem.nCols; j++) {
-            var site = component.createObject(percolationMatrix);
-            if(site === null) {
-                console.log("ERROR! Could note create PercolationSite!")
-                return false;
-            }
-            site.occupied = percolationSystem.isOccupied(i,j);
-            site.row = i
-            site.col = j
-            site.value = percolationSystem.value(i,j)
-            sites[i * nCols + j] = site;
-            site.label = percolationSystem.label(i,j)
-            site.area = percolationSystem.area(i,j)
-        }
-    }
+//    var nRows = percolationSystem.nRows;
+//    var nCols = percolationSystem.nCols;
+//    sites = new Array(percolationSystem.nRows * percolationSystem.nCols)
+//    var component = Qt.createComponent("PercolationSite.qml")
+//    for(var i = 0; i < percolationSystem.nRows; i++) {
+//        for(var j = 0; j < percolationSystem.nCols; j++) {
+//            var site = component.createObject(percolationMatrix);
+//            if(site === null) {
+//                console.log("ERROR! Could note create PercolationSite!")
+//                return false;
+//            }
+//            site.occupied = percolationSystem.isOccupied(i,j);
+//            site.row = i
+//            site.col = j
+//            site.value = percolationSystem.value(i,j)
+//            sites[i * nCols + j] = site;
+//            site.label = percolationSystem.label(i,j)
+//            site.area = percolationSystem.area(i,j)
+//        }
+//    }
 }
 
 function createRandomWalker() {
