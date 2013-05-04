@@ -70,14 +70,9 @@ Rectangle {
             } else if(wheel.angleDelta.y < 0) {
                 gameScene.targetScale /= 1.5
             }
-            console.log("Setting new position")
             var newPosition = mapFromItem(gameScene, relativeMouse.x, relativeMouse.y)
             gameScene.x += wheel.x - newPosition.x
             gameScene.y += wheel.y - newPosition.y
-
-            console.log(gameScene.scaleOriginX)
-            console.log(gameScene.scaleOriginY)
-            //            gameScene.targetScale = 1.5
         }
 
         onPositionChanged: {

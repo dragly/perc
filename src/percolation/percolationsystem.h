@@ -35,6 +35,11 @@ public:
 
     Q_INVOKABLE bool isOccupied(int row, int col);
 
+    Q_INVOKABLE double value(int row, int col);
+    Q_INVOKABLE uint label(int row, int col);
+    Q_INVOKABLE uint area(int row, int col);
+    Q_INVOKABLE uint maxLabel();
+    Q_INVOKABLE uint maxArea();
 public slots:
     void initialize(int nRows, int nCols, double p);
 signals:
@@ -42,12 +47,19 @@ signals:
     void nColsChanged(int arg);
 
 protected:
-//    PercolationSystemGraphics* m_graphics;
+
+    // functions
+    void generateLabelMatrix();
+    void generateAreaMatrix();
+
+    // members
     int m_nRows;
     int m_nCols;
 
-    mat m_probabilityMatrix;
+    mat m_valueMatrix;
     umat m_occupationMatrix;
+    umat m_labelMatrix;
+    umat m_areaMatrix;
 };
 
 inline const umat& PercolationSystem::occupationMatrix() {
@@ -55,7 +67,7 @@ inline const umat& PercolationSystem::occupationMatrix() {
 }
 
 inline const mat& PercolationSystem::probabilityMatrix() {
-    return m_probabilityMatrix;
+    return m_valueMatrix;
 }
 
 #endif // PERCOLATIONSYSTEM_H

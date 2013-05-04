@@ -8,10 +8,26 @@ Rectangle {
     height: 100
     color: "pink"
 
-    function initialize() {
-        var component = Qt.createComponent("qml/perc/PercolationSite.qml")
-        if(!component) {
-            console.log("Error!")
-        }
-    }
+//    Canvas {
+//        anchors.fill: parent
+//        onPaint: {
+//            var ctx = getContext();
+//            for(var i = 0; i < percolationSystem.nRows; i++) {
+//                for(var j = 0; j < percolationSystem.nCols; j++) {
+//                    var site = component.createObject(percolationMatrix);
+//                    if(site === null) {
+//                        console.log("ERROR! Could note create PercolationSite!")
+//                        return false;
+//                    }
+//                    site.occupied = percolationSystem.isOccupied(i,j);
+//                    site.row = i
+//                    site.col = j
+//                    site.value = percolationSystem.value(i,j)
+//                    sites[i * nCols + j] = site;
+//                    site.label = percolationSystem.label(i,j)
+//                    site.area = percolationSystem.area(i,j)
+//                }
+//            }
+//        }
+//    }
 }

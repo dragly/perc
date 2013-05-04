@@ -5,7 +5,7 @@
 #include <QDebug>
 
 #include <src/percolation/percolationsystem.h>
-#include <src/percolation/percolationsystemgraphics.h>
+//#include <src/percolation/percolationsystemgraphics.h>
 
 Game::Game() :
     m_gameScene(NULL)
