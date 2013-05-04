@@ -20,8 +20,7 @@ SOURCES += main.cpp \
     gameobject/gameobject.cpp \
     components/physicscomponent.cpp \
     components/graphicscomponent.cpp \
-    components/gameobjectcomponent.cpp \
-    percolation/percolationsystemgraphics.cpp
+    components/gameobjectcomponent.cpp
 
 # Installation path
 # target.path =
@@ -36,8 +35,7 @@ HEADERS += \
     gameobject/gameobject.h \
     components/physicscomponent.h \
     components/graphicscomponent.h \
-    components/gameobjectcomponent.h \
-    percolation/percolationsystemgraphics.h
+    components/gameobjectcomponent.h
 
 OTHER_FILES += \
     qml/perc/GameView.qml
