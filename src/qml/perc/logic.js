@@ -1,28 +1,44 @@
 var sites;
 var walkers = [];
+var clusters = [];
+var pressureSources = [];
+var clusterComponent = Qt.createComponent("Cluster.qml")
+var pressureSourceComponent = Qt.createComponent("sources/PressureSource.qml")
 
-function populate() {
-//    var nRows = percolationSystem.nRows;
-//    var nCols = percolationSystem.nCols;
-//    sites = new Array(percolationSystem.nRows * percolationSystem.nCols)
-//    console.log("Setting up matrix in QML")
-//    var component = Qt.createComponent("PercolationSite.qml")
-//    for(var i = 0; i < percolationSystem.nRows; i++) {
-//        for(var j = 0; j < percolationSystem.nCols; j++) {
-//            var site = component.createObject(percolationMatrix);
-//            if(site === null) {
-//                console.log("ERROR! Could note create PercolationSite!")
-//                return false;
-//            }
-//            site.occupied = percolationSystem.isOccupied(i,j);
-//            site.row = i
-//            site.col = j
-//            site.value = percolationSystem.value(i,j)
-//            sites[i * nCols + j] = site;
-//            site.label = percolationSystem.label(i,j)
-//            site.area = percolationSystem.area(i,j)
-//        }
-//    }
+function createPressureSource() {
+    var found = false;
+    var nAttempts = 0;
+    while(!found) {
+        if(nAttempts > 100000) {
+            console.log("Could not place walker!")
+            break;
+        }
+        var i = parseInt(Math.random() * percolationSystem.nRows)
+        var j = parseInt(Math.random() * percolationSystem.nCols)
+        if(percolationSystem.isOccupied(i,j)) {
+            var pressureSource = pressureSourceComponent.createObject(sceneRoot)
+            if(pressureSource === null) {
+                console.log("Could not create pressure source component.")
+                console.log(pressureSourceComponent.errorString())
+                return false
+            }
+
+            pressureSource.row = i
+            pressureSource.col = j
+            found = true
+            pressureSources.push(pressureSource)
+        }
+
+        nAttempts += 1
+    }
+}
+
+function refreshPressures() {
+    percolationSystem.clearPressureSources()
+    for(var i in pressureSources) {
+        var pressureSource = pressureSources[i]
+        percolationSystem.addPressureSource(pressureSource)
+    }
 }
 
 function createRandomWalker(type) {
@@ -42,7 +58,7 @@ function createRandomWalker(type) {
         if(percolationSystem.isOccupied(i,j)) {
             var walker = component.createObject(sceneRoot, {type: type});
             if(walker === null) {
-                console.log("ERROR! Could note create PercolationSite!")
+                console.log("ERROR! Could note create RandomWalker!")
                 return false;
             }
             walker.row = i
@@ -50,6 +66,7 @@ function createRandomWalker(type) {
             found = true
             walkers.push(walker)
         }
+        nAttempts += 1
     }
 }
 

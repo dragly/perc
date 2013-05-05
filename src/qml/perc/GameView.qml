@@ -8,6 +8,7 @@ Rectangle {
     GameScene {
         id: gameScene
         objectName: "gameScene"
+        imageType: gameMenu.imageType
         property real targetScale: scale
         readonly property alias currentScale: scaleTransform.xScale
         property alias scaleOriginX: scaleTransform.origin.x
@@ -94,5 +95,9 @@ Rectangle {
             prevX = -1
             prevY = -1
         }
+    }
+
+    GameMenu {
+        id: gameMenu
     }
 }

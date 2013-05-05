@@ -5,13 +5,16 @@ import "logic.js" as Logic
 
 Item {
     id: sceneRoot
+
+    property alias imageType: percolationSystem.imageType
+
     width: 200
     height: 300
 
     PercolationSystem {
         id: percolationSystem
-        width: 500
-        height: 500
+        width: nCols
+        height: nRows
         nRows: 500
         nCols: 500
         occupationTreshold: 0.55
@@ -26,13 +29,16 @@ Item {
         z: -10
     }
 
+    onImageTypeChanged: {
+        percolationSystem.update()
+    }
+
     Timer {
         id: percolationRefresh
         interval: 1000
         repeat: true
         running: true
         onTriggered: {
-            percolationSystem.recalculateMatricesInThread()
         }
     }
 
@@ -44,9 +50,12 @@ Item {
         repeat: true
         onTriggered: {
             Logic.moveWalkers()
+            Logic.refreshPressures()
+//            percolationSystem.recalculateMatricesInThread()
+            percolationSystem.update()
             triggers += 1
             if (triggers > 10) {
-                percolationSystem.update()
+//                Logic.refreshClusters()
                 triggers = 0
             }
         }
@@ -54,11 +63,12 @@ Item {
 
     Component.onCompleted: {
         percolationSystem.initialize()
-        for (var i = 0; i < 10; i++) {
+        for (var i = 0; i < 100; i++) {
             Logic.createRandomWalker("raise")
             Logic.createRandomWalker("lower")
             Logic.createDirectionWalker("left")
             Logic.createDirectionWalker("right")
+            Logic.createPressureSource()
         }
     }
 }
