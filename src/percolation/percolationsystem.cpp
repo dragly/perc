@@ -96,6 +96,8 @@ double PercolationSystem::maxFlow()
 }
 
 void PercolationSystem::generateLabelMatrix() {
+    QTime time;
+    time.start();
     m_labelMatrix = zeros<umat>(m_nRows, m_nCols);
     int currentLabel = 1;
     imat directions = zeros<imat>(4,2);
@@ -154,9 +156,12 @@ void PercolationSystem::generateLabelMatrix() {
             currentLabel += 1;
         }
     }
+    qDebug() << "Label time" << time.elapsed();
 }
 
 void PercolationSystem::generateAreaMatrix() {
+    QTime time;
+    time.start();
     m_areaMatrix = zeros<umat>(m_nRows, m_nCols);
     uvec areas = zeros<uvec>(m_labelMatrix.max() + 1);
 
@@ -168,10 +173,11 @@ void PercolationSystem::generateAreaMatrix() {
         }
     }
 
-    for(int l = 1; l <= m_labelMatrix.max(); l++) {
+    for(uint l = 1; l <= m_labelMatrix.max(); l++) {
         uvec indices = find(m_labelMatrix == l);
         m_areaMatrix.elem(indices) = areas(l) * ones<uvec>(indices.n_elem);
     }
+    qDebug() << "Area time" << time.elapsed();
 }
 
 void PercolationSystem::generatePressureAndFlowMatrices() {
@@ -179,7 +185,7 @@ void PercolationSystem::generatePressureAndFlowMatrices() {
     m_flowMatrix = zeros(m_nRows, m_nCols);
     int percolationLabel = -1;
     for(int i = 0; i < m_nRows; i++) {
-        int leftLabel = m_labelMatrix(i,0);
+        uint leftLabel = m_labelMatrix(i,0);
         if(leftLabel == 0) {
             continue;
         }
