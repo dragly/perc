@@ -47,7 +47,7 @@ Item {
     }
 
     Component.onCompleted: {
-        percolationSystem.initialize(200,200,0.55)
+        percolationSystem.initialize(1000,1000,0.55)
         for(var i = 0; i < 200; i++) {
             Logic.createRandomWalker()
             Logic.createDirectionWalker("left")

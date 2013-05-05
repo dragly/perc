@@ -106,74 +106,56 @@ double PercolationSystem::maxFlow()
     return m_flowMatrix.max();
 }
 
+bool PercolationSystem::labelSelfAndNeighbors(int row, int col, int label) {
+    if(row < 0 || col < 0 || row > m_nRows - 1 || col > m_nCols - 1) {
+        return false;
+    }
+    if(m_labelMatrix(row,col) > 0 || m_occupationMatrix(row, col) < 1) {
+        // Site already visited or not occupied, nothing to do here
+        return false;
+    }
+    m_labelMatrix(row, col) = label;
+    for(uint d = 0; d < m_visitDirections.n_elem; d++) {
+        labelSelfAndNeighbors(row + m_visitDirections(d,0), col + m_visitDirections(d,1), label);
+    }
+    return true;
+}
+
 void PercolationSystem::generateLabelMatrix() {
     QTime time;
     time.start();
+
+    m_visitDirections = zeros<imat>(4,2);
+    m_visitDirections(0,0) = -1;
+    m_visitDirections(1,1) = 1;
+    m_visitDirections(2,0) = 1;
+    m_visitDirections(3,1) = -1;
+    m_visitDirections(0,0) = -1;
+
     m_labelMatrix = zeros<umat>(m_nRows, m_nCols);
     int currentLabel = 1;
     imat directions = zeros<imat>(4,2);
-//    directions(0,0) = -1;
-//    directions(1,1) = 1;
-//    directions(2,0) = 1;
-//    directions(3,1) = -1;
-//    directions(0,0) = -1;
+    //    directions(0,0) = -1;
+    //    directions(1,1) = 1;
+    //    directions(2,0) = 1;
+    //    directions(3,1) = -1;
+    //    directions(0,0) = -1;
     directions(0,1) = -1;
     directions(1,0) = -1;
-//    directions(3,1) = -1;
+    //    directions(3,1) = -1;
 
     uvec foundLabels = zeros<uvec>(2);
     qDebug() << "Label time1" << time.elapsed();
 
     for(int i = 0; i < m_nRows; i++) {
         for(int j = 0; j < m_nCols; j++) {
-            if(m_occupationMatrix(i,j) == 1) {
-                int nFoundLabels = 0;
-                foundLabels.zeros();
-                for(int d = 0; d < 2; d++) {
-                    int i2 = i + directions(d,0);
-                    int j2 = j + directions(d,1);
-                    if(isOccupied(i2,j2)) {
-                        int otherLabel = m_labelMatrix(i2, j2);
-                        if(otherLabel > 0) {
-                            nFoundLabels += 1;
-                            foundLabels(d) = otherLabel;
-                        }
-                    }
-                }
-                if(nFoundLabels > 0) {
-                    uint newLabel = INFINITY;
-                    for(uint d = 0; d < 2; d++) {
-                        if(foundLabels(d) < newLabel && foundLabels(d) > 0) {
-                            newLabel = foundLabels(d);
-                        }
-                    }
-                    for(uint d = 0; d < 2; d++) {
-                        if(foundLabels(d) != newLabel && foundLabels(d) != 0) {
-                            uvec indices = find(m_labelMatrix == foundLabels(d));
-                            m_labelMatrix.elem(indices) = newLabel * ones<uvec>(indices.n_elem);
-                        }
-                    }
-                    m_labelMatrix(i,j) = newLabel;
-                } else {
-                    m_labelMatrix(i,j) = currentLabel;
-                    currentLabel += 1;
-                }
+            if(labelSelfAndNeighbors(i,j,currentLabel)) {
+                currentLabel += 1;
             }
         }
     }
+    cout << "Current label " << currentLabel << endl;
     qDebug() << "Label time2" << time.elapsed();
-
-    // Compact
-    currentLabel = 1;
-    uint currentMax = m_labelMatrix.max();
-    for(uint i = 1; i <= currentMax; i++) {
-        uvec indices = find(m_labelMatrix == i);
-        if(indices.n_elem > 0) {
-            m_labelMatrix.elem(indices) = currentLabel * ones<uvec>(indices.n_elem);
-            currentLabel += 1;
-        }
-    }
-    qDebug() << "Label time3" << time.elapsed();
 }
 
 void PercolationSystem::generateAreaMatrix() {
@@ -347,7 +329,7 @@ void PercolationSystem::paint(QPainter *painter)
     painter->setPen(Qt::transparent);
     QColor background("#084081");
     QColor occupiedColor("#A8DDB5");
-//    double maxAreaLocal = maxArea();
+        double maxAreaLocal = maxArea();
     QImage image(m_nCols, m_nRows, QImage::Format_ARGB32);
     qDebug() << "Draw time0" << time.elapsed();
     QRgb backRgb = background.rgba();
@@ -356,16 +338,18 @@ void PercolationSystem::paint(QPainter *painter)
     for(int i = 0; i < m_nRows; i++) {
         for(int j = 0; j < m_nCols; j++) {
             if(isOccupied(i,j)) {
-//                double areaRatio =  m_areaMatrix(i,j) / maxAreaLocal;
-//                double areaRatio =  m_valueMatrix(i,j) / maxValueLocal;
-//                painter->setBrush(occupiedColor);
-                image.setPixel(j,i,occupiedRgb);
+                double areaRatio =  m_areaMatrix(i,j) / maxAreaLocal;
+                //                double areaRatio =  m_valueMatrix(i,j) / maxValueLocal;
+                //                painter->setBrush(occupiedColor);
+                QColor areaColor(0.1 * 255, areaRatio * 255, 0.8*255, 255);
+                //                image.setPixel(j,i,occupiedRgb);
+                image.setPixel(j,i,areaColor.rgba());
 
             } else {
-//                painter->setBrush(background);
+                //                painter->setBrush(background);
                 image.setPixel(j,i,backRgb);
             }
-//            painter->drawRect(j*10, i*10, 10, 10);
+            //            painter->drawRect(j*10, i*10, 10, 10);
         }
     }
     qDebug() << "Draw time1" << time.elapsed();
