@@ -16,8 +16,8 @@ Item {
 
     PercolationSystem {
         id: percolationSystem
-        width: 500
-        height: 500
+        width: 5000
+        height: 5000
         transform:
             Scale {
                 origin.x: 0
@@ -28,6 +28,20 @@ Item {
 
         smooth: false
         z: -10
+    }
+
+    Binding {
+
+    }
+
+    Timer {
+        id: percolationRefresh
+        interval: 1000
+        repeat: true
+        running: true
+        onTriggered: {
+            percolationSystem.recalculateMatrices()
+        }
     }
 
     Timer {

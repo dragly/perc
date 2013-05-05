@@ -46,9 +46,10 @@ public:
     Q_INVOKABLE void lowerValue(int row, int col);
     Q_INVOKABLE void raiseValue(int row, int col);
     void paint(QPainter *painter);
-    bool labelSelfAndNeighbors(int row, int col, int label);
+    int labelSelfAndNeighbors(int row, int col, int label);
 public slots:
     void initialize(int nRows, int nCols, double p);
+    void recalculateMatrices();
 signals:
     void nRowsChanged(int arg);
     void nColsChanged(int arg);
@@ -60,6 +61,7 @@ protected:
     void generateAreaMatrix();
     void generatePressureAndFlowMatrices();
     void generateOccupationMatrix();
+
 
     // members
     int m_nRows;
@@ -75,6 +77,8 @@ protected:
 
 
     arma::imat m_visitDirections;
+
+    std::vector<int> m_areas;
 };
 
 inline const arma::umat& PercolationSystem::occupationMatrix() {
