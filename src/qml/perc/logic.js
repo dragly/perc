@@ -40,7 +40,7 @@ function createRandomWalker() {
         var i = parseInt(Math.random() * percolationSystem.nRows)
         var j = parseInt(Math.random() * percolationSystem.nCols)
         if(percolationSystem.isOccupied(i,j)) {
-            var walker = component.createObject(percolationMatrix);
+            var walker = component.createObject(sceneRoot);
             if(walker === null) {
                 console.log("ERROR! Could note create PercolationSite!")
                 return false;
@@ -86,7 +86,7 @@ function createDirectionWalker(type) {
                 occupiedNeighbors += 1
             }
             if(occupiedNeighbors < 2) { // only one way out - otherwise we might get stuck
-                var walker = component.createObject(percolationMatrix, {type: type});
+                var walker = component.createObject(sceneRoot, {type: type});
                 if(walker === null) {
                     console.log("ERROR! Could not create PercolationSite!")
                     return false;

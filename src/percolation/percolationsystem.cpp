@@ -36,13 +36,13 @@ void PercolationSystem::initialize(int nRows, int nCols, double p) {
     m_pressureMatrix = zeros(nRows, nCols);
 
     //    cout << m_valueMatrix << endl;
-
+    cout << "Generating occupation matrix..." << endl;
     m_occupationMatrix = m_valueMatrix < p;
 
-    cout << "Generating label matrix..." << endl;
-    generateLabelMatrix();
-    cout << "Generating area matrix..." << endl;
-    generateAreaMatrix();
+//    cout << "Generating label matrix..." << endl;
+//    generateLabelMatrix();
+//    cout << "Generating area matrix..." << endl;
+//    generateAreaMatrix();
 
     //    generatePressureAndFlowMatrices();
 
@@ -101,19 +101,24 @@ void PercolationSystem::generateLabelMatrix() {
     m_labelMatrix = zeros<umat>(m_nRows, m_nCols);
     int currentLabel = 1;
     imat directions = zeros<imat>(4,2);
-    directions(0,0) = -1;
-    directions(1,1) = 1;
-    directions(2,0) = 1;
-    directions(3,1) = -1;
+//    directions(0,0) = -1;
+//    directions(1,1) = 1;
+//    directions(2,0) = 1;
+//    directions(3,1) = -1;
+//    directions(0,0) = -1;
+    directions(0,1) = -1;
+    directions(1,0) = -1;
+//    directions(3,1) = -1;
 
-    uvec foundLabels = zeros<uvec>(4);
+    uvec foundLabels = zeros<uvec>(2);
+    qDebug() << "Label time1" << time.elapsed();
 
     for(int i = 0; i < m_nRows; i++) {
         for(int j = 0; j < m_nCols; j++) {
             if(m_occupationMatrix(i,j) == 1) {
                 int nFoundLabels = 0;
                 foundLabels.zeros();
-                for(int d = 0; d < 4; d++) {
+                for(int d = 0; d < 2; d++) {
                     int i2 = i + directions(d,0);
                     int j2 = j + directions(d,1);
                     if(isOccupied(i2,j2)) {
@@ -126,12 +131,12 @@ void PercolationSystem::generateLabelMatrix() {
                 }
                 if(nFoundLabels > 0) {
                     uint newLabel = INFINITY;
-                    for(uint d = 0; d < 4; d++) {
+                    for(uint d = 0; d < 2; d++) {
                         if(foundLabels(d) < newLabel && foundLabels(d) > 0) {
                             newLabel = foundLabels(d);
                         }
                     }
-                    for(uint d = 0; d < 4; d++) {
+                    for(uint d = 0; d < 2; d++) {
                         if(foundLabels(d) != newLabel && foundLabels(d) != 0) {
                             uvec indices = find(m_labelMatrix == foundLabels(d));
                             m_labelMatrix.elem(indices) = newLabel * ones<uvec>(indices.n_elem);
@@ -145,6 +150,7 @@ void PercolationSystem::generateLabelMatrix() {
             }
         }
     }
+    qDebug() << "Label time2" << time.elapsed();
 
     // Compact
     currentLabel = 1;
@@ -156,7 +162,7 @@ void PercolationSystem::generateLabelMatrix() {
             currentLabel += 1;
         }
     }
-    qDebug() << "Label time" << time.elapsed();
+    qDebug() << "Label time3" << time.elapsed();
 }
 
 void PercolationSystem::generateAreaMatrix() {
@@ -328,12 +334,15 @@ void PercolationSystem::paint(QPainter *painter)
     time.start();
     painter->setPen(Qt::transparent);
     QColor background("#084081");
-    double maxAreaLocal = maxArea();
+    QColor occupiedColor("#084081");
+//    double maxAreaLocal = maxArea();
+    double maxValueLocal = m_valueMatrix.max();
     for(int i = 0; i < m_nRows; i++) {
         for(int j = 0; j < m_nCols; j++) {
             if(isOccupied(i,j)) {
-                double areaRatio =  m_areaMatrix(i,j) / maxAreaLocal;
-                painter->setBrush(QColor(0.1 * 255, areaRatio * 255, 0.9 * 255, 1 * 255));
+//                double areaRatio =  m_areaMatrix(i,j) / maxAreaLocal;
+                double areaRatio =  m_valueMatrix(i,j) / maxValueLocal;
+                painter->setBrush(QColor(0.2 * 255, (areaRatio / 2 + 0.5) * 255, 0.9 * 255, 1 * 255));
             } else {
                 painter->setBrush(background);
             }
