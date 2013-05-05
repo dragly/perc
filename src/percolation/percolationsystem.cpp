@@ -18,22 +18,16 @@ using namespace Eigen;
 
 PercolationSystem::PercolationSystem(QQuickPaintedItem *parent) :
     QQuickPaintedItem(parent),
-    m_occupationProbability(0.5)
+    m_occupationTreshold(0.5)
 {
 }
 
-void PercolationSystem::initialize(int nRows, int nCols, double p) {
-    m_nCols = nCols;
-    m_nRows = nRows;
-    m_occupationProbability = p;
-    emit nRowsChanged(nRows);
-    emit nColsChanged(nCols);
-
-    m_valueMatrix = randu(nRows, nCols);
-    m_areaMatrix = zeros<umat>(nRows, nCols);
-    m_occupationMatrix = zeros<umat>(nRows, nCols);
-    m_flowMatrix = zeros(nRows, nCols);
-    m_pressureMatrix = zeros(nRows, nCols);
+void PercolationSystem::initialize() {
+    m_valueMatrix = randu(m_nRows, m_nCols);
+    m_areaMatrix = zeros<umat>(m_nRows, m_nCols);
+    m_occupationMatrix = zeros<umat>(m_nRows, m_nCols);
+    m_flowMatrix = zeros(m_nRows, m_nCols);
+    m_pressureMatrix = zeros(m_nRows, m_nCols);
 
     //    cout << m_valueMatrix << endl;
     recalculateMatrices();
@@ -48,6 +42,9 @@ void PercolationSystem::initialize(int nRows, int nCols, double p) {
 }
 
 void PercolationSystem::recalculateMatrices() {
+    if(!isInitializedProperly()) {
+        qWarning() << "Percolation system not initialized properly! Cannot generate matrices and continue...";
+    }
     generateOccupationMatrix();
     generateLabelMatrix();
     generateAreaMatrix();
@@ -66,10 +63,22 @@ void PercolationSystem::recalculateMatricesInThread() {
     QtConcurrent::run(this, &PercolationSystem::recalculateMatrices);
 }
 
+void PercolationSystem::setOccupationTreshold(double arg)
+{
+    if(m_occupationTreshold >= 0 && m_occupationTreshold <= 1) {
+        if (m_occupationTreshold != arg) {
+            m_occupationTreshold = arg;
+            emit occupationTresholdChanged(arg);
+        }
+    } else {
+        qWarning() << "Occupation treshold must be between 0 and 1.";
+    }
+}
+
 void PercolationSystem::lowerValue(int row, int col) {
     if(isSite(row,col)) {
 //        m_valueMatrix(row, col) = fmax(m_valueMatrix(row,col) - 0.05, 0);
-        m_valueMatrix(row, col) = fmax(m_occupationProbability - 0.05, 0);
+        m_valueMatrix(row, col) = fmax(m_occupationTreshold - 0.05, 0);
     }
 //    if(isSite(row+1,col)) {
 //        m_valueMatrix(row + 1, col) = fmin(m_valueMatrix(row + 1,col) - 0.05, 1);
@@ -92,9 +101,18 @@ void PercolationSystem::raiseValue(int row, int col) {
 }
 
 void PercolationSystem::generateOccupationMatrix() {
-    cout << "Generating occupation matrix..." << endl;
-    double p = m_occupationProbability;
+//    cout << "Generating occupation matrix..." << endl;
+    double p = m_occupationTreshold;
     m_occupationMatrix = m_valueMatrix < p;
+}
+
+bool PercolationSystem::isInitializedProperly()
+{
+    if(m_valueMatrix.n_cols == m_nCols && m_valueMatrix.n_rows == m_nRows) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 bool PercolationSystem::isOccupied(int row, int col)
@@ -164,7 +182,7 @@ int PercolationSystem::labelSelfAndNeighbors(int row, int col, int label) {
 }
 
 void PercolationSystem::generateLabelMatrix() {
-    cout << "Generating label matrix..." << endl;
+//    cout << "Generating label matrix..." << endl;
     QTime time;
     time.start();
 
@@ -188,7 +206,7 @@ void PercolationSystem::generateLabelMatrix() {
     //    directions(3,1) = -1;
 
     uvec foundLabels = zeros<uvec>(2);
-    qDebug() << "Label time1" << time.elapsed();
+//    qDebug() << "Label time1" << time.elapsed();
 
     m_areas.clear();
 
@@ -203,8 +221,8 @@ void PercolationSystem::generateLabelMatrix() {
             }
         }
     }
-    cout << "Current label " << currentLabel << endl;
-    qDebug() << "Label time2" << time.elapsed();
+//    cout << "Current label " << currentLabel << endl;
+//    qDebug() << "Label time2" << time.elapsed();
 }
 
 void PercolationSystem::generateImage() {
@@ -212,10 +230,10 @@ void PercolationSystem::generateImage() {
     QTime time;
     time.start();
     QColor background("#084081");
-    QColor occupiedColor("#A8DDB5");
+//    QColor occupiedColor("#A8DDB5");
     double maxAreaLocal = maxArea();
-    double maxValueLocal = m_valueMatrix.max();
-    qDebug() << "Draw time0" << time.elapsed();
+//    double maxValueLocal = m_valueMatrix.max();
+//    qDebug() << "Draw time0" << time.elapsed();
     QRgb backRgb = background.rgba();
     for(int i = 0; i < m_nRows; i++) {
         for(int j = 0; j < m_nCols; j++) {
@@ -235,11 +253,11 @@ void PercolationSystem::generateImage() {
             //            painter->drawRect(j*10, i*10, 10, 10);
         }
     }
-    qDebug() << "Draw time1" << time.elapsed();
+//    qDebug() << "Draw time1" << time.elapsed();
 }
 
 void PercolationSystem::generateAreaMatrix() {
-    cout << "Generating area matrix..." << endl;
+//    cout << "Generating area matrix..." << endl;
     for(int i = 0; i < m_nRows; i++) {
         for(int j = 0; j < m_nCols; j++) {
             m_areaMatrix(i,j) = m_areas[m_labelMatrix(i,j)];
@@ -394,5 +412,5 @@ void PercolationSystem::paint(QPainter *painter)
     QTime time;
     time.start();
     painter->drawImage(0,0,m_image);
-    qDebug() << "Draw time2" << time.elapsed();
+//    qDebug() << "Draw time2" << time.elapsed();
 }

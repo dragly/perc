@@ -17,11 +17,12 @@
 class PercolationSystem : public QQuickPaintedItem
 {
     Q_OBJECT
-    Q_PROPERTY(int nRows READ nRows NOTIFY nRowsChanged)
-    Q_PROPERTY(int nCols READ nCols NOTIFY nColsChanged)
+    Q_PROPERTY(int nRows READ nRows WRITE setNRows NOTIFY nRowsChanged)
+    Q_PROPERTY(int nCols READ nCols WRITE setNCols NOTIFY nColsChanged)
+    Q_PROPERTY(double occupationTreshold READ occupationTreshold WRITE setOccupationTreshold NOTIFY occupationTresholdChanged)
 public:
     PercolationSystem(QQuickPaintedItem *parent = 0);
-//    void setPercolationSystemGraphics(PercolationSystemGraphics* graphics);
+    //    void setPercolationSystemGraphics(PercolationSystemGraphics* graphics);
 
     const arma::umat &occupationMatrix();
     const arma::mat& probabilityMatrix();
@@ -50,13 +51,40 @@ public:
     void paint(QPainter *painter);
     int labelSelfAndNeighbors(int row, int col, int label);
     bool isSite(int row, int col);
+    double occupationTreshold() const
+    {
+        return m_occupationTreshold;
+    }
+
+    bool isInitializedProperly();
+
 public slots:
-    void initialize(int nRows, int nCols, double p);
+    void initialize();
     void recalculateMatrices();
     void recalculateMatricesInThread();
+    void setOccupationTreshold(double arg);
+
+    void setNCols(int arg)
+    {
+        if (m_nCols != arg) {
+            m_nCols = arg;
+            emit nColsChanged(arg);
+        }
+    }
+
+    void setNRows(int arg)
+    {
+        if (m_nRows != arg) {
+            m_nRows = arg;
+            emit nRowsChanged(arg);
+        }
+    }
+
 signals:
     void nRowsChanged(int arg);
     void nColsChanged(int arg);
+
+    void occupationTresholdChanged(double arg);
 
 protected:
     void generateImage();
@@ -70,7 +98,7 @@ protected:
     // members
     int m_nRows;
     int m_nCols;
-    double m_occupationProbability;
+    double m_occupationTreshold;
 
     arma::mat m_valueMatrix;
     arma::umat m_occupationMatrix;
