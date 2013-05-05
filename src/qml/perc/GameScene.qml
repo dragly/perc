@@ -10,8 +10,8 @@ Item {
 
     PercolationMatrix {
         id: percolationMatrix
-        nRows: 120
-        nCols: 120
+        nRows: 500
+        nCols: 500
     }
 
     PercolationSystem {
@@ -21,7 +21,7 @@ Item {
     Timer {
         id: advanceTimer
         running: true
-        interval: 100
+        interval: 200
         repeat: true
         onTriggered: {
             Logic.moveWalkers()
@@ -29,8 +29,8 @@ Item {
     }
 
     Component.onCompleted: {
-        percolationSystem.initialize(percolationMatrix.nRows,percolationMatrix.nCols,0.6)
-        for(var i = 0; i < 5; i++) {
+        percolationSystem.initialize(percolationMatrix.nRows,percolationMatrix.nCols,0.5)
+        for(var i = 0; i < 200; i++) {
             Logic.createRandomWalker()
             Logic.createDirectionWalker("left")
             Logic.createDirectionWalker("right")

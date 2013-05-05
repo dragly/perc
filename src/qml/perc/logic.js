@@ -26,7 +26,7 @@ function populate() {
 }
 
 function createRandomWalker() {
-    console.log("Creating random walker")
+//    console.log("Creating random walker")
     var component = Qt.createComponent("RandomWalker.qml")
     var found = false;
     var nAttempts = 0;
@@ -58,7 +58,7 @@ function createDirectionWalker(type) {
         type = "left"
     }
 
-    console.log("Creating direction walker")
+//    console.log("Creating direction walker")
     var component = Qt.createComponent("DirectionWalker.qml")
     var found = false;
     var nAttempts = 0;

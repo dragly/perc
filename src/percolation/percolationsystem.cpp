@@ -1,6 +1,7 @@
 #include "percolationsystem.h"
 #include <QObject>
 #include <QVariant>
+#include <QPainter>
 
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET 1
 
@@ -311,4 +312,12 @@ double PercolationSystem::pressure(int row, int col) {
 
 double PercolationSystem::flow(int row, int col) {
     return m_flowMatrix(row, col);
+}
+
+void PercolationSystem::paint(QPainter *painter)
+{
+    QRectF bounds = contentsBoundingRect();
+    painter->setBrush(Qt::red);
+    painter->drawRect(0,0,50,50);
+
 }

@@ -12,33 +12,21 @@ Rectangle {
         onPaint: {
             console.log("Painting matrix")
 //            console.log("Paint requested!")
-            var ctx = getContext("2d");
-            var index = 0;
-            var maxArea = percolationSystem.maxArea();
-            for(var i = 0; i < percolationSystem.nRows; i++) {
-                for(var j = 0; j < percolationSystem.nCols; j++) {
-//                    var site = component.createObject(percolationMatrix);
-//                    if(site === null) {
-//                        console.log("ERROR! Could note create PercolationSite!")
-//                        return false;
+//            var ctx = getContext("2d");
+//            var index = 0;
+//            var maxArea = percolationSystem.maxArea();
+//            for(var i = 0; i < percolationSystem.nRows; i++) {
+//                for(var j = 0; j < percolationSystem.nCols; j++) {
+//                    if(percolationSystem.isOccupied(i,j)) {
+//                        var areaRatio = percolationSystem.area(i,j) / maxArea;
+//                        ctx.fillStyle = Qt.rgba(0.1, areaRatio / 2 + 0.4, 0.9, 1);
+//                    } else {
+//                        ctx.fillStyle = "#084081";
 //                    }
-//                    site.occupied = percolationSystem.isOccupied(i,j);
-//                    site.row = i
-//                    site.col = j
-//                    site.value = percolationSystem.value(i,j)
-//                    sites[i * nCols + j] = site;
-//                    site.label = percolationSystem.label(i,j)
-//                    site.area = percolationSystem.area(i,j)
-                    if(percolationSystem.isOccupied(i,j)) {
-                        var areaRatio = percolationSystem.area(i,j) / maxArea;
-                        ctx.fillStyle = Qt.rgba(0.1, areaRatio / 2 + 0.4, 0.9, 1);
-                    } else {
-                        ctx.fillStyle = "#084081";
-                    }
-                    ctx.fillRect(j*10,i*10,10,10);
-                    index += 1;
-                }
-            }
+//                    ctx.fillRect(j*10,i*10,10,10);
+//                    index += 1;
+//                }
+//            }
         }
     }
 }

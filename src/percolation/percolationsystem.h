@@ -7,11 +7,12 @@
 #include <QMetaType>
 #include <QVariant>
 #include <QVariantList>
+#include <QQuickPaintedItem>
 
 #include <armadillo>
 #include <iostream>
 
-class PercolationSystem : public QObject
+class PercolationSystem : public QQuickPaintedItem
 {
     Q_OBJECT
     Q_PROPERTY(int nRows READ nRows NOTIFY nRowsChanged)

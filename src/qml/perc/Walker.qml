@@ -4,6 +4,8 @@ Rectangle {
     property int row: -1
     property int col: -1
 
+    smooth: true
+
     width: 10
     height: 10
     color: "#F03B20"
@@ -17,15 +19,15 @@ Rectangle {
 
     Behavior on x {
         NumberAnimation {
-            duration: 100
-            easing.type: Easing.InOutQuad
+            duration: 200
+//            easing.type: Easing.InOutQuad
         }
     }
 
     Behavior on y {
         NumberAnimation {
-            duration: 100
-            easing.type: Easing.InOutQuad
+            duration: 200
+//            easing.type: Easing.InOutQuad
         }
     }
 
