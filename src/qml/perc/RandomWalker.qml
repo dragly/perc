@@ -1,7 +1,16 @@
 import QtQuick 2.0
 
 Walker {
-    color: "yellow"
+    property string type: "raise"
+
+    onTypeChanged: {
+        if(type !== "raise" && type !== "lower") {
+            console.log("Type must be raise or lower")
+            type = "raise"
+        }
+    }
+
+    color: (type === "raise") ? "yellow" : "pink"
     function move() {
         var randomIndex = parseInt(Math.random() * 4)
         var found = false
@@ -17,6 +26,11 @@ Walker {
                 row = nextSiteRow;
                 col = nextSiteCol;
                 found = true
+                if(type === "raise") {
+                    percolationSystem.raiseValue(nextSiteRow,nextSiteCol)
+                } else {
+                    percolationSystem.lowerValue(nextSiteRow + directions[randomIndex][0], nextSiteCol + directions[randomIndex][1])
+                }
             } else {
                 randomIndex += 1
                 randomIndex = (randomIndex + 4) % 4

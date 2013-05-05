@@ -8,6 +8,8 @@
 #include <QVariant>
 #include <QVariantList>
 #include <QQuickPaintedItem>
+#include <QThread>
+#include <QImage>
 
 #include <armadillo>
 #include <iostream>
@@ -47,21 +49,23 @@ public:
     Q_INVOKABLE void raiseValue(int row, int col);
     void paint(QPainter *painter);
     int labelSelfAndNeighbors(int row, int col, int label);
+    bool isSite(int row, int col);
 public slots:
     void initialize(int nRows, int nCols, double p);
     void recalculateMatrices();
+    void recalculateMatricesInThread();
 signals:
     void nRowsChanged(int arg);
     void nColsChanged(int arg);
 
 protected:
-
-    // functions
+    void generateImage();
     void generateLabelMatrix();
     void generateAreaMatrix();
     void generatePressureAndFlowMatrices();
     void generateOccupationMatrix();
 
+    QThread thread;
 
     // members
     int m_nRows;
@@ -79,6 +83,8 @@ protected:
     arma::imat m_visitDirections;
 
     std::vector<int> m_areas;
+
+    QImage m_image;
 };
 
 inline const arma::umat& PercolationSystem::occupationMatrix() {

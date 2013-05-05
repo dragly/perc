@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QRgb>
 #include <vector>
+#include <QtConcurrent/QtConcurrent>
 
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET 1
 
@@ -50,14 +51,44 @@ void PercolationSystem::recalculateMatrices() {
     generateOccupationMatrix();
     generateLabelMatrix();
     generateAreaMatrix();
+    generateImage();
+}
+
+bool PercolationSystem::isSite(int row, int col) {
+    if(row < 0 || col < 0 || row >= m_nRows || col >= m_nCols) {
+        return false;
+    }
+    return true;
+}
+
+void PercolationSystem::recalculateMatricesInThread() {
+    // Run them in a separate thread
+    QtConcurrent::run(this, &PercolationSystem::recalculateMatrices);
 }
 
 void PercolationSystem::lowerValue(int row, int col) {
-    m_valueMatrix(row, col) = fmax(m_valueMatrix(row,col) - 0.05, 0);
+    if(isSite(row,col)) {
+//        m_valueMatrix(row, col) = fmax(m_valueMatrix(row,col) - 0.05, 0);
+        m_valueMatrix(row, col) = fmax(m_occupationProbability - 0.05, 0);
+    }
+//    if(isSite(row+1,col)) {
+//        m_valueMatrix(row + 1, col) = fmin(m_valueMatrix(row + 1,col) - 0.05, 1);
+//    }
+//    if(isSite(row-1,col)) {
+//        m_valueMatrix(row - 1, col) = fmin(m_valueMatrix(row - 1,col) - 0.05, 1);
+//    }
+//    if(isSite(row,col+1)) {
+//        m_valueMatrix(row, col + 1) = fmin(m_valueMatrix(row, col + 1) - 0.05, 1);
+//    }
+//    if(isSite(row,col-1)) {
+//        m_valueMatrix(row, col - 1) = fmin(m_valueMatrix(row, col - 1) - 0.05, 1);
+//    }
 }
 
 void PercolationSystem::raiseValue(int row, int col) {
-    m_valueMatrix(row, col) = fmin(m_valueMatrix(row,col) + 0.05, 1);
+    if(isSite(row,col)) {
+        m_valueMatrix(row, col) = fmin(m_valueMatrix(row,col) + 0.05, 1);
+    }
 }
 
 void PercolationSystem::generateOccupationMatrix() {
@@ -174,6 +205,37 @@ void PercolationSystem::generateLabelMatrix() {
     }
     cout << "Current label " << currentLabel << endl;
     qDebug() << "Label time2" << time.elapsed();
+}
+
+void PercolationSystem::generateImage() {
+    m_image = QImage(m_nCols, m_nRows, QImage::Format_ARGB32);
+    QTime time;
+    time.start();
+    QColor background("#084081");
+    QColor occupiedColor("#A8DDB5");
+    double maxAreaLocal = maxArea();
+    double maxValueLocal = m_valueMatrix.max();
+    qDebug() << "Draw time0" << time.elapsed();
+    QRgb backRgb = background.rgba();
+    for(int i = 0; i < m_nRows; i++) {
+        for(int j = 0; j < m_nCols; j++) {
+            if(isOccupied(i,j)) {
+                double areaRatio = 0.3 + (m_areaMatrix(i,j) / maxAreaLocal) * 2. / 3.;
+//                double areaRatio = 0.3 + (m_valueMatrix(i,j) / maxValueLocal) / 2.;
+                //                double areaRatio =  m_valueMatrix(i,j) / maxValueLocal;
+                //                painter->setBrush(occupiedColor);
+                QColor areaColor(0.1 * 255, areaRatio * 255, 0.8*255, 255);
+                //                image.setPixel(j,i,occupiedRgb);
+                m_image.setPixel(j,i,areaColor.rgba());
+
+            } else {
+                //                painter->setBrush(background);
+                m_image.setPixel(j,i,backRgb);
+            }
+            //            painter->drawRect(j*10, i*10, 10, 10);
+        }
+    }
+    qDebug() << "Draw time1" << time.elapsed();
 }
 
 void PercolationSystem::generateAreaMatrix() {
@@ -331,33 +393,6 @@ void PercolationSystem::paint(QPainter *painter)
 {
     QTime time;
     time.start();
-    painter->setPen(Qt::transparent);
-    QColor background("#084081");
-    QColor occupiedColor("#A8DDB5");
-        double maxAreaLocal = maxArea();
-    QImage image(m_nCols, m_nRows, QImage::Format_ARGB32);
-    qDebug() << "Draw time0" << time.elapsed();
-    QRgb backRgb = background.rgba();
-    QRgb occupiedRgb = occupiedColor.rgba();
-    double maxValueLocal = m_valueMatrix.max();
-    for(int i = 0; i < m_nRows; i++) {
-        for(int j = 0; j < m_nCols; j++) {
-            if(isOccupied(i,j)) {
-                double areaRatio = 0.3 + (m_areaMatrix(i,j) / maxAreaLocal) * 2. / 3.;
-                //                double areaRatio =  m_valueMatrix(i,j) / maxValueLocal;
-                //                painter->setBrush(occupiedColor);
-                QColor areaColor(0.1 * 255, areaRatio * 255, 0.8*255, 255);
-                //                image.setPixel(j,i,occupiedRgb);
-                image.setPixel(j,i,areaColor.rgba());
-
-            } else {
-                //                painter->setBrush(background);
-                image.setPixel(j,i,backRgb);
-            }
-            //            painter->drawRect(j*10, i*10, 10, 10);
-        }
-    }
-    qDebug() << "Draw time1" << time.elapsed();
-    painter->drawImage(0,0,image);
+    painter->drawImage(0,0,m_image);
     qDebug() << "Draw time2" << time.elapsed();
 }

@@ -27,10 +27,8 @@ Walker {
                 found = true
                 if(type === "right") {
                     direction -= 1
-                    percolationSystem.lowerValue(nextSiteRow,nextSiteCol)
                 } else {
                     direction += 1
-                    percolationSystem.raiseValue(nextSiteRow,nextSiteCol)
                 }
             } else {
                 if(type === "right") {

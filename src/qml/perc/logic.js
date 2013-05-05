@@ -25,7 +25,7 @@ function populate() {
 //    }
 }
 
-function createRandomWalker() {
+function createRandomWalker(type) {
 //    console.log("Creating random walker")
     var component = Qt.createComponent("RandomWalker.qml")
     var found = false;
@@ -40,7 +40,7 @@ function createRandomWalker() {
         var i = parseInt(Math.random() * percolationSystem.nRows)
         var j = parseInt(Math.random() * percolationSystem.nCols)
         if(percolationSystem.isOccupied(i,j)) {
-            var walker = component.createObject(sceneRoot);
+            var walker = component.createObject(sceneRoot, {type: type});
             if(walker === null) {
                 console.log("ERROR! Could note create PercolationSite!")
                 return false;
