@@ -43,6 +43,8 @@ public:
     Q_INVOKABLE double maxFlow();
     Q_INVOKABLE double pressure(int row, int col);
     Q_INVOKABLE double flow(int row, int col);
+    Q_INVOKABLE void lowerValue(int row, int col);
+    Q_INVOKABLE void raiseValue(int row, int col);
     void paint(QPainter *painter);
 public slots:
     void initialize(int nRows, int nCols, double p);
@@ -56,10 +58,12 @@ protected:
     void generateLabelMatrix();
     void generateAreaMatrix();
     void generatePressureAndFlowMatrices();
+    void generateOccupationMatrix();
 
     // members
     int m_nRows;
     int m_nCols;
+    double m_occupationProbability;
 
     arma::mat m_valueMatrix;
     arma::umat m_occupationMatrix;

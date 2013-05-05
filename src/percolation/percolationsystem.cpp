@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QTime>
 #include <QDebug>
+#include <QRgb>
 
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET 1
 
@@ -14,18 +15,15 @@ using namespace std;
 using namespace Eigen;
 
 PercolationSystem::PercolationSystem(QQuickPaintedItem *parent) :
-    QQuickPaintedItem(parent)
+    QQuickPaintedItem(parent),
+    m_occupationProbability(0.5)
 {
 }
-
-//void PercolationSystem::setPercolationSystemGraphics(PercolationSystemGraphics *graphics)
-//{
-//    m_graphics = graphics;
-//}
 
 void PercolationSystem::initialize(int nRows, int nCols, double p) {
     m_nCols = nCols;
     m_nRows = nRows;
+    m_occupationProbability = p;
     emit nRowsChanged(nRows);
     emit nColsChanged(nCols);
 
@@ -37,12 +35,12 @@ void PercolationSystem::initialize(int nRows, int nCols, double p) {
 
     //    cout << m_valueMatrix << endl;
     cout << "Generating occupation matrix..." << endl;
-    m_occupationMatrix = m_valueMatrix < p;
+    generateOccupationMatrix();
 
-//    cout << "Generating label matrix..." << endl;
-//    generateLabelMatrix();
-//    cout << "Generating area matrix..." << endl;
-//    generateAreaMatrix();
+    cout << "Generating label matrix..." << endl;
+    generateLabelMatrix();
+    cout << "Generating area matrix..." << endl;
+    generateAreaMatrix();
 
     //    generatePressureAndFlowMatrices();
 
@@ -51,6 +49,19 @@ void PercolationSystem::initialize(int nRows, int nCols, double p) {
     //    m_graphics->initialize();
 
     cout << "Initialized percolation system!" << endl;
+}
+
+void PercolationSystem::lowerValue(int row, int col) {
+    m_valueMatrix(row, col) = fmax(m_valueMatrix(row,col) - 0.05, 0);
+}
+
+void PercolationSystem::raiseValue(int row, int col) {
+    m_valueMatrix(row, col) = fmin(m_valueMatrix(row,col) + 0.05, 1);
+}
+
+void PercolationSystem::generateOccupationMatrix() {
+    double p = m_occupationProbability;
+    m_occupationMatrix = m_valueMatrix < p;
 }
 
 bool PercolationSystem::isOccupied(int row, int col)
@@ -332,22 +343,32 @@ void PercolationSystem::paint(QPainter *painter)
 {
     QTime time;
     time.start();
+    generateOccupationMatrix();
     painter->setPen(Qt::transparent);
     QColor background("#084081");
-    QColor occupiedColor("#084081");
+    QColor occupiedColor("#A8DDB5");
 //    double maxAreaLocal = maxArea();
+    QImage image(m_nCols, m_nRows, QImage::Format_ARGB32);
+    qDebug() << "Draw time0" << time.elapsed();
+    QRgb backRgb = background.rgba();
+    QRgb occupiedRgb = occupiedColor.rgba();
     double maxValueLocal = m_valueMatrix.max();
     for(int i = 0; i < m_nRows; i++) {
         for(int j = 0; j < m_nCols; j++) {
             if(isOccupied(i,j)) {
 //                double areaRatio =  m_areaMatrix(i,j) / maxAreaLocal;
-                double areaRatio =  m_valueMatrix(i,j) / maxValueLocal;
-                painter->setBrush(QColor(0.2 * 255, (areaRatio / 2 + 0.5) * 255, 0.9 * 255, 1 * 255));
+//                double areaRatio =  m_valueMatrix(i,j) / maxValueLocal;
+//                painter->setBrush(occupiedColor);
+                image.setPixel(j,i,occupiedRgb);
+
             } else {
-                painter->setBrush(background);
+//                painter->setBrush(background);
+                image.setPixel(j,i,backRgb);
             }
-            painter->drawRect(j*10, i*10, 10, 10);
+//            painter->drawRect(j*10, i*10, 10, 10);
         }
     }
-    qDebug() << "Draw time" << time.elapsed();
+    qDebug() << "Draw time1" << time.elapsed();
+    painter->drawImage(0,0,image);
+    qDebug() << "Draw time2" << time.elapsed();
 }

@@ -16,8 +16,17 @@ Item {
 
     PercolationSystem {
         id: percolationSystem
-        width: 5000
-        height: 5000
+        width: 500
+        height: 500
+        transform:
+            Scale {
+                origin.x: 0
+                origin.y: 0
+                xScale: 10
+                yScale: 10
+            }
+
+        smooth: false
         z: -10
     }
 
@@ -30,15 +39,15 @@ Item {
         onTriggered: {
             Logic.moveWalkers()
             triggers += 1
-//            if(triggers > 10) {
+            if(triggers > 10) {
 //                percolationSystem.update()
-//                triggers = 0
-//            }
+                triggers = 0
+            }
         }
     }
 
     Component.onCompleted: {
-        percolationSystem.initialize(1000,1000,0.55)
+        percolationSystem.initialize(200,200,0.55)
         for(var i = 0; i < 200; i++) {
             Logic.createRandomWalker()
             Logic.createDirectionWalker("left")
