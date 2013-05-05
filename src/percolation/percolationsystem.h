@@ -18,7 +18,7 @@ class PercolationSystem : public QQuickPaintedItem
     Q_PROPERTY(int nRows READ nRows NOTIFY nRowsChanged)
     Q_PROPERTY(int nCols READ nCols NOTIFY nColsChanged)
 public:
-    PercolationSystem(QObject* parent = 0);
+    PercolationSystem(QQuickPaintedItem *parent = 0);
 //    void setPercolationSystemGraphics(PercolationSystemGraphics* graphics);
 
     const arma::umat &occupationMatrix();
@@ -43,6 +43,7 @@ public:
     Q_INVOKABLE double maxFlow();
     Q_INVOKABLE double pressure(int row, int col);
     Q_INVOKABLE double flow(int row, int col);
+    void paint(QPainter *painter);
 public slots:
     void initialize(int nRows, int nCols, double p);
 signals:

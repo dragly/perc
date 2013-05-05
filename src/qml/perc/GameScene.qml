@@ -16,6 +16,9 @@ Item {
 
     PercolationSystem {
         id: percolationSystem
+        width: 5000
+        height: 5000
+        z: -10
     }
 
     Timer {
@@ -29,7 +32,7 @@ Item {
     }
 
     Component.onCompleted: {
-        percolationSystem.initialize(percolationMatrix.nRows,percolationMatrix.nCols,0.5)
+        percolationSystem.initialize(percolationMatrix.nRows,percolationMatrix.nCols,0.55)
         for(var i = 0; i < 200; i++) {
             Logic.createRandomWalker()
             Logic.createDirectionWalker("left")

@@ -2,6 +2,8 @@
 #include <QObject>
 #include <QVariant>
 #include <QPainter>
+#include <QTime>
+#include <QDebug>
 
 #define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET 1
 
@@ -11,8 +13,8 @@ using namespace arma;
 using namespace std;
 using namespace Eigen;
 
-PercolationSystem::PercolationSystem(QObject *parent) :
-    QObject(parent)
+PercolationSystem::PercolationSystem(QQuickPaintedItem *parent) :
+    QQuickPaintedItem(parent)
 {
 }
 
@@ -33,7 +35,7 @@ void PercolationSystem::initialize(int nRows, int nCols, double p) {
     m_flowMatrix = zeros(nRows, nCols);
     m_pressureMatrix = zeros(nRows, nCols);
 
-//    cout << m_valueMatrix << endl;
+    //    cout << m_valueMatrix << endl;
 
     m_occupationMatrix = m_valueMatrix < p;
 
@@ -42,11 +44,11 @@ void PercolationSystem::initialize(int nRows, int nCols, double p) {
     cout << "Generating area matrix..." << endl;
     generateAreaMatrix();
 
-//    generatePressureAndFlowMatrices();
+    //    generatePressureAndFlowMatrices();
 
-//    cout << m_occupationMatrix << endl;
+    //    cout << m_occupationMatrix << endl;
 
-//    m_graphics->initialize();
+    //    m_graphics->initialize();
 
     cout << "Initialized percolation system!" << endl;
 }
@@ -146,11 +148,11 @@ void PercolationSystem::generateLabelMatrix() {
     currentLabel = 1;
     uint currentMax = m_labelMatrix.max();
     for(uint i = 1; i <= currentMax; i++) {
-         uvec indices = find(m_labelMatrix == i);
-         if(indices.n_elem > 0) {
-             m_labelMatrix.elem(indices) = currentLabel * ones<uvec>(indices.n_elem);
-             currentLabel += 1;
-         }
+        uvec indices = find(m_labelMatrix == i);
+        if(indices.n_elem > 0) {
+            m_labelMatrix.elem(indices) = currentLabel * ones<uvec>(indices.n_elem);
+            currentLabel += 1;
+        }
     }
 }
 
@@ -192,10 +194,10 @@ void PercolationSystem::generatePressureAndFlowMatrices() {
         cerr << "No percolating cluster! Cannot solve pressure and flow problem..." << endl;
         return;
     }
-//    cout << percolationLabel << endl;
+    //    cout << percolationLabel << endl;
     umat percolatingCluster = m_labelMatrix == percolationLabel;
-//    cout << m_labelMatrix << endl;
-//    cout << percolatingCluster << endl;
+    //    cout << m_labelMatrix << endl;
+    //    cout << percolatingCluster << endl;
 
     imat moveRightMatrix = zeros<imat>(m_nRows, m_nCols);
     imat moveDownMatrix = zeros<imat>(m_nRows, m_nCols);
@@ -214,17 +216,17 @@ void PercolationSystem::generatePressureAndFlowMatrices() {
 
     int nEquations = m_nRows * (m_nCols - 2);
 
-//    cout << "moveRightMatrix" << endl;
-//    cout << moveRightMatrix << endl;
-//    cout << "moveDownMatrix" << endl;
-//    cout << moveDownMatrix << endl;
+    //    cout << "moveRightMatrix" << endl;
+    //    cout << moveRightMatrix << endl;
+    //    cout << "moveDownMatrix" << endl;
+    //    cout << moveDownMatrix << endl;
 
     vec mainDiag = zeros(nEquations);
     vec upperDiag1 = zeros(nEquations - 1);
     vec upperDiag2 = zeros(nEquations - m_nRows);
-//    for(int eq = 0; eq < nEquations; eq++) {
-//        mainDiag =
-//    }
+    //    for(int eq = 0; eq < nEquations; eq++) {
+    //        mainDiag =
+    //    }
     cout << "nEquations " << nEquations << endl;
     int eq = 0;
     for(int j = 1; j < m_nCols - 1; j++) {
@@ -244,14 +246,14 @@ void PercolationSystem::generatePressureAndFlowMatrices() {
     }
     uvec indices = find(mainDiag == 0);
     mainDiag.elem(indices) = ones(indices.n_elem);
-//    cout << "Done" << endl;
+    //    cout << "Done" << endl;
     mat equationMatrix = zeros(nEquations, nEquations);
-//    cout << equationMatrix.diag(0).n_elem << endl;
+    //    cout << equationMatrix.diag(0).n_elem << endl;
     equationMatrix.diag(0) = mainDiag;
-//    cout << equationMatrix.diag(1).n_elem << endl;
+    //    cout << equationMatrix.diag(1).n_elem << endl;
     equationMatrix.diag(1) = upperDiag1;
     equationMatrix.diag(-1) = upperDiag1;
-//    cout << equationMatrix.diag(m_nRows).n_elem << endl;
+    //    cout << equationMatrix.diag(m_nRows).n_elem << endl;
     equationMatrix.diag(m_nRows) = upperDiag2;
     equationMatrix.diag(-m_nRows) = upperDiag2;
 
@@ -264,14 +266,14 @@ void PercolationSystem::generatePressureAndFlowMatrices() {
         eq += 1;
     }
 
-//    cout << boundaries << endl;
-//    cout << equationMatrix << endl;
+    //    cout << boundaries << endl;
+    //    cout << equationMatrix << endl;
 
     vec pressures = solve(equationMatrix, boundaries);
 
-//    for(int i = 0; i < nEquations; i++) {
-//        A.
-//    }
+    //    for(int i = 0; i < nEquations; i++) {
+    //        A.
+    //    }
 
     m_pressureMatrix = zeros(m_nRows, m_nCols);
 
@@ -285,7 +287,7 @@ void PercolationSystem::generatePressureAndFlowMatrices() {
 
     m_pressureMatrix.submat(0,0,m_nRows-1,0) += 1;
 
-//    cout << percolatingCluster << endl;
+    //    cout << percolatingCluster << endl;
     for(int i = 0; i < m_nRows; i++) {
         for(int j = 0; j < m_nCols; j++) {
             if(i > 0) {
@@ -302,8 +304,8 @@ void PercolationSystem::generatePressureAndFlowMatrices() {
             }
         }
     }
-//    cout << m_flowMatrix << endl;
-//    cout << equationMatrix << endl;
+    //    cout << m_flowMatrix << endl;
+    //    cout << equationMatrix << endl;
 }
 
 double PercolationSystem::pressure(int row, int col) {
@@ -316,8 +318,21 @@ double PercolationSystem::flow(int row, int col) {
 
 void PercolationSystem::paint(QPainter *painter)
 {
-    QRectF bounds = contentsBoundingRect();
-    painter->setBrush(Qt::red);
-    painter->drawRect(0,0,50,50);
-
+    QTime time;
+    time.start();
+    painter->setPen(Qt::transparent);
+    QColor background("#084081");
+    double maxAreaLocal = maxArea();
+    for(int i = 0; i < m_nRows; i++) {
+        for(int j = 0; j < m_nCols; j++) {
+            if(isOccupied(i,j)) {
+                double areaRatio =  m_areaMatrix(i,j) / maxAreaLocal;
+                painter->setBrush(QColor(0.1 * 255, areaRatio * 255, 0.9 * 255, 1 * 255));
+            } else {
+                painter->setBrush(background);
+            }
+            painter->drawRect(j*10, i*10, 10, 10);
+        }
+    }
+    qDebug() << "Draw time" << time.elapsed();
 }

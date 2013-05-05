@@ -4,13 +4,16 @@ Rectangle {
     property int nRows: 0
     property int nCols: 0
 
+    color: "transparent"
+
     width: nRows * 10
     height: nCols * 10
 
     Canvas {
         anchors.fill: parent
         onPaint: {
-            console.log("Painting matrix")
+//            console.log("Painting matrix")
+//            var start = new Date().getTime();
 //            console.log("Paint requested!")
 //            var ctx = getContext("2d");
 //            var index = 0;
@@ -27,6 +30,8 @@ Rectangle {
 //                    index += 1;
 //                }
 //            }
+//            var elapsed = new Date().getTime() - start;
+//            console.log(elapsed);
         }
     }
 }
