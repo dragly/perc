@@ -28,13 +28,20 @@ class Cluster;
 class PercolationSystem : public QQuickPaintedItem
 {
     Q_OBJECT
+    Q_ENUMS(ImageType)
     Q_PROPERTY(int nRows READ nRows WRITE setNRows NOTIFY nRowsChanged)
     Q_PROPERTY(int nCols READ nCols WRITE setNCols NOTIFY nColsChanged)
     Q_PROPERTY(double occupationTreshold READ occupationTreshold WRITE setOccupationTreshold NOTIFY occupationTresholdChanged)
-    Q_PROPERTY(QString imageType READ imageType WRITE setImageType NOTIFY imageTypeChanged)
+    Q_PROPERTY(ImageType imageType READ imageType WRITE setImageType NOTIFY imageTypeChanged)
+
 public:
     PercolationSystem(QQuickPaintedItem *parent = 0);
     //    void setPercolationSystemGraphics(PercolationSystemGraphics* graphics);
+
+    enum ImageType {
+        PressureImage,
+        AreaImage
+    };
 
     const arma::umat &occupationMatrix();
     const arma::mat& probabilityMatrix();
@@ -73,7 +80,7 @@ public:
 
     Q_INVOKABLE void addPressureSource(QObject *pressureSource);
     Q_INVOKABLE void clearPressureSources();
-    QString imageType() const
+    ImageType imageType() const
     {
         return m_imageType;
     }
@@ -82,8 +89,7 @@ public slots:
     void update();
     void setFinishedUpdating();
     void initialize();
-    void recalculateMatrices();
-    void recalculateMatricesInThread();
+    void recalculateMatricesAndUpdate();
     void setOccupationTreshold(double arg);
 
     void setNCols(int arg)
@@ -102,7 +108,7 @@ public slots:
         }
     }
 
-    void setImageType(QString arg);
+    void setImageType(ImageType arg);
 
 signals:
     void nRowsChanged(int arg);
@@ -110,7 +116,7 @@ signals:
 
     void occupationTresholdChanged(double arg);
 
-    void imageTypeChanged(QString arg);
+    void imageTypeChanged(ImageType arg);
 
 protected:
     void generateImage();
@@ -146,7 +152,7 @@ protected:
 
     bool m_isFinishedUpdating;
 
-    QString m_imageType;
+    ImageType m_imageType;
     QFutureWatcher<void> watcher;
     QMutex m_imageTypeMutex;
     QMutex m_updateMatrixMutex;

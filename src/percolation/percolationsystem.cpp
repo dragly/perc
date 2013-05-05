@@ -22,7 +22,7 @@ PercolationSystem::PercolationSystem(QQuickPaintedItem *parent) :
     m_occupationTreshold(0.5),
     m_isFinishedUpdating(true),
     m_nClusters(0),
-    m_imageType("pressure")
+    m_imageType(PressureImage)
 {
     connect(&watcher, SIGNAL(finished()), this, SLOT(setFinishedUpdating()));
 }
@@ -103,14 +103,6 @@ void PercolationSystem::recalculateMatricesAndUpdate() {
     }
 }
 
-void PercolationSystem::recalculateMatricesInThread() {
-    // Run them in a separate thread
-//    QFuture<void> future;
-    QtConcurrent::run(this, &PercolationSystem::recalculateMatricesAndUpdate);
-//    watcher.setFuture(future);
-//    future.waitForFinished();
-}
-
 bool PercolationSystem::isSite(int row, int col) {
     if(row < 0 || col < 0 || row >= m_nRows || col >= m_nCols) {
         return false;
@@ -144,14 +136,14 @@ void PercolationSystem::setOccupationTreshold(double arg)
     }
 }
 
-void PercolationSystem::setImageType(QString arg)
+void PercolationSystem::setImageType(ImageType arg)
 {
-    m_imageTypeMutex.lock();
+    m_updateMatrixMutex.lock();
     if (m_imageType != arg) {
         m_imageType = arg;
         emit imageTypeChanged(arg);
     }
-    m_imageTypeMutex.unlock();
+    m_updateMatrixMutex.unlock();
 }
 
 void PercolationSystem::lowerValue(int row, int col) {
@@ -310,7 +302,7 @@ void PercolationSystem::generateLabelMatrix() {
 }
 
 void PercolationSystem::generateImage() {
-    m_imageTypeMutex.lock();
+//    m_imageTypeMutex.lock();
     m_image = QImage(m_nCols, m_nRows, QImage::Format_ARGB32);
     QTime time;
     time.start();
@@ -319,7 +311,7 @@ void PercolationSystem::generateImage() {
 //    double maxAreaLocal = maxArea();
 //    double maxAreaLocal = 1e-3 / (m_nRows * m_nCols);
     double maxAreaLocal;
-    if(m_imageType == "pressure") {
+    if(m_imageType == PressureImage) {
         maxAreaLocal = 1. / 100.;
     } else {
         maxAreaLocal = maxArea();
@@ -336,7 +328,7 @@ void PercolationSystem::generateImage() {
             if(isOccupied(i,j)) {
 //                double areaRatio = 0.3 + (m_areaMatrix(i,j) / maxAreaLocal) * 2. / 3.;
                 double areaRatio;
-                if(m_imageType == "pressure") {
+                if(m_imageType == PressureImage) {
                     areaRatio = fmin(0.3 + (m_pressureMatrix(i,j) / maxAreaLocal) * 2. / 3., 1);
                 } else {
                     areaRatio = 0.3 + (m_areaMatrix(i,j) / maxAreaLocal) * 2. / 3.;
@@ -356,7 +348,7 @@ void PercolationSystem::generateImage() {
         }
     }
 //    qDebug() << "Draw time1" << time.elapsed();
-    m_imageTypeMutex.unlock();
+//    m_imageTypeMutex.unlock();
 }
 
 void PercolationSystem::generateAreaMatrix() {

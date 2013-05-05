@@ -1,10 +1,11 @@
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
+import com.dragly.perc 1.0
 
 Item {
     id: gameMenuRoot
 
-    property string imageType: "pressure"
+    property int imageType: PercolationSystem.PressureImage
 
     anchors.left: parent.left
     height: parent.height * 0.8
@@ -94,10 +95,10 @@ Item {
             anchors.fill: parent
 
             onClicked: {
-                if(imageType == "pressure") {
-                    imageType = "area"
+                if(imageType === PercolationSystem.PressureImage) {
+                    imageType = PercolationSystem.AreaImage
                 } else {
-                    imageType = "pressure"
+                    imageType = PercolationSystem.PressureImage
                 }
             }
         }

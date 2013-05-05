@@ -15,8 +15,8 @@ Item {
         id: percolationSystem
         width: nCols
         height: nRows
-        nRows: 500
-        nCols: 500
+        nRows: 300
+        nCols: 2000
         occupationTreshold: 0.55
         transform: Scale {
             origin.x: 0

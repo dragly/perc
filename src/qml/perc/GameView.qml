@@ -14,15 +14,6 @@ Rectangle {
         property alias scaleOriginX: scaleTransform.origin.x
         property alias scaleOriginY: scaleTransform.origin.y
 
-        Rectangle {
-            id: currentOrigin
-            x: scaleTransform.origin.x
-            y: scaleTransform.origin.y
-            width: 2
-            height: 2
-            color: "yellow"
-        }
-
         transform: [
             Scale {
                 id: scaleTransform
