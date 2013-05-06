@@ -43,7 +43,7 @@ function refreshPressures() {
 
 function createRandomWalker(type) {
 //    console.log("Creating random walker")
-    var component = Qt.createComponent("RandomWalker.qml")
+    var component = Qt.createComponent("walkers/RandomWalker.qml")
     var found = false;
     var nAttempts = 0;
     while(!found) {
@@ -76,7 +76,7 @@ function createDirectionWalker(type) {
     }
 
 //    console.log("Creating direction walker")
-    var component = Qt.createComponent("DirectionWalker.qml")
+    var component = Qt.createComponent("walkers/DirectionWalker.qml")
     var found = false;
     var nAttempts = 0;
     while(!found) {

@@ -85,6 +85,9 @@ public:
         return m_imageType;
     }
 
+    Q_INVOKABLE void unlockUpdates();
+    Q_INVOKABLE bool tryLockUpdates();
+    ~PercolationSystem();
 public slots:
     void update();
     void setFinishedUpdating();
@@ -154,7 +157,6 @@ protected:
 
     ImageType m_imageType;
     QFutureWatcher<void> watcher;
-    QMutex m_imageTypeMutex;
     QMutex m_updateMatrixMutex;
 };
 

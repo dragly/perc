@@ -17,10 +17,6 @@ QML_IMPORT_PATH =
 SOURCES += main.cpp \
     game/game.cpp \
     percolation/percolationsystem.cpp \
-    gameobject/gameobject.cpp \
-    components/physicscomponent.cpp \
-    components/graphicscomponent.cpp \
-    components/gameobjectcomponent.cpp \
     percolation/cluster.cpp
 
 # Installation path
@@ -33,10 +29,6 @@ qtcAddDeployment()
 HEADERS += \
     game/game.h \
     percolation/percolationsystem.h \
-    gameobject/gameobject.h \
-    components/physicscomponent.h \
-    components/graphicscomponent.h \
-    components/gameobjectcomponent.h \
     percolation/cluster.h
 
 OTHER_FILES += \

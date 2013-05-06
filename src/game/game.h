@@ -3,7 +3,6 @@
 
 #include <src/qtquick2applicationviewer/qtquick2applicationviewer.h>
 #include <src/percolation/percolationsystem.h>
-#include <src/gameobject/gameobject.h>
 
 #include <QTimer>
 #include <QQuickItem>
@@ -20,7 +19,6 @@ public slots:
 private:
     QtQuick2ApplicationViewer m_viewer;
     QTimer m_advanceTimer;
-    QList<GameObject*> gameObjects;
     PercolationSystem m_percolationSystem;
     QQuickItem *m_gameScene;
 };
