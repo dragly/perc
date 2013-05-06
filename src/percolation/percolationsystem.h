@@ -142,6 +142,8 @@ protected:
     arma::umat m_labelMatrix;
     arma::umat m_areaMatrix;
     arma::mat m_pressureMatrix;
+    arma::mat m_oldPressureMatrix;
+    arma::mat m_pressureSourceMatrix;
     arma::mat m_flowMatrix;
 
     arma::imat m_visitDirections;

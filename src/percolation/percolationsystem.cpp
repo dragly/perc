@@ -46,6 +46,8 @@ void PercolationSystem::initialize() {
     m_occupationMatrix = zeros<umat>(m_nRows, m_nCols);
     m_flowMatrix = zeros(m_nRows, m_nCols);
     m_pressureMatrix = zeros(m_nRows, m_nCols);
+    m_pressureSourceMatrix = zeros(m_nRows, m_nCols);
+    m_oldPressureMatrix = zeros(m_nRows, m_nCols);
 
     //    cout << m_valueMatrix << endl;
     recalculateMatricesAndUpdate();
@@ -60,6 +62,8 @@ void PercolationSystem::initialize() {
 }
 
 void PercolationSystem::generatePressureMatrix() {
+//    qDebug() << "Generating pressure matrix";
+    m_pressureSourceMatrix.zeros();
     m_pressures = zeros(m_nClusters);
     for(QObject* pressureSource : m_pressureSources) {
         int row = pressureSource->property("row").toInt();
@@ -67,18 +71,88 @@ void PercolationSystem::generatePressureMatrix() {
         double pressure = pressureSource->property("pressure").toDouble();
         int label = labelAt(row, col);
         m_pressures(label) += pressure;
+        m_pressureSourceMatrix(row, col) = pressure;
     }
-    for(int i = 0; i < m_nClusters; i++) {
-        if(m_areas(i) > 0) {
-            m_pressures(i) /= m_areas(i);
-        }
-    }
-    m_pressureMatrix.zeros();
-    for(int i = 0; i < m_nRows; i++) {
-        for(int j = 0; j < m_nCols; j++) {
-            if(isOccupied(i,j)) {
-                int label = labelAt(i, j);
-                m_pressureMatrix(i,j) = m_pressures(label);
+//    for(int i = 0; i < m_nClusters; i++) {
+//        if(m_areas(i) > 0) {
+//            m_pressures(i) /= m_areas(i);
+//        }
+//    }
+    //    m_pressureMatrix.zeros();
+    double kappa = 0.01;
+    int iterations = 1;
+//    for(int it = 0; it < iterations; it++) {
+//        m_oldPressureMatrix = m_pressureMatrix;
+//        for(int i = 0; i < m_nRows; i++) {
+//            for(int j = 0; j < m_nCols; j++) {
+//                if(isOccupied(i,j)) {
+//                    int label = labelAt(i, j);
+//                    if(m_pressureSourceMatrix(i,j) > 0) {
+//                        m_pressureMatrix(i,j) = m_pressures(label); // set the source to the pressure based on the area
+//                    } else {
+//                        m_pressureMatrix(i,j) = m_oldPressureMatrix(i,j);
+//                        double fromOthers = 0;
+//                        int nOthers = 0;
+//                        if(isOccupied(i - 1, j) && m_oldPressureMatrix(i - 1,j) > m_pressureMatrix(i,j)) {
+//                            fromOthers += m_oldPressureMatrix(i - 1,j);
+//                            nOthers += 1;
+//                        }
+//                        if(isOccupied(i + 1, j) && m_oldPressureMatrix(i + 1,j) > m_pressureMatrix(i,j)) {
+//                            fromOthers += m_oldPressureMatrix(i + 1,j);
+//                            nOthers += 1;
+//                        }
+//                        if(isOccupied(i, j - 1) && m_oldPressureMatrix(i,j - 1) > m_pressureMatrix(i,j)) {
+//                            fromOthers += m_oldPressureMatrix(i,j - 1);
+//                            nOthers += 1;
+//                        }
+//                        if(isOccupied(i, j + 1) && m_oldPressureMatrix(i,j + 1) > m_pressureMatrix(i,j)) {
+//                            fromOthers += m_oldPressureMatrix(i,j + 1);
+//                            nOthers += 1;
+//                        }
+//                        fromOthers -= nOthers * m_oldPressureMatrix(i,j);
+//                        m_pressureMatrix(i,j) += kappa * fromOthers;
+//                    }
+//                }
+//            }
+//        }
+//    }
+    kappa = 0.9;
+    for(int it = 0; it < iterations; it++) {
+        m_oldPressureMatrix = m_pressureMatrix;
+        for(int i = 0; i < m_nRows; i++) {
+            for(int j = 0; j < m_nCols; j++) {
+                if(isOccupied(i,j)) {
+                    int label = labelAt(i, j);
+                    if(m_pressureSourceMatrix(i,j) > 0) {
+                        m_pressureMatrix(i,j) = m_pressures(label); // set the source to the pressure based on the area
+                    } else {
+                        m_pressureMatrix(i,j) = m_oldPressureMatrix(i,j);
+                        double fromOthers = 0;
+                        int nOthers = 0;
+                        if(isOccupied(i - 1, j)) {
+                            fromOthers += m_oldPressureMatrix(i - 1,j);
+                            nOthers += 1;
+                        }
+                        if(isOccupied(i + 1, j)) {
+                            fromOthers += m_oldPressureMatrix(i + 1,j);
+                            nOthers += 1;
+                        }
+                        if(isOccupied(i, j - 1)) {
+                            fromOthers += m_oldPressureMatrix(i,j - 1);
+                            nOthers += 1;
+                        }
+                        if(isOccupied(i, j + 1)) {
+                            fromOthers += m_oldPressureMatrix(i,j + 1);
+                            nOthers += 1;
+                        }
+//                        fromOthers -= nOthers * m_oldPressureMatrix(i,j);
+                        if(nOthers > 0) {
+                            fromOthers /= nOthers;
+                        }
+                        m_pressureMatrix(i,j) = m_pressureMatrix(i,j) * (1 - kappa);
+                        m_pressureMatrix(i,j) += kappa * fromOthers;
+                    }
+                }
             }
         }
     }
@@ -143,12 +217,12 @@ void PercolationSystem::setOccupationTreshold(double arg)
 }
 
 bool PercolationSystem::tryLockUpdates() {
-//    qDebug() << "Locked updates";
+    //    qDebug() << "Locked updates";
     return m_updateMatrixMutex.tryLock();
 }
 
 void PercolationSystem::unlockUpdates() {
-//    qDebug() << "Unlocked updates";
+    //    qDebug() << "Unlocked updates";
     m_updateMatrixMutex.unlock();
 }
 

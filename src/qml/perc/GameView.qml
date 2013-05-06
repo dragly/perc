@@ -5,43 +5,20 @@ Rectangle {
     width: 100
     height: 62
     color: "red"
+
     GameScene {
         id: gameScene
         objectName: "gameScene"
         imageType: gameMenu.imageType
-        property real targetScale: scale
-        readonly property alias currentScale: scaleTransform.xScale
-        property alias scaleOriginX: scaleTransform.origin.x
-        property alias scaleOriginY: scaleTransform.origin.y
 
-        transform: [
-            Scale {
-                id: scaleTransform
-
-                property int scaleDuration: 200
-
-                Behavior on xScale {
-                    NumberAnimation {
-                        duration: scaleTransform.scaleDuration
-                        easing.type: Easing.OutQuad
-                    }
+        onSelectedObjectsChanged: {
+            if(selectedObjects.length > 0) {
+                for(var i in selectedObjects) {
+                    gameObjectInfo.text = selectedObjects[i].informationText
                 }
-
-                Behavior on yScale {
-                    NumberAnimation {
-                        duration: scaleTransform.scaleDuration
-                        easing.type: Easing.OutQuad
-                    }
-                }
-            },
-            Translate {
-                id: positionTransform
+            } else {
+                gameObjectInfo.text = "Nothing selected"
             }
-        ]
-
-        onTargetScaleChanged: {
-            scaleTransform.xScale = targetScale
-            scaleTransform.yScale = targetScale
         }
     }
 
@@ -90,5 +67,20 @@ Rectangle {
 
     GameMenu {
         id: gameMenu
+    }
+
+    Rectangle {
+        id: gameObjectInfo
+        property alias text: gameObjectInfoText.text
+        anchors.right: parent.right
+        anchors.top: parent.top
+        width: parent.width * 0.2
+        height: parent.height * 0.1
+        Text {
+            id: gameObjectInfoText
+            anchors.centerIn: parent
+            text: "Nothing selected"
+            font.pixelSize: parent.height * 0.2
+        }
     }
 }

@@ -25,8 +25,10 @@ function createPressureSource() {
 
             pressureSource.row = i
             pressureSource.col = j
+            pressureSource.requestSelect.connect(sceneRoot.selectObject)
             found = true
             pressureSources.push(pressureSource)
+
         }
 
         nAttempts += 1

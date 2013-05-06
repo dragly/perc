@@ -5,20 +5,41 @@ import QtQuick.Particles 2.0
 Rectangle {
     id: pressureSourceRoot
 
+    signal requestSelect(var object)
+
     property double pressure: 1
     property int row
     property int col
 
     //    radius: 10
 
+    property string informationText: "Pressure source\nPressure: " + (Math.round(pressure * 100) / 100).toFixed(2)
+
     x: col * 10 + (10 - width) / 2
     y: row * 10 + (10 - height) / 2
 
-    width: 7
-    height: 7
-    color: "blue"
+    width: 6
+    height: 6
+    color: Qt.rgba(0.4, 0.4, 1 * pressure, 1)
 
     smooth: true
+
+    Timer {
+        id: lowerValueTimer
+        interval: 30 * 1000
+        running: true
+        repeat: true
+        onTriggered: {
+            pressure *= 0.9
+        }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            requestSelect(pressureSourceRoot)
+        }
+    }
 
     //    SequentialAnimation {
     //        running: true
@@ -65,7 +86,7 @@ Rectangle {
         width: 2
         group: "test"
         lifeSpan: 1000
-        emitRate: 50
+        emitRate: 50 * pressureSourceRoot.pressure
         size: 7
         endSize: 3
         acceleration: TargetDirection {
