@@ -2,8 +2,6 @@ var sites;
 var walkers = [];
 var clusters = [];
 var pressureSources = [];
-var clusterComponent = Qt.createComponent("Cluster.qml")
-var pressureSourceComponent = Qt.createComponent("sources/PressureSource.qml")
 
 function createPressureSource() {
     var found = false;
@@ -16,15 +14,10 @@ function createPressureSource() {
         var i = parseInt(Math.random() * percolationSystem.nRows)
         var j = parseInt(Math.random() * percolationSystem.nCols)
         if(percolationSystem.isOccupied(i,j)) {
-            var pressureSource = pressureSourceComponent.createObject(sceneRoot)
-            if(pressureSource === null) {
-                console.log("Could not create pressure source component.")
-                console.log(pressureSourceComponent.errorString())
-                return false
-            }
-
+            var pressureSource = entityManager.createEntityFromUrl("sources/PressureSource.qml")
             pressureSource.row = i
             pressureSource.col = j
+            pressureSource.pressure = Math.random()
             pressureSource.requestSelect.connect(sceneRoot.selectObject)
             found = true
             pressureSources.push(pressureSource)
@@ -37,10 +30,9 @@ function createPressureSource() {
 
 function refreshPressures(timeDiff) {
     percolationSystem.clearPressureSources()
-    console.log(timeDiff)
     for(var i in pressureSources) {
         var pressureSource = pressureSources[i]
-        pressureSource.pressure = pressureSource.pressure - 0.01 * timeDiff / 1000
+        pressureSource.pressure = pressureSource.pressure - 0.001 * timeDiff / 1000
         percolationSystem.addPressureSource(pressureSource)
     }
 }
@@ -60,11 +52,7 @@ function createRandomWalker(type) {
         var i = parseInt(Math.random() * percolationSystem.nRows)
         var j = parseInt(Math.random() * percolationSystem.nCols)
         if(percolationSystem.isOccupied(i,j)) {
-            var walker = component.createObject(sceneRoot, {type: type});
-            if(walker === null) {
-                console.log("ERROR! Could note create RandomWalker!")
-                return false;
-            }
+            var walker = entityManager.createEntityFromUrl("walkers/RandomWalker.qml", {type: type});
             walker.row = i
             walker.col = j
             found = true

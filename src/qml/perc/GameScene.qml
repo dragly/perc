@@ -100,6 +100,10 @@ Item {
         text: "UPS: " + parseFloat(Math.round(ups * 100) / 100).toFixed(2)
     }
 
+    EntityManager {
+        id: entityManager
+    }
+
     Timer {
         property int triggers: 0
         id: advanceTimer
