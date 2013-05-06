@@ -35,10 +35,12 @@ function createPressureSource() {
     }
 }
 
-function refreshPressures() {
+function refreshPressures(timeDiff) {
     percolationSystem.clearPressureSources()
+    console.log(timeDiff)
     for(var i in pressureSources) {
         var pressureSource = pressureSources[i]
+        pressureSource.pressure = pressureSource.pressure - 0.01 * timeDiff / 1000
         percolationSystem.addPressureSource(pressureSource)
     }
 }

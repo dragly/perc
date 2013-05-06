@@ -16,8 +16,10 @@ Rectangle {
                 for(var i in selectedObjects) {
                     gameObjectInfo.text = selectedObjects[i].informationText
                 }
+                gameObjectInfo.state = "active"
             } else {
                 gameObjectInfo.text = "Nothing selected"
+                gameObjectInfo.state = "hidden"
             }
         }
     }
@@ -74,6 +76,31 @@ Rectangle {
         property alias text: gameObjectInfoText.text
         anchors.right: parent.right
         anchors.top: parent.top
+        state: "active"
+        states: [
+            State {
+                name: "active"
+                PropertyChanges {
+                    target: gameObjectInfo
+                    anchors.topMargin: 0
+                }
+            },
+            State {
+                name: "hidden"
+                PropertyChanges {
+                    target: gameObjectInfo
+                    anchors.topMargin: -gameObjectInfo.height * 0.8
+                }
+            }
+        ]
+
+        Behavior on anchors.topMargin {
+            NumberAnimation {
+                duration: 300
+                easing.type: Easing.OutQuad
+            }
+        }
+
         width: parent.width * 0.2
         height: parent.height * 0.1
         Text {

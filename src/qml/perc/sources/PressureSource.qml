@@ -24,6 +24,12 @@ Rectangle {
 
     smooth: true
 
+    onPressureChanged: {
+        if(pressure < 0) {
+            pressure = 0
+        }
+    }
+
     Timer {
         id: lowerValueTimer
         interval: 30 * 1000
@@ -41,43 +47,6 @@ Rectangle {
         }
     }
 
-    //    SequentialAnimation {
-    //        running: true
-    //        loops: Animation.Infinite
-    //        ParallelAnimation {
-    //            NumberAnimation {
-    //                target: pressureSourceRoot
-    //                properties: "width,height"
-    //                to: 8
-    //                duration: 1000
-    //                easing.type: Easing.InOutQuad
-    //            }
-    //            ColorAnimation {
-    //                target: pressureSourceRoot
-    //                properties: "color"
-    //                to: "#FFFFA6"
-    //                duration: 1000
-    //                easing.type: Easing.InOutQuad
-    //            }
-    //        }
-    //        ParallelAnimation {
-    //            NumberAnimation {
-    //                target: pressureSourceRoot
-    //                properties: "width,height"
-    //                to: 5
-    //                duration: 1000
-    //                easing.type: Easing.InOutQuad
-    //            }
-    //            ColorAnimation {
-    //                target: pressureSourceRoot
-    //                properties: "color"
-    //                to: "#FFFFFF"
-    //                duration: 1000
-    //                easing.type: Easing.InOutQuad
-    //            }
-    //        }
-    //    }
-
     Emitter {
         shape: EllipseShape{}
         system: particleSystem
@@ -86,7 +55,7 @@ Rectangle {
         width: 2
         group: "test"
         lifeSpan: 1000
-        emitRate: 50 * pressureSourceRoot.pressure
+        emitRate: (pressureSourceRoot.pressure > 0) ? 50 * pressureSourceRoot.pressure : 0
         size: 7
         endSize: 3
         acceleration: TargetDirection {

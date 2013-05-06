@@ -7,7 +7,7 @@ Item {
     id: sceneRoot
 
     property alias imageType: percolationSystem.imageType
-    property double lastUpdateTime: -1
+    property double lastUpdateTime: Date.now()
     property var selectedObjects: []
     property real targetScale: scale
     readonly property alias currentScale: scaleTransform.xScale
@@ -112,7 +112,7 @@ Item {
             if(currentInterval > 200) {
                 if(percolationSystem.tryLockUpdates()) {
                     Logic.moveWalkers()
-                    Logic.refreshPressures()
+                    Logic.refreshPressures(currentInterval)
                     percolationSystem.unlockUpdates()
                     percolationSystem.update()
                     lastUpdateTime = currentUpdateTime
