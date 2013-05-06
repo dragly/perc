@@ -6,16 +6,13 @@ Rectangle {
 
     smooth: true
 
-    width: 10
-    height: 10
-    color: "#F03B20"
+    width: 3
+    height: 3
 
-    onColChanged: {
-        x = col * 10 + (10 - width) / 2
-    }
-    onRowChanged: {
-        y = row * 10 + (10 - width) / 2
-    }
+    x: col * 10 + (10 - width) / 2
+    y: row * 10 + (10 - width) / 2
+
+    color: "#F03B20"
 
     Behavior on x {
         NumberAnimation {
