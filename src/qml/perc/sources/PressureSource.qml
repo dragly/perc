@@ -2,7 +2,9 @@ import QtQuick 2.0
 import QtGraphicalEffects 1.0
 import QtQuick.Particles 2.0
 
-Rectangle {
+import ".."
+
+EntityBase {
     id: pressureSourceRoot
 
     signal requestSelect(var object)
@@ -20,7 +22,12 @@ Rectangle {
 
     width: 6
     height: 6
-    color: Qt.rgba(0.4, 0.4, 1 * pressure, 1)
+    Rectangle {
+        id: rect
+        anchors.fill: parent
+        color: Qt.rgba(0.4, 0.4, 1 * pressureSourceRoot.pressure, 1)
+    }
+
 
     smooth: true
 

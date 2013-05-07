@@ -146,7 +146,7 @@ Item {
         }
 
         function refresh() {
-            if(selectedObjects.length > 0) {
+            if(selectedObjects !== undefined && selectedObjects.length > 0) {
                 visible = true
                 anchors.centerIn = selectedObjects[0]
                 width = Math.max(selectedObjects[0].width + 5, 10 / gameScene.targetScale)
@@ -171,6 +171,9 @@ Item {
             Logic.createRandomWalker("lower")
             Logic.createDirectionWalker("left")
             Logic.createDirectionWalker("right")
+        }
+
+        for(var i = 0; i < 100; i++) {
             Logic.createPressureSource()
         }
     }
