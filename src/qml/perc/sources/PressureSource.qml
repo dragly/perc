@@ -3,6 +3,7 @@ import QtGraphicalEffects 1.0
 import QtQuick.Particles 2.0
 
 import ".."
+import "../defaults.js" as Defaults
 
 EntityBase {
     id: pressureSourceRoot
@@ -11,21 +12,20 @@ EntityBase {
 
     property double pressure: 1
 
-    //    radius: 10
+    //    radius: Defaults.GRID_SIZE
 
     property string informationText: "Pressure source\nPressure: " + (Math.round(pressure * 100) / 100).toFixed(2)
 
-    x: col * 10 + (10 - width) / 2
-    y: row * 10 + (10 - height) / 2
+    x: col * Defaults.GRID_SIZE + (Defaults.GRID_SIZE - width) / 2
+    y: row * Defaults.GRID_SIZE + (Defaults.GRID_SIZE - height) / 2
 
-    width: 6
-    height: 6
+    width: Defaults.GRID_SIZE * 0.6
+    height: Defaults.GRID_SIZE * 0.6
     Rectangle {
         id: rect
         anchors.fill: parent
         color: Qt.rgba(0.4, 0.4, 1 * pressureSourceRoot.pressure, 1)
     }
-
 
     smooth: true
 
@@ -56,20 +56,20 @@ EntityBase {
         shape: EllipseShape{}
         system: particleSystem
         anchors.centerIn: parent
-        height: 2
-        width: 2
+        height: Defaults.GRID_SIZE * 0.2
+        width: Defaults.GRID_SIZE * 0.2
         group: "test"
         lifeSpan: 1000
         emitRate: (pressureSourceRoot.pressure > 0) ? 50 * pressureSourceRoot.pressure : 0
-        size: 7
-        endSize: 3
+        size: Defaults.GRID_SIZE * 0.7
+        endSize: Defaults.GRID_SIZE * 0.3
         acceleration: TargetDirection {
             //            angleVariation: 180
-            targetX: 7
-            targetY: 5
-            magnitude: 10
-            magnitudeVariation: 10
-            targetVariation: 5
+            targetX: Defaults.GRID_SIZE * 0.7
+            targetY: Defaults.GRID_SIZE * 0.5
+            magnitude: Defaults.GRID_SIZE
+            magnitudeVariation: Defaults.GRID_SIZE
+            targetVariation: Defaults.GRID_SIZE * 0.5
         }
     }
 

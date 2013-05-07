@@ -2,11 +2,12 @@ import QtQuick 2.0
 import QtGraphicalEffects 1.0
 
 import ".."
+import "../defaults.js" as Defaults
 
 EntityBase {
     id: fighterPlaneRoot
-    width: 30
-    height: 40
+    width: Defaults.GRID_SIZE * 0.5
+    height: Defaults.GRID_SIZE * 0.7
 
     Item {
         id: imageContainer
@@ -19,13 +20,8 @@ EntityBase {
             anchors.centerIn: imageContainer
             width: fighterPlaneRoot.width
             height: fighterPlaneRoot.height
-            sourceSize.width: 120
-            sourceSize.height: 160
-            smooth: true
-            fillMode: Image.Stretch
         }
         visible: false
-        smooth: true
     }
 
     DropShadow {
@@ -44,11 +40,37 @@ EntityBase {
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            console.log(fighterPlaneRoot.parent.targetScale)
-//            image.sourceSize.width = fighterPlaneRoot.parent.targetScale * 30
-//            image.sourceSize.height = fighterPlaneRoot.parent.targetScale * 40
-            parent.width = fighterPlaneRoot.parent.targetScale * 30
-            parent.height = fighterPlaneRoot.parent.targetScale * 40
+            console.log("Clicked plane!")
+        }
+    }
+
+//    transform: [
+//        Rotation {
+//            id: flightRotationDummy
+//            origin.x: Defaults.GRID_SIZE * 4
+//            origin.y: Defaults.GRID_SIZE * 4
+//            angle: 0
+//        }
+//    ]
+
+    Behavior on rotation {
+        NumberAnimation {
+            duration: Defaults.TIME_STEP * 2
+        }
+    }
+
+    Timer {
+        running: true
+        repeat: true
+        interval: 200
+        onTriggered: {
+            if(col > 10) {
+                row += 1
+                rotation = 180
+            } else {
+                col += 1
+                rotation = 90
+            }
         }
     }
 }

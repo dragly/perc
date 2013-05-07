@@ -1,6 +1,7 @@
 import QtQuick 2.0
 
 import ".."
+import "../defaults.js" as Defaults
 
 EntityBase {
     property alias color: rect.color
@@ -12,26 +13,11 @@ EntityBase {
     }
     smooth: true
 
-    width: 3
-    height: 3
+    width: Defaults.GRID_SIZE * 0.3
+    height: Defaults.GRID_SIZE * 0.3
 
-    x: col * 10 + (10 - width) / 2
-    y: row * 10 + (10 - width) / 2
-
-
-    Behavior on x {
-        NumberAnimation {
-            duration: 200
-//            easing.type: Easing.InOutQuad
-        }
-    }
-
-    Behavior on y {
-        NumberAnimation {
-            duration: 200
-//            easing.type: Easing.InOutQuad
-        }
-    }
+    x: col * Defaults.GRID_SIZE + (Defaults.GRID_SIZE - width) / 2
+    y: row * Defaults.GRID_SIZE + (Defaults.GRID_SIZE - width) / 2
 
     function move() {
         console.log("Move not implemented for walker...")

@@ -2,6 +2,7 @@ import QtQuick 2.0
 import com.dragly.perc 1.0
 
 import "logic.js" as Logic
+import "defaults.js" as Defaults
 
 Item {
     id: sceneRoot
@@ -37,14 +38,17 @@ Item {
     ]
 
     onTargetScaleChanged: {
+        if(targetScale > 1) {
+            targetScale = 1
+        }
         scaleTransform.xScale = targetScale
         scaleTransform.yScale = targetScale
         selectionIndicator.refresh()
     }
 
-//    onSelectedObjectsChanged: {
-//        selectedObjectsChangedForReal()
-//    }
+    //    onSelectedObjectsChanged: {
+    //        selectedObjectsChangedForReal()
+    //    }
 
     function selectObject(abs) {
         var objects = []
@@ -56,8 +60,8 @@ Item {
         selectionIndicator.refresh()
     }
 
-    width: 200
-    height: 300
+    width: percolationSystem.width * Defaults.GRID_SIZE
+    height: percolationSystem.height * Defaults.GRID_SIZE
 
     PercolationSystem {
         id: percolationSystem
@@ -69,33 +73,78 @@ Item {
         transform: Scale {
             origin.x: 0
             origin.y: 0
-            xScale: 10
-            yScale: 10
+            xScale: Defaults.GRID_SIZE
+            yScale: Defaults.GRID_SIZE
         }
 
         smooth: false
+    }
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
+    MouseArea {
+        id: mainMouseArea
+        property bool isDragging: false
+
+        anchors.fill: parent
+
+        onClicked: {
+            if(!isDragging) {
+                console.log("clicked")
                 selectedObjects = []
             }
         }
+
+        onReleased: {
+            isDragging = false
+        }
+
+        onPressed: {
+            console.log("Pressed")
+        }
+
+        onPositionChanged: {
+            if(!isDragging) {
+                isDragging = true
+                selectionRectangle.x = mouse.x
+                selectionRectangle.y = mouse.y
+            } else {
+                selectionRectangle.width = mouse.x - selectionRectangle.x
+                selectionRectangle.height = mouse.y - selectionRectangle.y
+            }
+        }
+        z: 99999999
+    }
+
+    Rectangle {
+        id: selectionRectangle
+        border.width: 1
+        border.color: "white"
+                color: Qt.rgba(1,1,1,0.4)
+//        color: "white"
+//        opacity: 0.1
+        width: 100
+        height: 100
+        visible: mainMouseArea.isDragging
+        onVisibleChanged: {
+            console.log("Visible " + visible)
+            console.log(x + " " + y + " " + width + " " + height)
+        }
+
+        z: 99999
     }
 
     onImageTypeChanged: {
         percolationSystem.update()
     }
 
-    Text {
-        id: updatesPerSecondText
-        property double ups: 0
-        anchors.top: parent.top
-        anchors.left: parent.left
-        color: "white"
-        font.pixelSize: parent.height * 0.05
-        text: "UPS: " + parseFloat(Math.round(ups * 100) / 100).toFixed(2)
-    }
+    //    Text {
+    //        id: updatesPerSecondText
+    //        property double ups: 0
+    //        anchors.top: parent.top
+    //        anchors.left: parent.left
+    //        color: "white"
+    //        font.pixelSize: parent.height * 0.05
+    //        text: "UPS: " + parseFloat(Math.round(ups * 100) / 100).toFixed(2)
+    //    }
 
     EntityManager {
         id: entityManager
@@ -117,7 +166,7 @@ Item {
                     percolationSystem.unlockUpdates()
                     percolationSystem.update()
                     lastUpdateTime = currentUpdateTime
-                    updatesPerSecondText.ups = 1000 / currentInterval
+                    //                    updatesPerSecondText.ups = 1000 / currentInterval
                 }
             }
         }
@@ -127,16 +176,16 @@ Item {
         id: selectionIndicator
 
         property var selectedObjects: sceneRoot.selectedObjects
-//        property double targetWidth: 10 //(mySelectedObject !== null) ? Math.max(mySelectedObject.width + 5, 10 / gameScene.targetScale) : 0
-//        property double targetHeight: 10 //(mySelectedObject !== null) ? Math.max(mySelectedObject.width + 5, 10 / gameScene.targetScale) : 0
+        //        property double targetWidth: 10 //(mySelectedObject !== null) ? Math.max(mySelectedObject.width + 5, 10 / gameScene.targetScale) : 0
+        //        property double targetHeight: 10 //(mySelectedObject !== null) ? Math.max(mySelectedObject.width + 5, 10 / gameScene.targetScale) : 0
 
         color: "transparent"
         border.color: "white"
         border.width: Math.max(1, 1 / gameScene.targetScale)
         anchors.centerIn: (selectedObjects.length > 0) ? selectedObjects[0] : parent
         z: 9999
-        width: 10
-        height: 10
+        width: Defaults.GRID_SIZE
+        height: Defaults.GRID_SIZE
 
         onSelectedObjectsChanged: {
             refresh()
@@ -146,8 +195,8 @@ Item {
             if(selectedObjects !== undefined && selectedObjects.length > 0) {
                 visible = true
                 anchors.centerIn = selectedObjects[0]
-                width = Math.max(selectedObjects[0].width + 5, 10 / gameScene.targetScale)
-                height = Math.max(selectedObjects[0].height + 5, 10 / gameScene.targetScale)
+                width = Math.max(selectedObjects[0].width + Defaults.GRID_SIZE * 0.25, Defaults.GRID_SIZE / (10 * gameScene.targetScale))
+                height = Math.max(selectedObjects[0].height + Defaults.GRID_SIZE * 0.25, Defaults.GRID_SIZE / (10 * gameScene.targetScale))
             } else {
                 visible = false
             }
@@ -175,7 +224,5 @@ Item {
         }
 
         var plane = entityManager.createEntityFromUrl("planes/FighterPlane.qml")
-        plane.x = 100
-        plane.y = 100
     }
 }

@@ -10,6 +10,7 @@ Rectangle {
         id: gameScene
         objectName: "gameScene"
         imageType: gameMenu.imageType
+        targetScale: 0.1
 
         onSelectedObjectsChanged: {
             if(selectedObjects.length > 0) {
@@ -67,6 +68,10 @@ Rectangle {
             prevX = -1
             prevY = -1
         }
+    }
+
+    onWidthChanged: {
+        console.log(width)
     }
 
     GameMenu {
