@@ -13,7 +13,11 @@
 #include <QFutureWatcher>
 #include <QMutex>
 
+#ifdef Q_OS_ANDROID
+#include </home/svenni/apps/armadillo/armadillo>
+#else
 #include <armadillo>
+#endif
 #include <iostream>
 
 class PressureSource {
@@ -89,11 +93,12 @@ public:
     Q_INVOKABLE bool tryLockUpdates();
     ~PercolationSystem();
 public slots:
-    void update();
+//    void update();
     void setFinishedUpdating();
     void initialize();
     void recalculateMatricesAndUpdate();
     void setOccupationTreshold(double arg);
+    void requestRecalculation();
 
     void setNCols(int arg)
     {
@@ -120,6 +125,8 @@ signals:
     void occupationTresholdChanged(double arg);
 
     void imageTypeChanged(ImageType arg);
+
+    void readyToUpdate();
 
 protected:
     void generateImage();
@@ -158,7 +165,7 @@ protected:
     bool m_isFinishedUpdating;
 
     ImageType m_imageType;
-    QFutureWatcher<void> watcher;
+//    QFutureWatcher<void> watcher;
     QMutex m_updateMatrixMutex;
 };
 

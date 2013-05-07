@@ -11,7 +11,11 @@
 #include <vector>
 #include <QtConcurrent/QtConcurrent>
 
+#ifdef Q_OS_ANDROID
+#include </home/svenni/apps/armadillo/armadillo>
+#else
 #include <armadillo>
+#endif
 #include <iostream>
 
 using namespace arma;
@@ -24,7 +28,7 @@ PercolationSystem::PercolationSystem(QQuickPaintedItem *parent) :
     m_nClusters(0),
     m_imageType(PressureImage)
 {
-    connect(&watcher, SIGNAL(finished()), this, SLOT(setFinishedUpdating()));
+//    connect(&watcher, SIGNAL(finished()), this, SLOT(setFinishedUpdating()));
 }
 
 PercolationSystem::~PercolationSystem() {
@@ -158,10 +162,14 @@ void PercolationSystem::generatePressureMatrix() {
     }
 }
 
-void PercolationSystem::update() {
-    //    qDebug() << "update called!";
+void PercolationSystem::requestRecalculation() {
     QtConcurrent::run(this, &PercolationSystem::recalculateMatricesAndUpdate);
 }
+
+//void PercolationSystem::update() {
+//        qDebug() << "update called!";
+//    QtConcurrent::run(this, &PercolationSystem::recalculateMatricesAndUpdate);
+//}
 
 void PercolationSystem::recalculateMatricesAndUpdate() {
     //    if(m_updateMatrixMutex.tryLock()) {
@@ -176,7 +184,8 @@ void PercolationSystem::recalculateMatricesAndUpdate() {
     generatePressureMatrix();
     generateImage();
     //        m_isFinishedUpdating = true;
-    QQuickPaintedItem::update();
+//    QQuickPaintedItem::update();
+    emit readyToUpdate();
     m_updateMatrixMutex.unlock();
     //    } else {
     //        qDebug() << "Skipped recalulateMatrices! Not finished yet!";

@@ -6,11 +6,18 @@ import "../defaults.js" as Defaults
 EntityBase {
     property alias color: rect.color
 
-    Rectangle {
+//    Rectangle {
+//        id: rect
+//        color: "#F03B20"
+//        anchors.fill: parent
+//    }
+    Image {
+        property string color
         id: rect
-        color: "#F03B20"
         anchors.fill: parent
+        source: "../planes/fighterplane.png"
     }
+
     smooth: true
 
     width: Defaults.GRID_SIZE * 0.3

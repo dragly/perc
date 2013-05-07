@@ -1,5 +1,7 @@
 import QtQuick 2.0
 
+import "."
+
 Rectangle {
     width: 640
     height: 480

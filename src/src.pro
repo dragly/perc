@@ -33,3 +33,5 @@ HEADERS += \
 
 OTHER_FILES += \
     qml/perc/GameView.qml
+
+TARGET = perc

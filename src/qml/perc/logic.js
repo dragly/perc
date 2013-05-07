@@ -55,6 +55,7 @@ function createRandomWalker(type) {
             var walker = entityManager.createEntityFromUrl("walkers/RandomWalker.qml", {type: type});
             walker.row = i
             walker.col = j
+            walker.z = 99999
             found = true
             walkers.push(walker)
         }

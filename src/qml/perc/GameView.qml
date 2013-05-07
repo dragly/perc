@@ -28,13 +28,15 @@ Rectangle {
     }
 
     MouseArea {
-        property int prevX: -1
-        property int prevY: -1
+        id: mainViewMouseArea
+        property bool isDragging: false
+        property double prevX: 0
+        property double prevY: 0
         anchors.fill: parent
-        acceptedButtons: Qt.MiddleButton
+//        acceptedButtons: Qt.MiddleButton
         onWheel: {
             //            var realGameSceneX = gameScene.scaleOriginX
-            var currentScaleOrigin = mapFromItem(gameScene, gameScene.scaleOriginX, gameScene.scaleOriginY)
+//            var currentScaleOrigin = mapFromItem(gameScene, gameScene.scaleOriginX, gameScene.scaleOriginY)
             var relativeMouse = mapToItem(gameScene, wheel.x, wheel.y)
             //            gameScene.x += wheel.x - currentScaleOrigin.x
             //            gameScene.y += wheel.y - currentScaleOrigin.y
@@ -50,23 +52,55 @@ Rectangle {
             gameScene.y += wheel.y - newPosition.y
         }
 
+        onPressed: {
+            console.log("mainViewMouseArea pressed")
+            isDragging = true
+            prevX = mouse.x
+            prevY = mouse.y
+        }
+
         onPositionChanged: {
-            if(prevX > -1 && prevY > -1) {
+            if(isDragging) {
                 gameScene.x += mouse.x - prevX
                 gameScene.y += mouse.y - prevY
             }
             prevX = mouse.x
             prevY = mouse.y
+            isDragging = true
         }
 
         onReleased: {
-            prevX = -1
-            prevY = -1
+            console.log("mainViewMouseArea released")
+            isDragging = false
         }
 
         onExited: {
-            prevX = -1
-            prevY = -1
+            isDragging = false
+        }
+    }
+
+    PinchArea {
+        property double previousScale: 1
+        anchors.fill: parent
+        onPinchStarted: {
+            console.log("Pinch started")
+            mainViewMouseArea.isDragging = false
+            previousScale = pinch.scale
+        }
+
+        onPinchUpdated: {
+            var relativeMouse = mapToItem(gameScene, viewRoot.width / 2, viewRoot.height / 2)
+            gameScene.scaleOriginX = relativeMouse.x
+            gameScene.scaleOriginY = relativeMouse.y
+            var x = 5 * (pinch.scale - previousScale)
+            gameScene.targetScale *= 1 + 0.405 * x + 0.0822 * x * x
+            previousScale = pinch.scale
+            var newPosition = mapFromItem(gameScene, relativeMouse.x, relativeMouse.y)
+            gameScene.x += viewRoot.width / 2 - newPosition.x
+            gameScene.y += viewRoot.height / 2 - newPosition.y
+        }
+        onPinchFinished: {
+            console.log("Pinch finished")
         }
     }
 

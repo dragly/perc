@@ -19,7 +19,7 @@ Item {
         Scale {
             id: scaleTransform
 
-            property int scaleDuration: 200
+            property int scaleDuration: 50
 
             Behavior on xScale {
                 NumberAnimation {
@@ -67,8 +67,8 @@ Item {
         id: percolationSystem
         width: nCols
         height: nRows
-        nRows: 500
-        nCols: 500
+        nRows: 50
+        nCols: 50
         occupationTreshold: 0.55
         transform: Scale {
             origin.x: 0
@@ -78,40 +78,12 @@ Item {
         }
 
         smooth: false
-    }
 
-    MouseArea {
-        id: mainMouseArea
-        property bool isDragging: false
-
-        anchors.fill: parent
-
-        onClicked: {
-            if(!isDragging) {
-                console.log("clicked")
-                selectedObjects = []
-            }
+        onReadyToUpdate: {
+            percolationSystem.update()
         }
 
-        onReleased: {
-            isDragging = false
-        }
-
-        onPressed: {
-            console.log("Pressed")
-        }
-
-        onPositionChanged: {
-            if(!isDragging) {
-                isDragging = true
-                selectionRectangle.x = mouse.x
-                selectionRectangle.y = mouse.y
-            } else {
-                selectionRectangle.width = mouse.x - selectionRectangle.x
-                selectionRectangle.height = mouse.y - selectionRectangle.y
-            }
-        }
-        z: 99999999
+        z: -999
     }
 
     Rectangle {
@@ -164,13 +136,46 @@ Item {
                     Logic.moveWalkers()
                     Logic.refreshPressures(currentInterval)
                     percolationSystem.unlockUpdates()
-                    percolationSystem.update()
+                    percolationSystem.requestRecalculation()
                     lastUpdateTime = currentUpdateTime
-                    //                    updatesPerSecondText.ups = 1000 / currentInterval
                 }
             }
         }
     }
+
+//    MouseArea {
+//        id: mainMouseArea
+//        property bool isDragging: false
+
+//        anchors.fill: parent
+
+//        onClicked: {
+//            if(!isDragging) {
+//                console.log("clicked")
+//                selectedObjects = []
+//            }
+//        }
+
+//        onReleased: {
+//            isDragging = false
+//        }
+
+//        onPressed: {
+//            console.log("Pressed")
+//        }
+
+//        onPositionChanged: {
+//            if(!isDragging) {
+//                isDragging = true
+//                selectionRectangle.x = mouse.x
+//                selectionRectangle.y = mouse.y
+//            } else {
+//                selectionRectangle.width = mouse.x - selectionRectangle.x
+//                selectionRectangle.height = mouse.y - selectionRectangle.y
+//            }
+//        }
+//        z: 99999999
+//    }
 
     Rectangle {
         id: selectionIndicator
@@ -212,14 +217,14 @@ Item {
 
     Component.onCompleted: {
         percolationSystem.initialize()
-        for (var i = 0; i < 100; i++) {
+        for (var i = 0; i < 2; i++) {
             Logic.createRandomWalker("raise")
             Logic.createRandomWalker("lower")
             Logic.createDirectionWalker("left")
             Logic.createDirectionWalker("right")
         }
 
-        for(var i = 0; i < 100; i++) {
+        for(var i = 0; i < 5; i++) {
             Logic.createPressureSource()
         }
 
