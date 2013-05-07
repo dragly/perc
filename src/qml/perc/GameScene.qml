@@ -33,9 +33,6 @@ Item {
                     easing.type: Easing.OutQuad
                 }
             }
-        },
-        Translate {
-            id: positionTransform
         }
     ]
 
@@ -176,5 +173,9 @@ Item {
         for(var i = 0; i < 100; i++) {
             Logic.createPressureSource()
         }
+
+        var plane = entityManager.createEntityFromUrl("planes/FighterPlane.qml")
+        plane.x = 100
+        plane.y = 100
     }
 }

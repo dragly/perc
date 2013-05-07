@@ -10,8 +10,6 @@ EntityBase {
     signal requestSelect(var object)
 
     property double pressure: 1
-    property int row
-    property int col
 
     //    radius: 10
 

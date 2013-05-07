@@ -3,8 +3,6 @@ import QtQuick 2.0
 import ".."
 
 EntityBase {
-    property int row: -1
-    property int col: -1
     property alias color: rect.color
 
     Rectangle {

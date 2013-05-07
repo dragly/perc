@@ -22,6 +22,8 @@ Rectangle {
                 gameObjectInfo.state = "hidden"
             }
         }
+
+        smooth: true
     }
 
     MouseArea {
