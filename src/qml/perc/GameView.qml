@@ -33,7 +33,7 @@ Rectangle {
         property double prevX: 0
         property double prevY: 0
         anchors.fill: parent
-//        acceptedButtons: Qt.MiddleButton
+        acceptedButtons: Qt.MiddleButton
         onWheel: {
             //            var realGameSceneX = gameScene.scaleOriginX
 //            var currentScaleOrigin = mapFromItem(gameScene, gameScene.scaleOriginX, gameScene.scaleOriginY)

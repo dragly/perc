@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
-//import QtQuick.Particles 2.0
+import QtQuick.Particles 2.0
 
 import ".."
 import "../defaults.js" as Defaults
@@ -58,39 +58,39 @@ EntityBase {
         }
     }
 
-//    Emitter {
-//        shape: EllipseShape{}
-//        system: particleSystem
-//        anchors.centerIn: parent
-//        height: Defaults.GRID_SIZE * 0.2
-//        width: Defaults.GRID_SIZE * 0.2
-//        group: "test"
-//        lifeSpan: 1000
-//        emitRate: (pressureSourceRoot.pressure > 0) ? 50 * pressureSourceRoot.pressure : 0
-//        size: Defaults.GRID_SIZE * 0.7
-//        endSize: Defaults.GRID_SIZE * 0.3
-//        acceleration: TargetDirection {
-//            //            angleVariation: 180
-//            targetX: Defaults.GRID_SIZE * 0.7
-//            targetY: Defaults.GRID_SIZE * 0.5
-//            magnitude: Defaults.GRID_SIZE
-//            magnitudeVariation: Defaults.GRID_SIZE
-//            targetVariation: Defaults.GRID_SIZE * 0.5
-//        }
-//    }
+    Emitter {
+        shape: EllipseShape{}
+        system: particleSystem
+        anchors.centerIn: parent
+        height: Defaults.GRID_SIZE * 0.2
+        width: Defaults.GRID_SIZE * 0.2
+        group: "test"
+        lifeSpan: 1000
+        emitRate: (pressureSourceRoot.pressure > 0) ? 50 * pressureSourceRoot.pressure : 0
+        size: Defaults.GRID_SIZE * 0.7
+        endSize: Defaults.GRID_SIZE * 0.3
+        acceleration: TargetDirection {
+            //            angleVariation: 180
+            targetX: Defaults.GRID_SIZE * 0.7
+            targetY: Defaults.GRID_SIZE * 0.5
+            magnitude: Defaults.GRID_SIZE
+            magnitudeVariation: Defaults.GRID_SIZE
+            targetVariation: Defaults.GRID_SIZE * 0.5
+        }
+    }
 
-//    ParticleSystem {
-//        id: particleSystem
-//        ImageParticle {
-//            groups: "test"
-//            sprites: [
-//                Sprite {
-//                    name: "testsprite"
-//                    source: "../particles/particle.png"
-//                }
-//            ]
-//            //            entryEffect: ImageParticle.Scale
-//        }
-//    }
+    ParticleSystem {
+        id: particleSystem
+        ImageParticle {
+            groups: "test"
+            sprites: [
+                Sprite {
+                    name: "testsprite"
+                    source: "../particles/particle.png"
+                }
+            ]
+            //            entryEffect: ImageParticle.Scale
+        }
+    }
 }
 

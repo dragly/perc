@@ -14,6 +14,7 @@ Item {
     readonly property alias currentScale: scaleTransform.xScale
     property alias scaleOriginX: scaleTransform.origin.x
     property alias scaleOriginY: scaleTransform.origin.y
+    property alias lightSource: lightSource
 
     transform: [
         Scale {
@@ -36,6 +37,13 @@ Item {
             }
         }
     ]
+
+    NMapLightSource {
+        id: lightSource
+        z: 10
+        lightIntensity: 0.2
+        anchors.centerIn: parent
+    }
 
     onTargetScaleChanged: {
         if(targetScale > 1) {
@@ -143,39 +151,40 @@ Item {
         }
     }
 
-//    MouseArea {
-//        id: mainMouseArea
-//        property bool isDragging: false
+    MouseArea {
+        id: mainMouseArea
+        property bool isDragging: false
 
-//        anchors.fill: parent
+        anchors.fill: parent
 
-//        onClicked: {
-//            if(!isDragging) {
-//                console.log("clicked")
-//                selectedObjects = []
-//            }
-//        }
+        onClicked: {
+            if(!isDragging) {
+                console.log("clicked")
+                lightSource.setLightPos(mouse.x, mouse.y)
+                selectedObjects = []
+            }
+        }
 
-//        onReleased: {
-//            isDragging = false
-//        }
+        onReleased: {
+            isDragging = false
+        }
 
-//        onPressed: {
-//            console.log("Pressed")
-//        }
+        onPressed: {
+            console.log("Pressed")
+        }
 
-//        onPositionChanged: {
-//            if(!isDragging) {
-//                isDragging = true
-//                selectionRectangle.x = mouse.x
-//                selectionRectangle.y = mouse.y
-//            } else {
-//                selectionRectangle.width = mouse.x - selectionRectangle.x
-//                selectionRectangle.height = mouse.y - selectionRectangle.y
-//            }
-//        }
-//        z: 99999999
-//    }
+        onPositionChanged: {
+            if(!isDragging) {
+                isDragging = true
+                selectionRectangle.x = mouse.x
+                selectionRectangle.y = mouse.y
+            } else {
+                selectionRectangle.width = mouse.x - selectionRectangle.x
+                selectionRectangle.height = mouse.y - selectionRectangle.y
+            }
+        }
+        z: 99999999
+    }
 
     Rectangle {
         id: selectionIndicator

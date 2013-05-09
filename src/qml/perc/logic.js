@@ -56,6 +56,8 @@ function createRandomWalker(type) {
             walker.row = i
             walker.col = j
             walker.z = 99999
+            walker.lightSource = sceneRoot.lightSource
+            console.log()
             found = true
             walkers.push(walker)
         }
@@ -101,6 +103,7 @@ function createDirectionWalker(type) {
                     console.log("ERROR! Could not create PercolationSite!")
                     return false;
                 }
+                walker.lightSource = sceneRoot.lightSource
                 walker.row = i
                 walker.col = j
                 found = true
