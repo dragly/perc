@@ -41,7 +41,7 @@ Item {
     NMapLightSource {
         id: lightSource
         z: 10
-        lightIntensity: 0.2
+        lightIntensity: 0.5
         anchors.centerIn: parent
     }
 
@@ -71,27 +71,45 @@ Item {
     width: percolationSystem.width * Defaults.GRID_SIZE
     height: percolationSystem.height * Defaults.GRID_SIZE
 
-    PercolationSystem {
+//    PercolationSystem {
+//        id: percolationSystem
+//        width: nCols
+//        height: nRows
+//        nRows: 50
+//        nCols: 50
+//        occupationTreshold: 0.55
+//        transform: Scale {
+//            origin.x: 0
+//            origin.y: 0
+//            xScale: Defaults.GRID_SIZE
+//            yScale: Defaults.GRID_SIZE
+//        }
+
+//        smooth: false
+
+//        onReadyToUpdate: {
+//            percolationSystem.update()
+//        }
+
+//        z: -999
+//    }
+
+    TestPercolationEffect {
         id: percolationSystem
         width: nCols
         height: nRows
         nRows: 50
         nCols: 50
         occupationTreshold: 0.55
+        lightSource: lightSource
+        z: -999
+        smooth: false
         transform: Scale {
             origin.x: 0
             origin.y: 0
             xScale: Defaults.GRID_SIZE
             yScale: Defaults.GRID_SIZE
         }
-
-        smooth: false
-
-        onReadyToUpdate: {
-            percolationSystem.update()
-        }
-
-        z: -999
     }
 
     Rectangle {
@@ -160,7 +178,6 @@ Item {
         onClicked: {
             if(!isDragging) {
                 console.log("clicked")
-                lightSource.setLightPos(mouse.x, mouse.y)
                 selectedObjects = []
             }
         }
@@ -174,6 +191,7 @@ Item {
         }
 
         onPositionChanged: {
+            lightSource.setLightPos(mouse.x, mouse.y)
             if(!isDragging) {
                 isDragging = true
                 selectionRectangle.x = mouse.x
@@ -226,7 +244,7 @@ Item {
 
     Component.onCompleted: {
         percolationSystem.initialize()
-        for (var i = 0; i < 2; i++) {
+        for (var i = 0; i < 5; i++) {
             Logic.createRandomWalker("raise")
             Logic.createRandomWalker("lower")
             Logic.createDirectionWalker("left")

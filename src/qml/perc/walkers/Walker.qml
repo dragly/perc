@@ -4,14 +4,14 @@ import ".."
 import "../defaults.js" as Defaults
 
 EntityBase {
-    property alias color: rect.color
+    property string color
     property alias lightSource: nMapEffect.lightSource
 
-    Rectangle {
-        id: rect
-        color: "#F03B20"
-        anchors.fill: parent
-    }
+//    Rectangle {
+//        id: rect
+//        color: "#F03B20"
+//        anchors.fill: parent
+//    }
 //    Image {
 //        property string color
 //        id: rect
@@ -26,14 +26,15 @@ EntityBase {
         anchors.centerIn: parent
         elementPositionX: parent.x + parent.width / 2
         elementPositionY: parent.y + parent.height / 2
-        sourceImage: "images/heart.png"
-        normalsImage: "images/heartn.png"
+        sourceImage: "images/ape.png"
+        normalsImage: "images/apen.png"
 //        lightSource: lightSource
         diffuseBoost: 0
         switchX: false
         switchY: false
         width: nMapEffect.originalWidth
         height: nMapEffect.originalHeight
+        scale: 0.3
     }
 
     smooth: true

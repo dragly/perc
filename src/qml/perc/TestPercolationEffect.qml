@@ -1,9 +1,44 @@
 import QtQuick 2.0
+import com.dragly.perc 1.0
+import "defaults.js" as Defaults
 
 /* Simple normal mapping shader */
 
 ShaderEffect {
     id: root
+
+    property alias nRows: perco.nRows
+    property alias nCols: perco.nCols
+    property alias occupationTreshold: perco.occupationTreshold
+    property alias imageType: perco.imageType
+    function tryLockUpdates() {
+        return perco.tryLockUpdates()
+    }
+    function initialize() {
+        return perco.initialize()
+    }
+    function clearPressureSources() {
+        return perco.clearPressureSources()
+    }
+    function addPressureSource(object) {
+        return perco.addPressureSource(object)
+    }
+    function isOccupied(row,col) {
+        return perco.isOccupied(row,col)
+    }
+    function unlockUpdates() {
+        return perco.unlockUpdates()
+    }
+    function raiseValue(row,col) {
+        return perco.raiseValue(row,col)
+    }
+    function lowerValue(row,col) {
+        return perco.lowerValue(row,col)
+    }
+    function requestRecalculation() {
+        return perco.requestRecalculation()
+    }
+
     // Original image
     property string sourceImage
     // Normal mapped image
@@ -32,11 +67,21 @@ ShaderEffect {
     property real _lightPosX: lightSource.lightPosX / lightSource.width * (lightSource.width/root.width) - elementPositionX/root.width
     property real _lightPosY: lightSource.lightPosY / lightSource.height * (lightSource.height/root.height) - elementPositionY/root.height
 
-    property variant _source: ShaderEffectSource { sourceItem: sourceImageItem; hideSource: true }
-    property variant _source2: ShaderEffectSource { sourceItem: normalsourceImageItem; hideSource: true }
+    property variant _source: ShaderEffectSource { sourceItem: perco; hideSource: true }
+    property variant _source2: ShaderEffectSource { sourceItem: perco; hideSource: true }
 
     width: sourceImageItem.width
     height: sourceImageItem.height
+
+    PercolationSystem {
+        id: perco
+
+        smooth: false
+        onReadyToUpdate: {
+            perco.update()
+        }
+        anchors.fill: parent
+    }
 
     Image {
         id: sourceImageItem
