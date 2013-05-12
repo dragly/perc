@@ -23,8 +23,15 @@ ShaderEffect {
     property real _lightPosX: lightSource.lightPosX / (gameScene.width)
     property real _lightPosY: lightSource.lightPosY / (gameScene.height)
 
-    property variant _source: ShaderEffectSource { sourceItem: source; hideSource: true; mipmap: false }
-//    property variant _source2: ShaderEffectSource { sourceItem: percoItem; hideSource: true; mipmap: false }
+    property variant _source: effectSource
+
+    ShaderEffectSource {
+        id: effectSource
+        sourceItem: source
+        hideSource: true
+        mipmap: false
+    }
+    //    property variant _source2: ShaderEffectSource { sourceItem: percoItem; hideSource: true; mipmap: false }
 
     fragmentShader: "
 varying highp vec2 qt_TexCoord0;

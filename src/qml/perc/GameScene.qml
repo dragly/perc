@@ -20,7 +20,7 @@ Item {
         Scale {
             id: scaleTransform
 
-            property int scaleDuration: 50
+            property int scaleDuration: 200
 
             Behavior on xScale {
                 NumberAnimation {
@@ -49,9 +49,11 @@ Item {
         if(targetScale > 1) {
             targetScale = 1
         }
+        console.log(targetScale)
         scaleTransform.xScale = targetScale
         scaleTransform.yScale = targetScale
         selectionIndicator.refresh()
+//        simple.update()
     }
 
     //    onSelectedObjectsChanged: {
@@ -97,26 +99,34 @@ Item {
     Item {
         id: percolationSystemItem
 
-        width: percolationSystem.width * 16
-        height: percolationSystem.height * 16
+//        property double samples: 1
+        property double samples: Math.min(8, 16 * Math.sqrt(targetScale))
+
+        width: percolationSystem.width * samples
+        height: percolationSystem.height * samples
+
+        clip: true
 
         PercolationSystem {
             id: percolationSystem
             width: nCols
             height: nRows
-            nRows: 50
-            nCols: 50
+            nRows: 300
+            nCols: 300
             occupationTreshold: 0.55
 
             smooth: false
 
-            z: -999
-
             transform: Scale {
-                xScale: 16
-                yScale: 16
+                xScale: percolationSystemItem.samples
+                yScale: percolationSystemItem.samples
             }
         }
+
+//        transform: Scale {
+//            xScale: Defaults.GRID_SIZE / percolationSystemItem.samples
+//            yScale: Defaults.GRID_SIZE / percolationSystemItem.samples
+//        }
     }
 
     PercolationSystemShader {
@@ -125,8 +135,7 @@ Item {
         width: percolationSystem.width
         height: percolationSystem.height
         lightSource: lightSource
-        z: -999
-        smooth: false
+        smooth: true
         transform: Scale {
             xScale: Defaults.GRID_SIZE
             yScale: Defaults.GRID_SIZE

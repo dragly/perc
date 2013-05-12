@@ -449,7 +449,7 @@ void PercolationSystem::generateImage() {
             //            painter->drawRect(j*10, i*10, 10, 10);
         }
     }
-    //    qDebug() << "Draw time1" << time.elapsed();
+//        qDebug() << "Draw time1" << time.elapsed();
     //    m_imageTypeMutex.unlock();
 }
 
@@ -474,6 +474,8 @@ void PercolationSystem::paint(QPainter *painter)
 {
     QTime time;
     time.start();
+//    qDebug() << "Asked to draw!";
+//    qDebug() << mapRectToScene(boundingRect());
     painter->drawImage(0,0,m_image);
-    //    qDebug() << "Draw time2" << time.elapsed();
+//        qDebug() << "Draw time2" << time.elapsed();
 }
