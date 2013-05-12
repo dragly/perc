@@ -9,6 +9,8 @@ ShaderEffect {
 
     property variant source
 
+    property real samples: 2
+
     // Lightsource which defines the position of light
     property NMapLightSource lightSource
     // Boost diffuse effect of this item
@@ -30,6 +32,7 @@ ShaderEffect {
         sourceItem: source
         hideSource: true
         mipmap: false
+        textureSize: Qt.size(sourceItem.width * root.samples, sourceItem.height * root.samples)
     }
     //    property variant _source2: ShaderEffectSource { sourceItem: percoItem; hideSource: true; mipmap: false }
 

@@ -96,46 +96,26 @@ Item {
     //        z: -999
     //    }
 
-    Item {
-        id: percolationSystemItem
+    PercolationSystem {
+        id: percolationSystem
+        width: nCols
+        height: nRows
+        nRows: 50
+        nCols: 50
+        occupationTreshold: 0.55
 
-//        property double samples: 1
-        property double samples: Math.min(8, 16 * Math.sqrt(targetScale))
-
-        width: percolationSystem.width * samples
-        height: percolationSystem.height * samples
-
-        clip: true
-
-        PercolationSystem {
-            id: percolationSystem
-            width: nCols
-            height: nRows
-            nRows: 300
-            nCols: 300
-            occupationTreshold: 0.55
-
-            smooth: false
-
-            transform: Scale {
-                xScale: percolationSystemItem.samples
-                yScale: percolationSystemItem.samples
-            }
-        }
-
-//        transform: Scale {
-//            xScale: Defaults.GRID_SIZE / percolationSystemItem.samples
-//            yScale: Defaults.GRID_SIZE / percolationSystemItem.samples
-//        }
+        smooth: false
     }
 
     PercolationSystemShader {
         id: percolationSystemShader
-        source: percolationSystemItem
+        source: percolationSystem
         width: percolationSystem.width
         height: percolationSystem.height
         lightSource: lightSource
         smooth: true
+        samples: 32 * Math.sqrt(targetScale)
+
         transform: Scale {
             xScale: Defaults.GRID_SIZE
             yScale: Defaults.GRID_SIZE
