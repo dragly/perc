@@ -29,6 +29,7 @@ Item {
         }
 
         entities.push(entity)
+        entity.requestSelection.connect(gameScene.requestSelection)
         return entity
     }
 }

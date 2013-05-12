@@ -7,7 +7,7 @@ import "defaults.js" as Defaults
 Item {
     id: sceneRoot
 
-//    property alias imageType: percolationSystem.imageType
+    property alias imageType: percolationSystem.imageType
     property double lastUpdateTime: Date.now()
     property var selectedObjects: []
     property real targetScale: scale
@@ -15,34 +15,22 @@ Item {
     property alias scaleOriginX: scaleTransform.origin.x
     property alias scaleOriginY: scaleTransform.origin.y
     property alias lightSource: lightSource
+    property real energy: 0
 
-    transform: [
-        Scale {
-            id: scaleTransform
+    function addEnergy(amount) {
+        energy += amount
+    }
 
-            property int scaleDuration: 200
-
-//            Behavior on xScale {
-//                NumberAnimation {
-//                    duration: scaleTransform.scaleDuration
-//                    easing.type: Easing.OutQuad
-//                }
-//            }
-
-//            Behavior on yScale {
-//                NumberAnimation {
-//                    duration: scaleTransform.scaleDuration
-//                    easing.type: Easing.OutQuad
-//                }
-//            }
+    function requestSelection(object) {
+        for(var i in entityManager.entities) {
+            var other = entityManager.entities[i]
+            other.selected = false
         }
-    ]
+        var objects = []
+        objects.push(object)
+        object.selected = true
 
-    NMapLightSource {
-        id: lightSource
-        z: 10
-        lightIntensity: 0.2
-        anchors.centerIn: parent
+        selectedObjects = objects
     }
 
     onTargetScaleChanged: {
@@ -52,81 +40,56 @@ Item {
         console.log(targetScale)
         scaleTransform.xScale = targetScale
         scaleTransform.yScale = targetScale
-        selectionIndicator.refresh()
-//        simple.update()
-    }
-
-    //    onSelectedObjectsChanged: {
-    //        selectedObjectsChangedForReal()
-    //    }
-
-    function selectObject(abs) {
-        var objects = []
-        objects.push(abs)
-        selectedObjects = objects
     }
 
     onSelectedObjectsChanged: {
-        selectionIndicator.refresh()
+        //        selectionIndicator.refresh()
     }
 
     width: percolationSystem.width * Defaults.GRID_SIZE
     height: percolationSystem.height * Defaults.GRID_SIZE
 
-    //    PercolationSystem {
-    //        id: percolationSystem
-    //        width: nCols
-    //        height: nRows
-    //        nRows: 500
-    //        nCols: 500
-    //        occupationTreshold: 0.55
-    //        transform: Scale {
-    //            origin.x: 0
-    //            origin.y: 0
-    //            xScale: Defaults.GRID_SIZE
-    //            yScale: Defaults.GRID_SIZE
-    //        }
+    transform: [
+        Scale {
+            id: scaleTransform
 
-    //        smooth: false
+            property int scaleDuration: 200
 
-    //        onReadyToUpdate: {
-    //            percolationSystem.update()
-    //        }
+            Behavior on xScale {
+                NumberAnimation {
+                    duration: scaleTransform.scaleDuration
+                    easing.type: Easing.OutQuad
+                }
+            }
 
-    //        z: -999
-    //    }
+            Behavior on yScale {
+                NumberAnimation {
+                    duration: scaleTransform.scaleDuration
+                    easing.type: Easing.OutQuad
+                }
+            }
+        }
+    ]
 
-    Rectangle {
-        id: selectionRectangle
-        border.width: 1
-        border.color: "white"
-        color: Qt.rgba(1,1,1,0.4)
-        //        color: "white"
-        //        opacity: 0.1
-        width: 100
-        height: 100
-        visible: mainMouseArea.isDragging
-        onVisibleChanged: {
-            console.log("Visible " + visible)
-            console.log(x + " " + y + " " + width + " " + height)
+    PercolationSystem {
+        id: percolationSystem
+        width: nCols
+        height: nRows
+        nRows: 100
+        nCols: 100
+        occupationTreshold: 0.4
+
+        transform: Scale {
+            origin.x: 0
+            origin.y: 0
+            xScale: Defaults.GRID_SIZE
+            yScale: Defaults.GRID_SIZE
         }
 
-        z: 99999
+        smooth: false
+
+        z: -999
     }
-
-//    onImageTypeChanged: {
-//        percolationSystem.update()
-//    }
-
-    //    Text {
-    //        id: updatesPerSecondText
-    //        property double ups: 0
-    //        anchors.top: parent.top
-    //        anchors.left: parent.left
-    //        color: "white"
-    //        font.pixelSize: parent.height * 0.05
-    //        text: "UPS: " + parseFloat(Math.round(ups * 100) / 100).toFixed(2)
-    //    }
 
     EntityManager {
         id: entityManager
@@ -150,81 +113,87 @@ Item {
                     lastUpdateTime = currentUpdateTime
                 }
             }
+            //            selectionIndicator.refresh()
         }
     }
 
     MouseArea {
         id: mainMouseArea
         property bool isDragging: false
+        property point dragStart
 
+        propagateComposedEvents: true
         hoverEnabled: true
 
         anchors.fill: parent
-
-        onClicked: {
-            if(!isDragging) {
-                console.log("clicked")
-                selectedObjects = []
-            }
-        }
+        //        onClicked: {
+        //            if(!isDragging) {
+        //                console.log("clicked")
+        //                selectedObjects = []
+        //            }
+        //        }
 
         onReleased: {
+            if(isDragging) {
+                var newSelection = []
+                for(var i in entityManager.entities) {
+                    var entity = entityManager.entities[i]
+                    var rect = selectionRectangle
+                    if(entity.x > rect.x && entity.x < rect.x + rect.width && entity.y > rect.y && entity.y < rect.y + rect.height) {
+                        newSelection.push(entity)
+                        entity.selected = true
+                    } else {
+                        entity.selected = false
+                    }
+                }
+                sceneRoot.selectedObjects = newSelection
+            } else {
+                selectedObjects = []
+            }
+            selectionRectangle.width = 1
+            selectionRectangle.height = 1
             isDragging = false
         }
 
         onPressed: {
             console.log("Pressed")
             isDragging = true
-            selectionRectangle.x = mouse.x
-            selectionRectangle.y = mouse.y
+            dragStart.x = mouse.x
+            dragStart.y = mouse.y
         }
 
         onPositionChanged: {
-            lightSource.setLightPos(mouse.x, mouse.y)
             if(isDragging) {
-                selectionRectangle.width = mouse.x - selectionRectangle.x
-                selectionRectangle.height = mouse.y - selectionRectangle.y
+                if(mouse.x > dragStart.x) {
+                    selectionRectangle.x = dragStart.x
+                    selectionRectangle.width = mouse.x - dragStart.x
+                } else {
+                    selectionRectangle.x = mouse.x
+                    selectionRectangle.width = dragStart.x - mouse.x
+                }
+                if(mouse.y > dragStart.y) {
+                    selectionRectangle.y = dragStart.y
+                    selectionRectangle.height = mouse.y - dragStart.y
+                } else {
+                    selectionRectangle.y = mouse.y
+                    selectionRectangle.height = dragStart.y - mouse.y
+                }
             }
         }
-        z: 99999999
     }
 
     Rectangle {
-        id: selectionIndicator
-
-        property var selectedObjects: sceneRoot.selectedObjects
-        //        property double targetWidth: 10 //(mySelectedObject !== null) ? Math.max(mySelectedObject.width + 5, 10 / gameScene.targetScale) : 0
-        //        property double targetHeight: 10 //(mySelectedObject !== null) ? Math.max(mySelectedObject.width + 5, 10 / gameScene.targetScale) : 0
-
-        color: "transparent"
+        id: selectionRectangle
+        border.width: 1
         border.color: "white"
-        border.width: Math.max(1, 1 / gameScene.targetScale)
-        anchors.centerIn: (selectedObjects.length > 0) ? selectedObjects[0] : parent
-        z: 9999
-        width: Defaults.GRID_SIZE
-        height: Defaults.GRID_SIZE
+        color: Qt.rgba(1,1,1,0.4)
+        //        color: "white"
+        //        opacity: 0.1
+        width: 0
+        height: 0
+        visible: mainMouseArea.isDragging
 
-        onSelectedObjectsChanged: {
-            refresh()
-        }
-
-        function refresh() {
-            if(selectedObjects !== undefined && selectedObjects.length > 0) {
-                visible = true
-                anchors.centerIn = selectedObjects[0]
-                width = Math.max(selectedObjects[0].width + Defaults.GRID_SIZE * 0.25, Defaults.GRID_SIZE / (10 * gameScene.targetScale))
-                height = Math.max(selectedObjects[0].height + Defaults.GRID_SIZE * 0.25, Defaults.GRID_SIZE / (10 * gameScene.targetScale))
-            } else {
-                visible = false
-            }
-        }
-
-        SequentialAnimation {
-            running: true
-            loops: Animation.Infinite
-            ColorAnimation { target: selectionIndicator; property: "border.color"; from: "white"; to: "black"; duration: 200; easing.type: Easing.InOutQuad }
-            ColorAnimation { target: selectionIndicator; property: "border.color"; from: "black"; to: "white"; duration: 200; easing.type: Easing.InOutQuad }
-        }
+        z: 99999
     }
 
     Component.onCompleted: {
@@ -241,5 +210,12 @@ Item {
         }
 
         var plane = entityManager.createEntityFromUrl("planes/FighterPlane.qml")
+    }
+
+    NMapLightSource {
+        id: lightSource
+        z: 10
+        lightIntensity: 2
+        anchors.centerIn: parent
     }
 }

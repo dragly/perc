@@ -18,7 +18,7 @@ function createPressureSource() {
             pressureSource.row = i
             pressureSource.col = j
             pressureSource.pressure = Math.random()
-            pressureSource.requestSelect.connect(sceneRoot.selectObject)
+//            pressureSource.requestSelect.connect(sceneRoot.selectObject)
             found = true
             pressureSources.push(pressureSource)
 
@@ -56,8 +56,8 @@ function createRandomWalker(type) {
             walker.row = i
             walker.col = j
             walker.z = 99999
-            walker.lightSource = sceneRoot.lightSource
-            console.log()
+//            walker.lightSource = sceneRoot.lightSource
+            walker.collectedEnergy.connect(gameScene, addEnergy)
             found = true
             walkers.push(walker)
         }
@@ -98,12 +98,8 @@ function createDirectionWalker(type) {
                 occupiedNeighbors += 1
             }
             if(occupiedNeighbors < 2) { // only one way out - otherwise we might get stuck
-                var walker = component.createObject(sceneRoot, {type: type});
-                if(walker === null) {
-                    console.log("ERROR! Could not create PercolationSite!")
-                    return false;
-                }
-                walker.lightSource = sceneRoot.lightSource
+                var walker = entityManager.createEntityFromUrl("walkers/DirectionWalker.qml", {type: type});
+//                walker.lightSource = sceneRoot.lightSource
                 walker.row = i
                 walker.col = j
                 found = true

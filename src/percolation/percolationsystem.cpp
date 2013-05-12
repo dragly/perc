@@ -29,6 +29,7 @@ PercolationSystem::PercolationSystem(QQuickPaintedItem *parent) :
     m_imageType(PressureImage)
 {
     connect(this, SIGNAL(readyToUpdate()), this, SLOT(update()));
+    connect(this, SIGNAL(imageTypeChanged(ImageType)), this, SLOT(requestRecalculation()));
 }
 
 PercolationSystem::~PercolationSystem() {
@@ -247,11 +248,13 @@ void PercolationSystem::setImageType(ImageType arg)
     }
 }
 
-void PercolationSystem::lowerValue(int row, int col) {
-    if(isSite(row,col)) {
+double PercolationSystem::lowerValue(int row, int col) {
+    if(isOccupied(row,col)) {
         //        m_valueMatrix(row, col) = fmax(m_valueMatrix(row,col) - 0.05, 0);
         m_valueMatrix(row, col) = fmax(m_occupationTreshold - 0.05, 0);
+        return 0.05;
     }
+    return 0;
     //    if(isSite(row+1,col)) {
     //        m_valueMatrix(row + 1, col) = fmin(m_valueMatrix(row + 1,col) - 0.05, 1);
     //    }
@@ -266,16 +269,18 @@ void PercolationSystem::lowerValue(int row, int col) {
     //    }
 }
 
-void PercolationSystem::raiseValue(int row, int col) {
-    if(isSite(row,col)) {
+double PercolationSystem::raiseValue(int row, int col) {
+    if(isOccupied(row,col)) {
         m_valueMatrix(row, col) = fmin(m_valueMatrix(row,col) + 0.05, 1);
+        return 0.05;
     }
+    return 0;
 }
 
 void PercolationSystem::generateOccupationMatrix() {
     //    cout << "Generating occupation matrix..." << endl;
-    double p = m_occupationTreshold;
-    m_occupationMatrix = m_valueMatrix < p;
+    double p = 1 - m_occupationTreshold;
+    m_occupationMatrix = m_valueMatrix > p;
 
 }
 

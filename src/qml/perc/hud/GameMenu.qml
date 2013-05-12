@@ -6,11 +6,12 @@ Item {
     id: gameMenuRoot
 
     property int imageType: PercolationSystem.PressureImage
+    property double energy
 
-    anchors.left: parent.left
-    height: parent.height * 0.8
-    width: parent.width * 0.1
-    anchors.verticalCenter: parent.verticalCenter
+    anchors.right: parent.right
+    anchors.top: parent.top
+    height: parent.height * 0.6
+    width: parent.width * 0.2
 
     state: "hidden"
 
@@ -19,19 +20,19 @@ Item {
             name: "active"
             PropertyChanges {
                 target: gameMenuRoot
-                anchors.leftMargin: 0
+                anchors.rightMargin: 0
             }
         },
         State {
             name: "hidden"
             PropertyChanges {
                 target: gameMenuRoot
-                anchors.leftMargin: -gameMenuRoot.width * 0.8
+                anchors.rightMargin: -gameMenuRoot.width * 0.9
             }
         }
     ]
 
-    Behavior on anchors.leftMargin {
+    Behavior on anchors.rightMargin {
         NumberAnimation {
             duration: 300
             easing.type: Easing.OutQuad
@@ -84,6 +85,7 @@ Item {
     }
 
     Rectangle {
+        id: switchImageTypeButton
         anchors.horizontalCenter: parent.horizontalCenter
         height: parent.width * 0.8
         width: parent.width * 0.8
@@ -102,5 +104,13 @@ Item {
                 }
             }
         }
+    }
+
+    Text {
+        text: "Energy: " + (Math.round(gameMenuRoot.energy * 100) / 100).toFixed(2)
+        font.pixelSize: parent.width * 0.1
+        anchors.top: switchImageTypeButton.bottom
+        anchors.left: parent.left
+        anchors.leftMargin: parent.width*0.2
     }
 }

@@ -1,5 +1,8 @@
 import QtQuick 2.0
 import com.dragly.perc 1.0
+
+import "hud"
+
 import "defaults.js" as Defaults
 
 Rectangle {
@@ -8,52 +11,61 @@ Rectangle {
     height: 62
     color: "red"
 
-    Component.onCompleted: {
-        percolationSystemShader.updateSourceRect()
-    }
+    property double lastMouseX: 0
+    property double lastMouseY: 0
 
-    PercolationSystem {
-        id: percolationSystem
-        width: nCols
-        height: nRows
-        nRows: 500
-        nCols: 500
-        occupationTreshold: 0.55
-        imageType: gameMenu.imageType
+//    Component.onCompleted: {
+//        percolationSystemShader.updateSourceRect()
+//    }
 
-        smooth: false
-    }
+//    PercolationSystem {
+//        id: percolationSystem
+//        width: nCols
+//        height: nRows
+//        nRows: 500
+//        nCols: 500
+//        occupationTreshold: 0.55
+//        imageType: gameMenu.imageType
 
-    PercolationSystemShader {
-        id: percolationSystemShader
-        source: percolationSystem
-        lightSource: lightSource
+//        smooth: false
+//    }
 
-        anchors.fill: parent
+//    PercolationSystemShader {
+//        id: percolationSystemShader
+//        source: percolationSystem
+//        lightSource: lightSource
 
-        smooth: true
-        samples: 16 * Math.sqrt(gameScene.targetScale)
+//        anchors.fill: parent
 
-        function updateSourceRect() {
-            sourceRect = Qt.rect(- (mapFromItem(gameScene, 0,0).x) / (Defaults.GRID_SIZE * gameScene.targetScale),
-                                -(mapFromItem(gameScene, 0,0).y) / (Defaults.GRID_SIZE * gameScene.targetScale),
-                                viewRoot.width / (Defaults.GRID_SIZE * gameScene.targetScale),
-                                viewRoot.height / (Defaults.GRID_SIZE * gameScene.targetScale))
-        }
+//        lightIntensity: 10 * gameScene.targetScale
 
-//        transform: Scale {
-//            xScale: Defaults.GRID_SIZE
-//            yScale: Defaults.GRID_SIZE
+//        smooth: true
+//        samples: 32 * Math.sqrt(gameScene.targetScale)
+
+//        function updateSourceRect() {
+//            sourceRect = Qt.rect(- (mapFromItem(gameScene, 0,0).x) / (Defaults.GRID_SIZE * gameScene.targetScale),
+//                                -(mapFromItem(gameScene, 0,0).y) / (Defaults.GRID_SIZE * gameScene.targetScale),
+//                                viewRoot.width / (Defaults.GRID_SIZE * gameScene.targetScale),
+//                                viewRoot.height / (Defaults.GRID_SIZE * gameScene.targetScale))
 //        }
-    }
+
+////        transform: Scale {
+////            xScale: Defaults.GRID_SIZE
+////            yScale: Defaults.GRID_SIZE
+////        }
+//    }
 
     GameScene {
         id: gameScene
         objectName: "gameScene"
         targetScale: 0.1
+        imageType: gameMenu.imageType
 
         onSelectedObjectsChanged: {
-            if(selectedObjects.length > 0) {
+            if(selectedObjects.length > 1) {
+                gameObjectInfo.text = "Selected " + selectedObjects.length + " items"
+                gameObjectInfo.state = "active"
+            } else if(selectedObjects.length > 0) {
                 for(var i in selectedObjects) {
                     gameObjectInfo.text = selectedObjects[i].informationText
                 }
@@ -64,9 +76,9 @@ Rectangle {
             }
         }
 
-        onCurrentScaleChanged: {
-            percolationSystemShader.updateSourceRect()
-        }
+//        onCurrentScaleChanged: {
+//            percolationSystemShader.updateSourceRect()
+//        }
 
         smooth: true
     }
@@ -76,6 +88,8 @@ Rectangle {
         property bool isDragging: false
         property double prevX: 0
         property double prevY: 0
+        propagateComposedEvents: true
+        hoverEnabled: true
         anchors.fill: parent
         acceptedButtons: Qt.MiddleButton
         onWheel: {
@@ -94,7 +108,7 @@ Rectangle {
             var newPosition = mapFromItem(gameScene, relativeMouse.x, relativeMouse.y)
             gameScene.x += wheel.x - newPosition.x
             gameScene.y += wheel.y - newPosition.y
-            percolationSystemShader.updateSourceRect()
+//            percolationSystemShader.updateSourceRect()
         }
 
         onPressed: {
@@ -108,11 +122,15 @@ Rectangle {
             if(isDragging) {
                 gameScene.x += mouse.x - prevX
                 gameScene.y += mouse.y - prevY
-                percolationSystemShader.updateSourceRect()
+//                percolationSystemShader.updateSourceRect()
             }
             prevX = mouse.x
             prevY = mouse.y
-            isDragging = true
+            lastMouseX = mouse.x
+            lastMouseY = mouse.y
+            var relativeMouse = mapToItem(gameScene, mouse.x, mouse.y)
+            gameScene.lightSource.setLightPos(relativeMouse.x, relativeMouse.y)
+//            mouse.accepted = false
         }
 
         onReleased: {
@@ -150,51 +168,24 @@ Rectangle {
         }
     }
 
-    onWidthChanged: {
-        console.log(width)
-    }
+//    onWidthChanged: {
+//        percolationSystemShader.updateSourceRect()
+//    }
+
+//    onHeightChanged: {
+//        percolationSystemShader.updateSourceRect()
+//    }
 
     GameMenu {
         id: gameMenu
+        energy: gameScene.energy
     }
 
-    Rectangle {
+    SelectionMenu {
         id: gameObjectInfo
-        property alias text: gameObjectInfoText.text
-        anchors.right: parent.right
-        anchors.top: parent.top
-        state: "active"
-        states: [
-            State {
-                name: "active"
-                PropertyChanges {
-                    target: gameObjectInfo
-                    anchors.topMargin: 0
-                }
-            },
-            State {
-                name: "hidden"
-                PropertyChanges {
-                    target: gameObjectInfo
-                    anchors.topMargin: -gameObjectInfo.height * 0.8
-                }
-            }
-        ]
-
-        Behavior on anchors.topMargin {
-            NumberAnimation {
-                duration: 300
-                easing.type: Easing.OutQuad
-            }
-        }
-
-        width: parent.width * 0.2
-        height: parent.height * 0.1
-        Text {
-            id: gameObjectInfoText
-            anchors.centerIn: parent
-            text: "Nothing selected"
-            font.pixelSize: parent.height * 0.2
-        }
     }
+
+//    StatsMenu {
+//        id: statsMenu
+//    }
 }

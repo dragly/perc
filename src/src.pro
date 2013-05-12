@@ -35,6 +35,7 @@ HEADERS += \
 
 OTHER_FILES += \
     qml/perc/GameView.qml \
-    qml/perc/PercolationSystemShader.qml
+    qml/perc/PercolationSystemShader.qml \
+    qml/perc/hud/GameMenu.qml
 
 TARGET = perc

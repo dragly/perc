@@ -3,6 +3,9 @@ import QtQuick 2.0
 Walker {
     property string type: "left"
     property int direction: 0
+
+    informationText: "Direction walker " + type
+
     color: (type === "left" ? "red" : "orange")
     onTypeChanged: {
         if(type !== "left" && type !== "right") {

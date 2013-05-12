@@ -2,6 +2,9 @@ import QtQuick 2.0
 
 Walker {
     property string type: "raise"
+    signal collectedEnergy(var amount)
+
+    informationText: "Random walker " + type
 
     onTypeChanged: {
         if(type !== "raise" && type !== "lower") {
@@ -27,9 +30,10 @@ Walker {
                 col = nextSiteCol;
                 found = true
                 if(type === "raise") {
-                    percolationSystem.raiseValue(nextSiteRow,nextSiteCol)
+                    var cost = percolationSystem.raiseValue(nextSiteRow,nextSiteCol)
                 } else {
-                    percolationSystem.lowerValue(nextSiteRow + directions[randomIndex][0], nextSiteCol + directions[randomIndex][1])
+                    var gain = percolationSystem.lowerValue(nextSiteRow + directions[randomIndex][0], nextSiteCol + directions[randomIndex][1])
+                    collectedEnergy(gain)
                 }
             } else {
                 randomIndex += 1

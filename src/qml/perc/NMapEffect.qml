@@ -32,7 +32,7 @@ ShaderEffect {
     property real _lightPosX: elementPositionX/root.width - lightSource.lightPosX / lightSource.width * (lightSource.width/root.width)
     property real _lightPosY: elementPositionY/root.height - lightSource.lightPosY / lightSource.height * (lightSource.height/root.height)
 
-    property variant _source: ShaderEffectSource { sourceItem: sourceImageItem; hideSource: true }
+    property variant _source: ShaderEffectSource { sourceItem: sourceImageItem; hideSource: true } // TODO: Set texture size to reduce memory usage
     property variant _source2: ShaderEffectSource { sourceItem: normalsourceImageItem; hideSource: true }
 
     width: sourceImageItem.width

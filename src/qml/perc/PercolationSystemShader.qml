@@ -11,20 +11,21 @@ ShaderEffect {
     property alias sourceRect: effectSource.sourceRect
 
     property real samples: 2
+    property real ambient: 0.5
 
     // Lightsource which defines the position of light
     property NMapLightSource lightSource
     // Boost diffuse effect of this item
-    property real diffuseBoost: 0.0
+    property real diffuseBoost: 0
     // Light intensity from source or alternatively custom intensity for this item
-    property real lightIntensity: gameScene.lightSource.lightIntensity
+    property real lightIntensity: 0.5
     // Optional 'colorize' effect to apply for the item, can be used for fog effect
     property color colorizeColor: "#404040"
     property real colorizeAmount: 0.0
 
     /* Private */
-    property real _lightPosX: gameScene.lightSource.lightPosX / (gameScene.width)
-    property real _lightPosY: gameScene.lightSource.lightPosY / (gameScene.height)
+    property real _lightPosX: gameView.lastMouseX / (gameView.width)
+    property real _lightPosY: gameView.lastMouseY / (gameView.height)
 
     property variant _source: effectSource
 
@@ -32,9 +33,6 @@ ShaderEffect {
         id: effectSource
         hideSource: true
         mipmap: false
-        onSourceRectChanged: {
-            console.log(sourceRect)
-        }
 
         textureSize: Qt.size(sourceRect.width * root.samples, sourceRect.height * root.samples)
     }
@@ -48,6 +46,7 @@ uniform sampler2D _source;
 uniform highp float _lightPosX;
 uniform highp float _lightPosY;
 uniform highp float diffuseBoost;
+uniform highp float ambient;
 uniform highp float lightIntensity;
 uniform highp float colorizeAmount;
 uniform highp vec4 colorizeColor;
@@ -64,7 +63,7 @@ void main(void)
     highp float yp = (_lightPosY - pixPos.y);
     highp vec3 light_pos = normalize(vec3(xp, yp, lightIntensity));
 
-    highp float diffuse = max(dot(normal, light_pos), 0.2);
+    highp float diffuse = max(dot(normal, light_pos), ambient);
     diffuse *= (1.0 + diffuseBoost);
 
     highp vec4 color = vec4(diffuse * pix.rgb, pix.a);

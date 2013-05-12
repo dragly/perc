@@ -69,8 +69,8 @@ public:
     Q_INVOKABLE double maxFlow();
     Q_INVOKABLE double pressure(int row, int col);
     Q_INVOKABLE double flow(int row, int col);
-    Q_INVOKABLE void lowerValue(int row, int col);
-    Q_INVOKABLE void raiseValue(int row, int col);
+    Q_INVOKABLE double lowerValue(int row, int col);
+    Q_INVOKABLE double raiseValue(int row, int col);
     void paint(QPainter *painter);
     int labelSelfAndNeighbors(int row, int col, int label);
     bool isSite(int row, int col);

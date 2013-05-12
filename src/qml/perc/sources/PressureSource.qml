@@ -8,7 +8,7 @@ import "../defaults.js" as Defaults
 EntityBase {
     id: pressureSourceRoot
 
-    signal requestSelect(var object)
+//    signal requestSelect(var object)
 
     property double pressure: 1
 
@@ -46,12 +46,12 @@ EntityBase {
         }
     }
 
-    MouseArea {
-        anchors.fill: parent
-        onClicked: {
-            requestSelect(pressureSourceRoot)
-        }
-    }
+//    MouseArea {
+//        anchors.fill: parent
+//        onClicked: {
+//            requestSelect(pressureSourceRoot)
+//        }
+//    }
 
     Emitter {
         shape: EllipseShape{}
