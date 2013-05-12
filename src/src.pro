@@ -32,6 +32,7 @@ HEADERS += \
     percolation/cluster.h
 
 OTHER_FILES += \
-    qml/perc/GameView.qml
+    qml/perc/GameView.qml \
+    qml/perc/PercolationSystemShader.qml
 
 TARGET = perc

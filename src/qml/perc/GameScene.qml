@@ -41,7 +41,7 @@ Item {
     NMapLightSource {
         id: lightSource
         z: 10
-        lightIntensity: 5
+        lightIntensity: 0.2
         anchors.centerIn: parent
     }
 
@@ -71,54 +71,75 @@ Item {
     width: percolationSystem.width * Defaults.GRID_SIZE
     height: percolationSystem.height * Defaults.GRID_SIZE
 
-    PercolationSystem {
-        id: percolationSystem
-        width: nCols
-        height: nRows
-        nRows: 500
-        nCols: 500
-        occupationTreshold: 0.55
+    //    PercolationSystem {
+    //        id: percolationSystem
+    //        width: nCols
+    //        height: nRows
+    //        nRows: 500
+    //        nCols: 500
+    //        occupationTreshold: 0.55
+    //        transform: Scale {
+    //            origin.x: 0
+    //            origin.y: 0
+    //            xScale: Defaults.GRID_SIZE
+    //            yScale: Defaults.GRID_SIZE
+    //        }
+
+    //        smooth: false
+
+    //        onReadyToUpdate: {
+    //            percolationSystem.update()
+    //        }
+
+    //        z: -999
+    //    }
+
+    Item {
+        id: percolationSystemItem
+
+        width: percolationSystem.width * 16
+        height: percolationSystem.height * 16
+
+        PercolationSystem {
+            id: percolationSystem
+            width: nCols
+            height: nRows
+            nRows: 50
+            nCols: 50
+            occupationTreshold: 0.55
+
+            smooth: false
+
+            z: -999
+
+            transform: Scale {
+                xScale: 16
+                yScale: 16
+            }
+        }
+    }
+
+    PercolationSystemShader {
+        id: percolationSystemShader
+        source: percolationSystemItem
+        width: percolationSystem.width
+        height: percolationSystem.height
+        lightSource: lightSource
+        z: -999
+        smooth: false
         transform: Scale {
-            origin.x: 0
-            origin.y: 0
             xScale: Defaults.GRID_SIZE
             yScale: Defaults.GRID_SIZE
         }
-
-        smooth: false
-
-        onReadyToUpdate: {
-            percolationSystem.update()
-        }
-
-        z: -999
     }
-
-//    TestPercolationEffect {
-//        id: percolationSystem
-//        width: nCols
-//        height: nRows
-//        nRows: 50
-//        nCols: 50
-//        occupationTreshold: 0.55
-//        lightSource: lightSource
-//        z: -999
-//        smooth: false
-//        transform: Scale {
-//            origin.x: 0
-//            origin.y: 0
-//            xScale: Defaults.GRID_SIZE
-//            yScale: Defaults.GRID_SIZE
-//        }
-//    }
 
     Rectangle {
         id: selectionRectangle
         border.width: 1
         border.color: "white"
-                color: Qt.rgba(1,1,1,0.4)
-//        color: "white"
-//        opacity: 0.1
+        color: Qt.rgba(1,1,1,0.4)
+        //        color: "white"
+        //        opacity: 0.1
         width: 100
         height: 100
         visible: mainMouseArea.isDragging
@@ -173,6 +194,8 @@ Item {
         id: mainMouseArea
         property bool isDragging: false
 
+        hoverEnabled: true
+
         anchors.fill: parent
 
         onClicked: {
@@ -188,15 +211,14 @@ Item {
 
         onPressed: {
             console.log("Pressed")
+            isDragging = true
+            selectionRectangle.x = mouse.x
+            selectionRectangle.y = mouse.y
         }
 
         onPositionChanged: {
             lightSource.setLightPos(mouse.x, mouse.y)
-            if(!isDragging) {
-                isDragging = true
-                selectionRectangle.x = mouse.x
-                selectionRectangle.y = mouse.y
-            } else {
+            if(isDragging) {
                 selectionRectangle.width = mouse.x - selectionRectangle.x
                 selectionRectangle.height = mouse.y - selectionRectangle.y
             }

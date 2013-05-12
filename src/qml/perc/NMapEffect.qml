@@ -13,7 +13,7 @@ ShaderEffect {
     // Boost diffuse effect of this item
     property real diffuseBoost: 0.0
     // Light intensity from source or alternatively custom intensity for this item
-    property real lightIntensity: lightSource.lightIntensity
+    property real lightIntensity: lightSource.lightIntensity * 10
     // Switch x-coordinate of normal mapped image
     property bool switchX: false
     // Switch y-coordinate of normal mapped image

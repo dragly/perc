@@ -28,7 +28,7 @@ PercolationSystem::PercolationSystem(QQuickPaintedItem *parent) :
     m_nClusters(0),
     m_imageType(PressureImage)
 {
-//    connect(&watcher, SIGNAL(finished()), this, SLOT(setFinishedUpdating()));
+    connect(this, SIGNAL(readyToUpdate()), this, SLOT(update()));
 }
 
 PercolationSystem::~PercolationSystem() {
