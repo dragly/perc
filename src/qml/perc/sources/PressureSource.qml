@@ -28,11 +28,6 @@ EntityBase {
         radius: Defaults.GRID_SIZE
     }
 
-    Image {
-        anchors.fill: parent
-        source: "../planes/fighterplane.png"
-    }
-
     smooth: true
 
     onPressureChanged: {

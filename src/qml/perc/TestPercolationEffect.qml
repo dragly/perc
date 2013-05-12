@@ -67,20 +67,33 @@ ShaderEffect {
     property real _lightPosX: lightSource.lightPosX / lightSource.width * (lightSource.width/root.width) - elementPositionX/root.width
     property real _lightPosY: lightSource.lightPosY / lightSource.height * (lightSource.height/root.height) - elementPositionY/root.height
 
-    property variant _source: ShaderEffectSource { sourceItem: perco; hideSource: true }
-    property variant _source2: ShaderEffectSource { sourceItem: perco; hideSource: true }
+    property variant _source: ShaderEffectSource { sourceItem: percoItem; hideSource: true; mipmap: false }
+    property variant _source2: ShaderEffectSource { sourceItem: percoItem; hideSource: true; mipmap: false }
 
     width: sourceImageItem.width
     height: sourceImageItem.height
 
-    PercolationSystem {
-        id: perco
+    Item {
+        id: percoItem
+        width: perco.width * Defaults.GRID_SIZE
+        height: perco.height * Defaults.GRID_SIZE
+        PercolationSystem {
+            id: perco
 
-        smooth: false
-        onReadyToUpdate: {
-            perco.update()
+            width: nCols
+            height: nRows
+
+            smooth: false
+            onReadyToUpdate: {
+                perco.update()
+            }
+            transform: Scale {
+                origin.x: 0
+                origin.y: 0
+                xScale: Defaults.GRID_SIZE
+                yScale: Defaults.GRID_SIZE
+            }
         }
-        anchors.fill: parent
     }
 
     Image {

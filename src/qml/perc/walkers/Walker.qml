@@ -22,25 +22,25 @@ EntityBase {
 
 
     NMapEffect {
+        anchors.fill: parent
         id: nMapEffect
         anchors.centerIn: parent
-        elementPositionX: parent.x + parent.width / 2
-        elementPositionY: parent.y + parent.height / 2
+        elementPositionX: parent.x // + parent.width / 2
+        elementPositionY: parent.y // + parent.height / 2
         sourceImage: "images/ape.png"
         normalsImage: "images/apen.png"
 //        lightSource: lightSource
-        diffuseBoost: 0
+        diffuseBoost: 0.4
         switchX: false
         switchY: false
         width: nMapEffect.originalWidth
         height: nMapEffect.originalHeight
-        scale: 0.3
     }
 
     smooth: true
 
-    width: Defaults.GRID_SIZE * 0.3
-    height: Defaults.GRID_SIZE * 0.3
+    width: Defaults.GRID_SIZE * 0.7
+    height: Defaults.GRID_SIZE * 0.7
 
     x: col * Defaults.GRID_SIZE + (Defaults.GRID_SIZE - width) / 2
     y: row * Defaults.GRID_SIZE + (Defaults.GRID_SIZE - width) / 2

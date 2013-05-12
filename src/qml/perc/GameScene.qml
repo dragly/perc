@@ -41,7 +41,7 @@ Item {
     NMapLightSource {
         id: lightSource
         z: 10
-        lightIntensity: 0.5
+        lightIntensity: 5
         anchors.centerIn: parent
     }
 
@@ -71,46 +71,46 @@ Item {
     width: percolationSystem.width * Defaults.GRID_SIZE
     height: percolationSystem.height * Defaults.GRID_SIZE
 
-//    PercolationSystem {
-//        id: percolationSystem
-//        width: nCols
-//        height: nRows
-//        nRows: 50
-//        nCols: 50
-//        occupationTreshold: 0.55
-//        transform: Scale {
-//            origin.x: 0
-//            origin.y: 0
-//            xScale: Defaults.GRID_SIZE
-//            yScale: Defaults.GRID_SIZE
-//        }
-
-//        smooth: false
-
-//        onReadyToUpdate: {
-//            percolationSystem.update()
-//        }
-
-//        z: -999
-//    }
-
-    TestPercolationEffect {
+    PercolationSystem {
         id: percolationSystem
         width: nCols
         height: nRows
-        nRows: 50
-        nCols: 50
+        nRows: 500
+        nCols: 500
         occupationTreshold: 0.55
-        lightSource: lightSource
-        z: -999
-        smooth: false
         transform: Scale {
             origin.x: 0
             origin.y: 0
             xScale: Defaults.GRID_SIZE
             yScale: Defaults.GRID_SIZE
         }
+
+        smooth: false
+
+        onReadyToUpdate: {
+            percolationSystem.update()
+        }
+
+        z: -999
     }
+
+//    TestPercolationEffect {
+//        id: percolationSystem
+//        width: nCols
+//        height: nRows
+//        nRows: 50
+//        nCols: 50
+//        occupationTreshold: 0.55
+//        lightSource: lightSource
+//        z: -999
+//        smooth: false
+//        transform: Scale {
+//            origin.x: 0
+//            origin.y: 0
+//            xScale: Defaults.GRID_SIZE
+//            yScale: Defaults.GRID_SIZE
+//        }
+//    }
 
     Rectangle {
         id: selectionRectangle
