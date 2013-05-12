@@ -7,7 +7,7 @@ import "defaults.js" as Defaults
 Item {
     id: sceneRoot
 
-    property alias imageType: percolationSystem.imageType
+//    property alias imageType: percolationSystem.imageType
     property double lastUpdateTime: Date.now()
     property var selectedObjects: []
     property real targetScale: scale
@@ -22,19 +22,19 @@ Item {
 
             property int scaleDuration: 200
 
-            Behavior on xScale {
-                NumberAnimation {
-                    duration: scaleTransform.scaleDuration
-                    easing.type: Easing.OutQuad
-                }
-            }
+//            Behavior on xScale {
+//                NumberAnimation {
+//                    duration: scaleTransform.scaleDuration
+//                    easing.type: Easing.OutQuad
+//                }
+//            }
 
-            Behavior on yScale {
-                NumberAnimation {
-                    duration: scaleTransform.scaleDuration
-                    easing.type: Easing.OutQuad
-                }
-            }
+//            Behavior on yScale {
+//                NumberAnimation {
+//                    duration: scaleTransform.scaleDuration
+//                    easing.type: Easing.OutQuad
+//                }
+//            }
         }
     ]
 
@@ -96,32 +96,6 @@ Item {
     //        z: -999
     //    }
 
-    PercolationSystem {
-        id: percolationSystem
-        width: nCols
-        height: nRows
-        nRows: 50
-        nCols: 50
-        occupationTreshold: 0.55
-
-        smooth: false
-    }
-
-    PercolationSystemShader {
-        id: percolationSystemShader
-        source: percolationSystem
-        width: percolationSystem.width
-        height: percolationSystem.height
-        lightSource: lightSource
-        smooth: true
-        samples: 32 * Math.sqrt(targetScale)
-
-        transform: Scale {
-            xScale: Defaults.GRID_SIZE
-            yScale: Defaults.GRID_SIZE
-        }
-    }
-
     Rectangle {
         id: selectionRectangle
         border.width: 1
@@ -140,9 +114,9 @@ Item {
         z: 99999
     }
 
-    onImageTypeChanged: {
-        percolationSystem.update()
-    }
+//    onImageTypeChanged: {
+//        percolationSystem.update()
+//    }
 
     //    Text {
     //        id: updatesPerSecondText

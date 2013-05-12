@@ -7,7 +7,8 @@ import "defaults.js" as Defaults
 ShaderEffect {
     id: root
 
-    property variant source
+    property alias source: effectSource.sourceItem
+    property alias sourceRect: effectSource.sourceRect
 
     property real samples: 2
 
@@ -16,23 +17,26 @@ ShaderEffect {
     // Boost diffuse effect of this item
     property real diffuseBoost: 0.0
     // Light intensity from source or alternatively custom intensity for this item
-    property real lightIntensity: lightSource.lightIntensity
+    property real lightIntensity: gameScene.lightSource.lightIntensity
     // Optional 'colorize' effect to apply for the item, can be used for fog effect
     property color colorizeColor: "#404040"
     property real colorizeAmount: 0.0
 
     /* Private */
-    property real _lightPosX: lightSource.lightPosX / (gameScene.width)
-    property real _lightPosY: lightSource.lightPosY / (gameScene.height)
+    property real _lightPosX: gameScene.lightSource.lightPosX / (gameScene.width)
+    property real _lightPosY: gameScene.lightSource.lightPosY / (gameScene.height)
 
     property variant _source: effectSource
 
     ShaderEffectSource {
         id: effectSource
-        sourceItem: source
         hideSource: true
         mipmap: false
-        textureSize: Qt.size(sourceItem.width * root.samples, sourceItem.height * root.samples)
+        onSourceRectChanged: {
+            console.log(sourceRect)
+        }
+
+        textureSize: Qt.size(sourceRect.width * root.samples, sourceRect.height * root.samples)
     }
     //    property variant _source2: ShaderEffectSource { sourceItem: percoItem; hideSource: true; mipmap: false }
 

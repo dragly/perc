@@ -1,4 +1,6 @@
 import QtQuick 2.0
+import com.dragly.perc 1.0
+import "defaults.js" as Defaults
 
 Rectangle {
     id: viewRoot
@@ -6,10 +8,48 @@ Rectangle {
     height: 62
     color: "red"
 
+    Component.onCompleted: {
+        percolationSystemShader.updateSourceRect()
+    }
+
+    PercolationSystem {
+        id: percolationSystem
+        width: nCols
+        height: nRows
+        nRows: 500
+        nCols: 500
+        occupationTreshold: 0.55
+        imageType: gameMenu.imageType
+
+        smooth: false
+    }
+
+    PercolationSystemShader {
+        id: percolationSystemShader
+        source: percolationSystem
+        lightSource: lightSource
+
+        anchors.fill: parent
+
+        smooth: true
+        samples: 16 * Math.sqrt(gameScene.targetScale)
+
+        function updateSourceRect() {
+            sourceRect = Qt.rect(- (mapFromItem(gameScene, 0,0).x) / (Defaults.GRID_SIZE * gameScene.targetScale),
+                                -(mapFromItem(gameScene, 0,0).y) / (Defaults.GRID_SIZE * gameScene.targetScale),
+                                viewRoot.width / (Defaults.GRID_SIZE * gameScene.targetScale),
+                                viewRoot.height / (Defaults.GRID_SIZE * gameScene.targetScale))
+        }
+
+//        transform: Scale {
+//            xScale: Defaults.GRID_SIZE
+//            yScale: Defaults.GRID_SIZE
+//        }
+    }
+
     GameScene {
         id: gameScene
         objectName: "gameScene"
-        imageType: gameMenu.imageType
         targetScale: 0.1
 
         onSelectedObjectsChanged: {
@@ -22,6 +62,10 @@ Rectangle {
                 gameObjectInfo.text = "Nothing selected"
                 gameObjectInfo.state = "hidden"
             }
+        }
+
+        onCurrentScaleChanged: {
+            percolationSystemShader.updateSourceRect()
         }
 
         smooth: true
@@ -50,6 +94,7 @@ Rectangle {
             var newPosition = mapFromItem(gameScene, relativeMouse.x, relativeMouse.y)
             gameScene.x += wheel.x - newPosition.x
             gameScene.y += wheel.y - newPosition.y
+            percolationSystemShader.updateSourceRect()
         }
 
         onPressed: {
@@ -63,6 +108,7 @@ Rectangle {
             if(isDragging) {
                 gameScene.x += mouse.x - prevX
                 gameScene.y += mouse.y - prevY
+                percolationSystemShader.updateSourceRect()
             }
             prevX = mouse.x
             prevY = mouse.y
