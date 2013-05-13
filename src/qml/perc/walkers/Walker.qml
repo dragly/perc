@@ -5,6 +5,7 @@ import "../defaults.js" as Defaults
 
 EntityBase {
     property string color
+
 //    property alias lightSource: nMapEffect.lightSource
 
 //    Rectangle {

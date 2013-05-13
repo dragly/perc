@@ -140,17 +140,26 @@ Item {
         onReleased: {
             console.log("Released")
             if(isDragging) {
-                var newSelection = []
+                var newSelection;
+                if(mouse.modifiers & Qt.ShiftModifier) {
+                    newSelection = sceneRoot.selectedObjects
+                } else {
+                    newSelection = []
+                }
                 for(var i in entityManager.entities) {
                     var entity = entityManager.entities[i]
                     var rect = selectionRectangle
                     if(entity.x > rect.x && entity.x < rect.x + rect.width && entity.y > rect.y && entity.y < rect.y + rect.height) {
                         newSelection.push(entity)
-                        entity.selected = true
                     } else {
                         entity.selected = false
                     }
                 }
+                for(var i in newSelection) {
+                    var entity = newSelection[i]
+                    entity.selected = true
+                }
+
                 sceneRoot.selectedObjects = newSelection
             } else {
                 selectedObjects = []
