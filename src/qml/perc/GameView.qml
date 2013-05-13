@@ -14,52 +14,62 @@ Rectangle {
     property double lastMouseX: 0
     property double lastMouseY: 0
 
-//    Component.onCompleted: {
-//        percolationSystemShader.updateSourceRect()
-//    }
+    Component.onCompleted: {
+        percolationSystemShader.updateSourceRect()
+    }
 
-//    PercolationSystem {
-//        id: percolationSystem
-//        width: nCols
-//        height: nRows
-//        nRows: 500
-//        nCols: 500
-//        occupationTreshold: 0.55
-//        imageType: gameMenu.imageType
+    onWidthChanged: {
+        percolationSystemShader.updateSourceRect()
+    }
 
-//        smooth: false
-//    }
+    onHeightChanged: {
+        percolationSystemShader.updateSourceRect()
+    }
 
-//    PercolationSystemShader {
-//        id: percolationSystemShader
-//        source: percolationSystem
+    PercolationSystem {
+        id: percolationSystem
+        width: nCols
+        height: nRows
+        nRows: 500
+        nCols: 500
+        occupationTreshold: 0.55
+        imageType: gameMenu.imageType
+
+        smooth: false
+    }
+
+    PercolationSystemShader {
+        id: percolationSystemShader
+        source: percolationSystem
 //        lightSource: lightSource
 
-//        anchors.fill: parent
+        anchors.fill: parent
 
-//        lightIntensity: 10 * gameScene.targetScale
+        lightIntensity: 10 * gameScene.targetScale
 
-//        smooth: true
-//        samples: 32 * Math.sqrt(gameScene.targetScale)
+        smooth: true
+        samples: 32 * Math.sqrt(gameScene.targetScale)
 
-//        function updateSourceRect() {
-//            sourceRect = Qt.rect(- (mapFromItem(gameScene, 0,0).x) / (Defaults.GRID_SIZE * gameScene.targetScale),
-//                                -(mapFromItem(gameScene, 0,0).y) / (Defaults.GRID_SIZE * gameScene.targetScale),
-//                                viewRoot.width / (Defaults.GRID_SIZE * gameScene.targetScale),
-//                                viewRoot.height / (Defaults.GRID_SIZE * gameScene.targetScale))
+        function updateSourceRect() {
+            var newRect = gameView.mapToItem(gameScene,0,0,viewRoot.width,viewRoot.height)
+            console.log(newRect.x + " " + newRect.y);
+            sourceRect = Qt.rect(newRect.x / (Defaults.GRID_SIZE),
+                                newRect.y / (Defaults.GRID_SIZE),
+                                newRect.width / (Defaults.GRID_SIZE),
+                                newRect.height / (Defaults.GRID_SIZE))
+        }
+
+//        transform: Scale {
+//            xScale: Defaults.GRID_SIZE
+//            yScale: Defaults.GRID_SIZE
 //        }
-
-////        transform: Scale {
-////            xScale: Defaults.GRID_SIZE
-////            yScale: Defaults.GRID_SIZE
-////        }
-//    }
+    }
 
     GameScene {
         id: gameScene
         objectName: "gameScene"
         targetScale: 0.1
-        imageType: gameMenu.imageType
+//        imageType: gameMenu.imageType
 
         onSelectedObjectsChanged: {
             if(selectedObjects.length > 1) {
@@ -76,9 +86,9 @@ Rectangle {
             }
         }
 
-//        onCurrentScaleChanged: {
-//            percolationSystemShader.updateSourceRect()
-//        }
+        onCurrentScaleChanged: {
+            percolationSystemShader.updateSourceRect()
+        }
 
         smooth: true
     }
@@ -122,7 +132,7 @@ Rectangle {
             if(isDragging) {
                 gameScene.x += mouse.x - prevX
                 gameScene.y += mouse.y - prevY
-//                percolationSystemShader.updateSourceRect()
+                percolationSystemShader.updateSourceRect()
             }
             prevX = mouse.x
             prevY = mouse.y
@@ -167,14 +177,6 @@ Rectangle {
             console.log("Pinch finished")
         }
     }
-
-//    onWidthChanged: {
-//        percolationSystemShader.updateSourceRect()
-//    }
-
-//    onHeightChanged: {
-//        percolationSystemShader.updateSourceRect()
-//    }
 
     GameMenu {
         id: gameMenu

@@ -7,11 +7,11 @@ import "defaults.js" as Defaults
 Item {
     id: sceneRoot
 
-    property alias imageType: percolationSystem.imageType
+//    property alias imageType: percolationSystem.imageType
     property double lastUpdateTime: Date.now()
     property var selectedObjects: []
     property real targetScale: scale
-    readonly property alias currentScale: scaleTransform.xScale
+    readonly property alias currentScale: scaleTransform.yScale
     property alias scaleOriginX: scaleTransform.origin.x
     property alias scaleOriginY: scaleTransform.origin.y
     property alias lightSource: lightSource
@@ -71,25 +71,25 @@ Item {
         }
     ]
 
-    PercolationSystem {
-        id: percolationSystem
-        width: nCols
-        height: nRows
-        nRows: 100
-        nCols: 100
-        occupationTreshold: 0.4
+//    PercolationSystem {
+//        id: percolationSystem
+//        width: nCols
+//        height: nRows
+//        nRows: 100
+//        nCols: 100
+//        occupationTreshold: 0.4
 
-        transform: Scale {
-            origin.x: 0
-            origin.y: 0
-            xScale: Defaults.GRID_SIZE
-            yScale: Defaults.GRID_SIZE
-        }
+//        transform: Scale {
+//            origin.x: 0
+//            origin.y: 0
+//            xScale: Defaults.GRID_SIZE
+//            yScale: Defaults.GRID_SIZE
+//        }
 
-        smooth: false
+//        smooth: false
 
-        z: -999
-    }
+//        z: -999
+//    }
 
     EntityManager {
         id: entityManager

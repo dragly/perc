@@ -14,7 +14,7 @@ ShaderEffect {
     property real ambient: 0.5
 
     // Lightsource which defines the position of light
-    property NMapLightSource lightSource
+//    property NMapLightSource lightSource
     // Boost diffuse effect of this item
     property real diffuseBoost: 0
     // Light intensity from source or alternatively custom intensity for this item
