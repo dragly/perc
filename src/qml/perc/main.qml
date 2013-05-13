@@ -3,8 +3,8 @@ import QtQuick 2.0
 import "."
 
 Rectangle {
-    width: 640
-    height: 480
+    width: 1280
+    height: 720
 
     GameView {
         id: gameView

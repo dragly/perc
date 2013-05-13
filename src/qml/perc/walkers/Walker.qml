@@ -36,8 +36,8 @@ EntityBase {
 
     smooth: true
 
-    width: Defaults.GRID_SIZE * 0.3
-    height: Defaults.GRID_SIZE * 0.3
+    width: Defaults.GRID_SIZE * 0.7
+    height: Defaults.GRID_SIZE * 0.7
 
     x: col * Defaults.GRID_SIZE + (Defaults.GRID_SIZE - width) / 2
     y: row * Defaults.GRID_SIZE + (Defaults.GRID_SIZE - width) / 2

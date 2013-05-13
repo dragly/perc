@@ -133,7 +133,12 @@ Item {
         //            }
         //        }
 
+        onExited: {
+            console.log("Exited")
+        }
+
         onReleased: {
+            console.log("Released")
             if(isDragging) {
                 var newSelection = []
                 for(var i in entityManager.entities) {
@@ -198,14 +203,14 @@ Item {
 
     Component.onCompleted: {
         percolationSystem.initialize()
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < 50; i++) {
             Logic.createRandomWalker("raise")
             Logic.createRandomWalker("lower")
             Logic.createDirectionWalker("left")
             Logic.createDirectionWalker("right")
         }
 
-        for(var i = 0; i < 5; i++) {
+        for(var i = 0; i < 50; i++) {
             Logic.createPressureSource()
         }
 
@@ -215,7 +220,7 @@ Item {
     NMapLightSource {
         id: lightSource
         z: 10
-        lightIntensity: 2
+        lightIntensity: 0.5
         anchors.centerIn: parent
     }
 }

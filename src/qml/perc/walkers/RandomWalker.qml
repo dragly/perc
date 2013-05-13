@@ -4,7 +4,7 @@ Walker {
     property string type: "raise"
     signal collectedEnergy(var amount)
 
-    informationText: "Random walker " + type
+    informationText: (type === "lower") ? "Collector" : "Constructor"
 
     onTypeChanged: {
         if(type !== "raise" && type !== "lower") {

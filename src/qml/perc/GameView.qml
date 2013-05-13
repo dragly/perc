@@ -52,7 +52,6 @@ Rectangle {
 
         function updateSourceRect() {
             var newRect = gameView.mapToItem(gameScene,0,0,viewRoot.width,viewRoot.height)
-            console.log(newRect.x + " " + newRect.y);
             sourceRect = Qt.rect(newRect.x / (Defaults.GRID_SIZE),
                                 newRect.y / (Defaults.GRID_SIZE),
                                 newRect.width / (Defaults.GRID_SIZE),

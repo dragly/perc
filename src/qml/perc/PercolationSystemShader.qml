@@ -34,7 +34,10 @@ ShaderEffect {
         hideSource: true
         mipmap: false
 
-        textureSize: Qt.size(sourceRect.width * root.samples, sourceRect.height * root.samples)
+        textureSize: Qt.size(Math.min(sourceRect.width * root.samples, root.width), Math.min(sourceRect.height * root.samples, root.height))
+        onTextureSizeChanged: {
+            console.log(textureSize)
+        }
     }
     //    property variant _source2: ShaderEffectSource { sourceItem: percoItem; hideSource: true; mipmap: false }
 
@@ -55,7 +58,7 @@ void main(void)
 {
     highp vec2 pixPos = qt_TexCoord0;
     highp vec4 pix = texture2D(_source, pixPos.st);
-//    highp vec4 pix2 = texture2D(_source, pixPos.st);
+    highp vec4 pix2 = texture2D(_source, pixPos.st);
 //    highp float lightness = sqrt(dot(pix2,pix2));
 //    highp vec3 normal = normalize(vec3(0,0,1) + pix2.rgb * 2.0 - 1.0);
     highp vec3 normal = normalize(vec3(0.0,0.0,1));
