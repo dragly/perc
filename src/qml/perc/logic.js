@@ -1,7 +1,7 @@
 var sites;
-var walkers = [];
-var clusters = [];
-var pressureSources = [];
+//var walkers = [];
+//var clusters = [];
+//var pressureSources = [];
 
 function createPressureSource() {
     var found = false;
@@ -57,7 +57,7 @@ function createRandomWalker(type) {
             walker.col = j
             walker.z = 99999
 //            walker.lightSource = sceneRoot.lightSource
-            walker.collectedEnergy.connect(gameScene, addEnergy)
+            walker.collectedEnergy.connect(viewRoot, addEnergy)
             found = true
             walkers.push(walker)
         }

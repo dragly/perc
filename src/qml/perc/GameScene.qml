@@ -7,18 +7,24 @@ import "defaults.js" as Defaults
 Item {
     id: sceneRoot
 
+    width: 100
+    height: 62
+
 //    property alias imageType: percolationSystem.imageType
-    property double lastUpdateTime: Date.now()
+    property PercolationSystem percolationSystem: null
     property var selectedObjects: []
     property real targetScale: scale
     readonly property alias currentScale: scaleTransform.yScale
     property alias scaleOriginX: scaleTransform.origin.x
     property alias scaleOriginY: scaleTransform.origin.y
     property alias lightSource: lightSource
-    property real energy: 0
 
-    function addEnergy(amount) {
-        energy += amount
+    Component.onCompleted: {
+        if(percolationSystem === null) {
+            console.log("Error: PercolationSystem must be set in GameScene")
+            Qt.quit()
+            return
+        }
     }
 
     function requestSelection(object) {
@@ -46,9 +52,6 @@ Item {
         //        selectionIndicator.refresh()
     }
 
-    width: percolationSystem.width * Defaults.GRID_SIZE
-    height: percolationSystem.height * Defaults.GRID_SIZE
-
     transform: [
         Scale {
             id: scaleTransform
@@ -70,52 +73,6 @@ Item {
             }
         }
     ]
-
-//    PercolationSystem {
-//        id: percolationSystem
-//        width: nCols
-//        height: nRows
-//        nRows: 100
-//        nCols: 100
-//        occupationTreshold: 0.4
-
-//        transform: Scale {
-//            origin.x: 0
-//            origin.y: 0
-//            xScale: Defaults.GRID_SIZE
-//            yScale: Defaults.GRID_SIZE
-//        }
-
-//        smooth: false
-
-//        z: -999
-//    }
-
-    EntityManager {
-        id: entityManager
-    }
-
-    Timer {
-        property int triggers: 0
-        id: advanceTimer
-        running: true
-        interval: 1000 / 60 // hoping for 60 FPS
-        repeat: true
-        onTriggered: {
-            var currentUpdateTime = Date.now()
-            var currentInterval = currentUpdateTime - lastUpdateTime
-            if(currentInterval > 200) {
-                if(percolationSystem.tryLockUpdates()) {
-                    Logic.moveWalkers()
-                    Logic.refreshPressures(currentInterval)
-                    percolationSystem.unlockUpdates()
-                    percolationSystem.requestRecalculation()
-                    lastUpdateTime = currentUpdateTime
-                }
-            }
-            //            selectionIndicator.refresh()
-        }
-    }
 
     MouseArea {
         id: mainMouseArea
@@ -208,22 +165,6 @@ Item {
         visible: mainMouseArea.isDragging
 
         z: 99999
-    }
-
-    Component.onCompleted: {
-        percolationSystem.initialize()
-        for (var i = 0; i < 50; i++) {
-            Logic.createRandomWalker("raise")
-            Logic.createRandomWalker("lower")
-            Logic.createDirectionWalker("left")
-            Logic.createDirectionWalker("right")
-        }
-
-        for(var i = 0; i < 50; i++) {
-            Logic.createPressureSource()
-        }
-
-        var plane = entityManager.createEntityFromUrl("planes/FighterPlane.qml")
     }
 
     NMapLightSource {

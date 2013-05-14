@@ -4,19 +4,37 @@ import com.dragly.perc 1.0
 import "hud"
 
 import "defaults.js" as Defaults
+import "logic.js" as Logic
 
 Item {
     id: viewRoot
+
+    signal returnToMainMenuClicked
+    property double lastUpdateTime: Date.now()
+    property real energy: 0
+
     width: 100
     height: 62
 
-    property double lastMouseX: 0
-    property double lastMouseY: 0
-
-    signal returnToMainMenuClicked
-
     Component.onCompleted: {
+        percolationSystem.initialize()
+        for (var i = 0; i < 50; i++) {
+            Logic.createRandomWalker("raise")
+            Logic.createRandomWalker("lower")
+            Logic.createDirectionWalker("left")
+            Logic.createDirectionWalker("right")
+        }
+
+        for(var i = 0; i < 50; i++) {
+            Logic.createPressureSource()
+        }
+
+        var plane = entityManager.createEntityFromUrl("planes/FighterPlane.qml")
         percolationSystemShader.updateSourceRect()
+    }
+
+    function addEnergy(amount) {
+        energy += amount
     }
 
     onWidthChanged: {
@@ -48,7 +66,6 @@ Item {
     PercolationSystemShader {
         id: percolationSystemShader
         source: percolationSystem
-//        lightSource: lightSource
 
         anchors.fill: parent
 
@@ -64,17 +81,17 @@ Item {
                                 newRect.width / (Defaults.GRID_SIZE),
                                 newRect.height / (Defaults.GRID_SIZE))
         }
-
-//        transform: Scale {
-//            xScale: Defaults.GRID_SIZE
-//            yScale: Defaults.GRID_SIZE
-//        }
     }
 
     GameScene {
         id: gameScene
+
+        width: percolationSystem.width * Defaults.GRID_SIZE
+        height: percolationSystem.height * Defaults.GRID_SIZE
+
         objectName: "gameScene"
         targetScale: 0.1
+        percolationSystem: percolationSystem
 //        imageType: gameMenu.imageType
 
         onSelectedObjectsChanged: {
@@ -97,6 +114,33 @@ Item {
         }
 
         smooth: true
+    }
+
+    EntityManager {
+        id: entityManager
+        gameScene: gameScene
+    }
+
+    Timer {
+        property int triggers: 0
+        id: advanceTimer
+        running: true
+        interval: 1000 / 60 // hoping for 60 FPS
+        repeat: true
+        onTriggered: {
+            var currentUpdateTime = Date.now()
+            var currentInterval = currentUpdateTime - lastUpdateTime
+            if(currentInterval > 200) {
+                if(percolationSystem.tryLockUpdates()) {
+                    Logic.moveWalkers()
+                    Logic.refreshPressures(currentInterval)
+                    percolationSystem.unlockUpdates()
+                    percolationSystem.requestRecalculation()
+                    lastUpdateTime = currentUpdateTime
+                }
+            }
+            //            selectionIndicator.refresh()
+        }
     }
 
     MouseArea {
@@ -186,7 +230,6 @@ Item {
 
     GameMenu {
         id: gameMenu
-        energy: gameScene.energy
         onReturnToMainMenuClicked: {
             viewRoot.returnToMainMenuClicked()
         }
