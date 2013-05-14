@@ -1,65 +1,53 @@
-function createPressureSource() {
+function randomSite(percolationSystem) {
     var found = false;
     var nAttempts = 0;
-    var sourcesList = gameViewRoot.pressureSources
     while(!found) {
-        if(nAttempts > 100000) {
-            console.log("Could not place walker!")
-            break;
+        if(nAttempts > 10000) {
+            console.log("Could not find random site!")
+            return {row: 0, col: 0}
         }
         var i = parseInt(Math.random() * percolationSystem.nRows)
         var j = parseInt(Math.random() * percolationSystem.nCols)
         if(percolationSystem.isOccupied(i,j)) {
-            var pressureSource = entityManager.createEntityFromUrl("sources/PressureSource.qml")
-            pressureSource.row = i
-            pressureSource.col = j
-            pressureSource.pressure = Math.random()
-//            pressureSource.requestSelect.connect(sceneRoot.selectObject)
-            found = true
-            sourcesList.push(pressureSource)
+            return { row: i, col: j }
         }
-
         nAttempts += 1
     }
-    gameViewRoot.pressureSources = sourcesList
 }
 
-function refreshPressures(timeDiff) {
+function createPressureSource(percolationSystem) {
+    var found = false;
+    var nAttempts = 0;
+    var sourcesList = percolationSystem.pressureSources
+    var site = randomSite(percolationSystem)
+    var properties = {
+        row: site.row,
+        col: site.col,
+        pressure: Math.random()
+    }
+    var pressureSource = entityManager.createEntityFromUrl("sources/PressureSource.qml", properties)
+    sourcesList.push(pressureSource)
+    percolationSystem.pressureSources = sourcesList
+}
+
+function refreshPressures(gameView, percolationSystem) {
     percolationSystem.clearPressureSources()
-    for(var i in gameViewRoot.pressureSources) {
-        var pressureSource = pressureSources[i]
+    for(var i in gameView.pressureSources) {
+        var pressureSource = gameView.pressureSources[i]
         percolationSystem.addPressureSource(pressureSource)
     }
 }
 
 function createRandomWalker(type, team) {
-//    console.log("Creating random walker")
-    var component = Qt.createComponent("walkers/RandomWalker.qml")
-    var found = false;
-    var nAttempts = 0;
-    while(!found) {
-
-        if(nAttempts > 100000) {
-            console.log("Could not place walker!")
-            break;
-        }
-
-        var i = parseInt(Math.random() * percolationSystem.nRows)
-        var j = parseInt(Math.random() * percolationSystem.nCols)
-        if(percolationSystem.isOccupied(i,j)) {
-            var properties = {
-                type: type,
-                team: team,
-                row: i,
-                col: j
-            }
-            var walker = entityManager.createEntityFromUrl("walkers/RandomWalker.qml", properties);
-//            walker.lightSource = sceneRoot.lightSource
-            found = true
-//            walkers.push(walker)
-        }
-        nAttempts += 1
+    //    console.log("Creating random walker")
+    var site = randomSite(percolationSystem)
+    var properties = {
+        type: type,
+        team: team,
+        row: site.row,
+        col: site.col
     }
+    var walker = entityManager.createEntityFromUrl("walkers/RandomWalker.qml", properties);
 }
 
 function createDirectionWalker(type, team) {
@@ -67,7 +55,7 @@ function createDirectionWalker(type, team) {
         type = "left"
     }
 
-//    console.log("Creating direction walker")
+    //    console.log("Creating direction walker")
     var component = Qt.createComponent("walkers/DirectionWalker.qml")
     var found = false;
     var nAttempts = 0;
@@ -103,7 +91,7 @@ function createDirectionWalker(type, team) {
                 }
                 var walker = entityManager.createEntityFromUrl("walkers/DirectionWalker.qml", properties);
                 found = true
-//                walkers.push(walker)
+                //                walkers.push(walker)
             }
         }
         nAttempts += 1

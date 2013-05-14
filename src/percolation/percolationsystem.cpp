@@ -37,12 +37,11 @@ PercolationSystem::~PercolationSystem() {
     m_updateMatrixMutex.unlock();
 }
 
-void PercolationSystem::clearPressureSources() {
-    m_pressureSources.clear();
-}
-
-void PercolationSystem::addPressureSource(QObject* pressureSource) {
-    m_pressureSources.push_back(pressureSource);
+void PercolationSystem::setPressureSources(const QList<QObject *> &pressureSources) {
+    m_updateMatrixMutex.lock();
+    m_pressureSources = pressureSources;
+    m_updateMatrixMutex.unlock();
+    emit pressureSourcesChanged(m_pressureSources);
 }
 
 void PercolationSystem::randomizeMatrix() {

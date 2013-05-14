@@ -8,7 +8,7 @@ import "defaults.js" as Defaults
 import "logic.js" as Logic
 
 Item {
-    id: viewRoot
+    id: gameViewRoot
 
     signal exitToMainMenu
     signal resume
@@ -17,9 +17,10 @@ Item {
     property double lastUpdateTime: Date.now()
     property alias nRows: percolationSystem.nRows
     property alias nCols: percolationSystem.nCols
+    property alias occupationTreshold: percolationSystem.occupationTreshold
     readonly property alias percolationSystem: percolationSystem
     readonly property alias entityManager: entityManager
-    property variant pressureSources: []
+//    property alias pressureSources: percolationSystem.pressureSources
     property Team playerTeam: Team{ isPlayer: true; name: "player"}
     property list<Team> otherTeams
 
@@ -37,11 +38,10 @@ Item {
     }
 
     onRestart: {
+        percolationSystem.pressureSources = []
         entityManager.clear()
-        pressureSources = []
         percolationSystem.initialize()
         percolationSystemShader.updateSourceRect()
-        state = "running"
     }
 
     onWidthChanged: {
@@ -68,7 +68,8 @@ Item {
         nRows: 10
         nCols: 10
         occupationTreshold: 0.55
-        imageType: gameMenu.imageType
+        imageType: constructionMenu.imageType
+//        pressureSources: pressureSources
 
         smooth: false
     }
@@ -85,7 +86,7 @@ Item {
         samples: 32 * Math.sqrt(gameScene.targetScale)
 
         function updateSourceRect() {
-            var newRect = viewRoot.mapToItem(gameScene,0,0,viewRoot.width,viewRoot.height)
+            var newRect = gameViewRoot.mapToItem(gameScene,0,0,gameViewRoot.width,gameViewRoot.height)
             sourceRect = Qt.rect(newRect.x / (Defaults.GRID_SIZE),
                                 newRect.y / (Defaults.GRID_SIZE),
                                 newRect.width / (Defaults.GRID_SIZE),
@@ -104,21 +105,6 @@ Item {
         percolationSystem: percolationSystem
 //        imageType: gameMenu.imageType
 
-        onSelectedObjectsChanged: {
-            if(selectedObjects.length > 1) {
-                gameObjectInfo.text = selectedObjects.length + " items selected"
-                gameObjectInfo.state = "active"
-            } else if(selectedObjects.length > 0) {
-                for(var i in selectedObjects) {
-                    gameObjectInfo.text = selectedObjects[i].informationText
-                }
-                gameObjectInfo.state = "active"
-            } else {
-                gameObjectInfo.text = "Nothing selected"
-                gameObjectInfo.state = "hidden"
-            }
-        }
-
         onCurrentScaleChanged: {
             percolationSystemShader.updateSourceRect()
         }
@@ -126,9 +112,16 @@ Item {
         smooth: true
     }
 
+    Binding {
+        id: myBinding
+        target: gameObjectInfo
+        property: "text"
+    }
+
     EntityManager {
         id: entityManager
         gameScene: gameScene
+        gameView: gameViewRoot
     }
 
     Timer {
@@ -141,12 +134,7 @@ Item {
             var currentUpdateTime = Date.now()
             var currentInterval = currentUpdateTime - lastUpdateTime
             if(percolationSystem.tryLockUpdates()) {
-                if(currentInterval > 200) {
-                    Logic.refreshPressures(currentInterval)
-                    lastUpdateTime = currentUpdateTime
-                }
                 entityManager.advance(currentUpdateTime)
-
                 percolationSystem.unlockUpdates()
                 percolationSystem.requestRecalculation()
             }
@@ -196,8 +184,8 @@ Item {
             }
             prevX = mouse.x
             prevY = mouse.y
-            percolationSystemShader.lightPosX = mouse.x / (viewRoot.width)
-            percolationSystemShader.lightPosY = mouse.y / (viewRoot.height)
+            percolationSystemShader.lightPosX = mouse.x / (gameViewRoot.width)
+            percolationSystemShader.lightPosY = mouse.y / (gameViewRoot.height)
             var relativeMouse = mapToItem(gameScene, mouse.x, mouse.y)
             gameScene.lightSource.setLightPos(relativeMouse.x, relativeMouse.y)
 //            mouse.accepted = false
@@ -223,23 +211,23 @@ Item {
         }
 
         onPinchUpdated: {
-            var relativeMouse = mapToItem(gameScene, viewRoot.width / 2, viewRoot.height / 2)
+            var relativeMouse = mapToItem(gameScene, gameViewRoot.width / 2, gameViewRoot.height / 2)
             gameScene.scaleOriginX = relativeMouse.x
             gameScene.scaleOriginY = relativeMouse.y
             var x = 5 * (pinch.scale - previousScale)
             gameScene.targetScale *= 1 + 0.405 * x + 0.0822 * x * x
             previousScale = pinch.scale
             var newPosition = mapFromItem(gameScene, relativeMouse.x, relativeMouse.y)
-            gameScene.x += viewRoot.width / 2 - newPosition.x
-            gameScene.y += viewRoot.height / 2 - newPosition.y
+            gameScene.x += gameViewRoot.width / 2 - newPosition.x
+            gameScene.y += gameViewRoot.height / 2 - newPosition.y
         }
         onPinchFinished: {
             console.log("Pinch finished")
         }
     }
 
-    GameMenu {
-        id: gameMenu
+    ConstructionMenu {
+        id: constructionMenu
         energy: playerTeam.energy
         onPauseClicked: {
             pause()
@@ -248,6 +236,7 @@ Item {
 
     SelectionMenu {
         id: gameObjectInfo
+        selectedObjects: gameScene.selectedObjects
     }
 
     states: [

@@ -12,6 +12,7 @@ EntityBase {
 
     property double pressure: 1
     property double lastTime: Date.now()
+    property double reductionPerSecond: 1e-6
 
     //    radius: Defaults.GRID_SIZE
 
@@ -22,6 +23,13 @@ EntityBase {
 
     width: Defaults.GRID_SIZE * 0.6
     height: Defaults.GRID_SIZE * 0.6
+
+    Component.onCompleted: {
+        var sources = gameView.percolationSystem.pressureSources
+        sources.push(pressureSourceRoot)
+        gameView.percolationSystem.pressureSources = sources
+    }
+
     Rectangle {
         id: rect
         anchors.fill: parent
@@ -39,17 +47,7 @@ EntityBase {
 
     onAdvance: {
         var interval = currentTime - lastTime
-        pressure = pressure - 0.0001 * interval / 1000
-    }
-
-    Timer {
-        id: lowerValueTimer
-        interval: 30 * 1000
-        running: true
-        repeat: true
-        onTriggered: {
-            pressure *= 0.9
-        }
+        pressure = pressure - reductionPerSecond * interval / 1000
     }
 
 //    MouseArea {

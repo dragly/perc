@@ -1,7 +1,8 @@
 import QtQuick 2.0
 
 Item {
-    property var gameScene: parent
+    property var gameView: null
+    property GameScene gameScene: null
     property var componentUrls: []
     property var components: []
     property var entities: []
@@ -11,6 +12,8 @@ Item {
             properties = {}
         }
 
+        properties.gameView = gameView
+
         var component = null
         for(var i in componentUrls) {
             var componentURL = componentUrls[i]
@@ -18,11 +21,13 @@ Item {
                 component = components[i];
             }
         }
+
         if(component === null) {
             component = Qt.createComponent(url)
             components.push(component)
             componentUrls.push(url)
         }
+
         var entity = component.createObject(gameScene, properties)
         if(entity === null) {
             console.log("Could not create entity!")

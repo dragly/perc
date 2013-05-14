@@ -24,19 +24,25 @@ Rectangle {
         opacity: 0
         enabled: false
         onLoaded: {
+            gameRoot.state = "game"
+            console.log("Restart")
+            levelLoader.item.restart()
+            console.log("Resume")
+            levelLoader.item.resume()
             item.exitToMainMenu.connect(gameRoot.testMe)
         }
     }
 
     MainMenu {
         id: mainMenu
+        opacity: 0
+        enabled: false
         onSelectedLevel: {
             if(levelLoader.item !== null) {
                 levelLoader.item.pause()
             }
+            levelLoader.source = ""
             levelLoader.source = "levels/" + levelName
-            gameRoot.state = "game"
-            levelLoader.item.restart()
         }
     }
 
@@ -57,6 +63,5 @@ Rectangle {
                 enabled: true
             }
         }
-
     ]
 }

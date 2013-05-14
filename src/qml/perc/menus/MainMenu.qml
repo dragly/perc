@@ -25,20 +25,39 @@ Item {
         }
     }
 
-    Rectangle {
-        color: "blue"
-        width: 100
-        height: 100
-        Text {
-            text: "Load level"
-            color: "white"
-            anchors.centerIn: parent
-        }
+    Row {
         anchors.centerIn: parent
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                selectedLevel("test/TestLevel.qml")
+        spacing: parent.width * 0.01
+        Rectangle {
+            color: "blue"
+            width: 100
+            height: 100
+            Text {
+                text: "Test level"
+                color: "white"
+                anchors.centerIn: parent
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    selectedLevel("test/TestLevel.qml")
+                }
+            }
+        }
+        Rectangle {
+            color: "blue"
+            width: 100
+            height: 100
+            Text {
+                text: "Tiny level"
+                color: "white"
+                anchors.centerIn: parent
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    selectedLevel("test/TinyWorld.qml")
+                }
             }
         }
     }

@@ -37,6 +37,7 @@ class PercolationSystem : public QQuickPaintedItem
     Q_PROPERTY(int nCols READ nCols WRITE setNCols NOTIFY nColsChanged)
     Q_PROPERTY(double occupationTreshold READ occupationTreshold WRITE setOccupationTreshold NOTIFY occupationTresholdChanged)
     Q_PROPERTY(ImageType imageType READ imageType WRITE setImageType NOTIFY imageTypeChanged)
+    Q_PROPERTY(QList<QObject*> pressureSources READ pressureSources WRITE setPressureSources NOTIFY pressureSourcesChanged)
 
 public:
     PercolationSystem(QQuickPaintedItem *parent = 0);
@@ -82,8 +83,8 @@ public:
 
     bool isInitializedProperly();
 
-    Q_INVOKABLE void addPressureSource(QObject *pressureSource);
-    Q_INVOKABLE void clearPressureSources();
+//    Q_INVOKABLE void addPressureSource(QObject *pressureSource);
+//    Q_INVOKABLE void clearPressureSources();
     ImageType imageType() const
     {
         return m_imageType;
@@ -91,8 +92,14 @@ public:
 
     Q_INVOKABLE void unlockUpdates();
     Q_INVOKABLE bool tryLockUpdates();
+
     ~PercolationSystem();
     void randomizeMatrix();
+    QList<QObject*> pressureSources() const
+    {
+        return m_pressureSources;
+    }
+
 public slots:
 //    void update();
     void setFinishedUpdating();
@@ -116,6 +123,7 @@ public slots:
             emit nRowsChanged(arg);
         }
     }
+    void setPressureSources(const QList<QObject *> &pressureSources);
 
     void setImageType(ImageType arg);
 
@@ -128,6 +136,8 @@ signals:
     void imageTypeChanged(ImageType arg);
 
     void readyToUpdate();
+
+    void pressureSourcesChanged(QList<QObject*> arg);
 
 protected:
     void generateImage();
@@ -158,10 +168,10 @@ protected:
 
     arma::vec m_areas;
     arma::vec m_pressures;
-    std::vector<QObject*> m_pressureSources;
+    QList<QObject*> m_pressureSources;
 
     QImage m_image;
-    std::vector<Cluster*> m_clusters;
+//    std::vector<Cluster*> m_clusters;
 
     bool m_isFinishedUpdating;
 

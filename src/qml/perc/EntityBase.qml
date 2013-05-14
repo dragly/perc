@@ -4,6 +4,7 @@ import "defaults.js" as Defaults
 
 Item {
     id: entityRoot
+//    property GameView gameView: null
     property int row: 0
     property int col: 0
     property string informationText: "Not set"

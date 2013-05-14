@@ -10,14 +10,24 @@ GameView {
 
     onRestart: {
         for (var i = 0; i < 50; i++) {
-            Logic.createRandomWalker("raise", playerTeam)
-            Logic.createRandomWalker("lower", playerTeam)
-            Logic.createDirectionWalker("left", enemyTeam)
-            Logic.createDirectionWalker("right", enemyTeam)
+            var site = Logic.randomSite(percolationSystem)
+            var properties = {
+                type: "lower",
+                team: playerTeam,
+                row: site.row,
+                col: site.col
+            }
+            entityManager.createEntityFromUrl("walkers/RandomWalker.qml", properties);
         }
 
         for(var i = 0; i < 50; i++) {
-            Logic.createPressureSource()
+            var site = Logic.randomSite(percolationSystem)
+            var properties = {
+                pressure: 1,
+                row: site.row,
+                col: site.col
+            }
+            entityManager.createEntityFromUrl("sources/PressureSource.qml", properties);
         }
 
         var plane = entityManager.createEntityFromUrl("planes/FighterPlane.qml")

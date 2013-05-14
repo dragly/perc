@@ -12,7 +12,7 @@ Item {
 
 //    property alias imageType: percolationSystem.imageType
     property PercolationSystem percolationSystem: null
-    property var selectedObjects: []
+    property list<EntityBase> selectedObjects
     property real targetScale: scale
     readonly property alias currentScale: scaleTransform.yScale
     property alias scaleOriginX: scaleTransform.origin.x
@@ -46,10 +46,6 @@ Item {
         console.log(targetScale)
         scaleTransform.xScale = targetScale
         scaleTransform.yScale = targetScale
-    }
-
-    onSelectedObjectsChanged: {
-        //        selectionIndicator.refresh()
     }
 
     transform: [
