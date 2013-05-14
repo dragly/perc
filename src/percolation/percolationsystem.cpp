@@ -45,6 +45,10 @@ void PercolationSystem::addPressureSource(QObject* pressureSource) {
     m_pressureSources.push_back(pressureSource);
 }
 
+void PercolationSystem::randomizeMatrix() {
+    m_valueMatrix.randu();
+}
+
 void PercolationSystem::initialize() {
     m_valueMatrix = randu(m_nRows, m_nCols);
     m_areaMatrix = zeros<umat>(m_nRows, m_nCols);

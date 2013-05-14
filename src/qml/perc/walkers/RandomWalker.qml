@@ -4,7 +4,12 @@ Walker {
     property string type: "raise"
     signal collectedEnergy(var amount)
 
-    informationText: (type === "lower") ? "Collector" : "Constructor"
+//    informationText: (type === "lower") ? "Collector" : "Constructor"
+    informationText: "Collector walker " + type + (team ? "\nteam: " + team.name : "")
+
+    onCollectedEnergy: {
+        team.addEnergy(amount)
+    }
 
     onTypeChanged: {
         if(type !== "raise" && type !== "lower") {

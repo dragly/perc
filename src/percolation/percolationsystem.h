@@ -92,6 +92,7 @@ public:
     Q_INVOKABLE void unlockUpdates();
     Q_INVOKABLE bool tryLockUpdates();
     ~PercolationSystem();
+    void randomizeMatrix();
 public slots:
 //    void update();
     void setFinishedUpdating();

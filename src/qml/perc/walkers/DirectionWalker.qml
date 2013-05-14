@@ -4,7 +4,7 @@ Walker {
     property string type: "left"
     property int direction: 0
 
-    informationText: "Direction walker " + type
+    informationText: "Direction walker " + type + (team ? "\nteam: " + team.name : "")
 
     color: (type === "left" ? "red" : "orange")
     onTypeChanged: {

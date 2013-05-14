@@ -1,6 +1,7 @@
 import QtQuick 2.0
 
 import "."
+import "menus"
 
 Rectangle {
     id: gameRoot
@@ -13,56 +14,29 @@ Rectangle {
     state: "main"
 
     function testMe() {
+        console.log("Testme")
         state = "main"
     }
 
     Loader {
         id: levelLoader
         anchors.fill: parent
+        opacity: 0
+        enabled: false
         onLoaded: {
-            item.returnToMainMenuClicked.connect(gameRoot.testMe)
+            item.exitToMainMenu.connect(gameRoot.testMe)
         }
     }
 
-    Item {
+    MainMenu {
         id: mainMenu
-        opacity: 0
-
-        anchors.fill: parent
-
-        Rectangle {
-            color: "white"
-            opacity: 0.5
-            anchors {
-                fill: parent
+        onSelectedLevel: {
+            if(levelLoader.item !== null) {
+                levelLoader.item.pause()
             }
-        }
-
-        Rectangle {
-            color: "white"
-            anchors {
-                fill: parent
-                margins: parent.width * 0.1
-            }
-        }
-
-        Rectangle {
-            color: "blue"
-            width: 100
-            height: 100
-            Text {
-                text: "Load level"
-                color: "white"
-                anchors.centerIn: parent
-            }
-            anchors.centerIn: parent
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    levelLoader.source = "levels/test/TestLevel.qml"
-                    gameRoot.state = "game"
-                }
-            }
+            levelLoader.source = "levels/" + levelName
+            gameRoot.state = "game"
+            levelLoader.item.restart()
         }
     }
 
@@ -72,10 +46,16 @@ Rectangle {
             PropertyChanges {
                 target: mainMenu
                 opacity: 1
+                enabled: true
             }
         },
         State {
             name: "game"
+            PropertyChanges {
+                target: levelLoader
+                opacity: 1
+                enabled: true
+            }
         }
 
     ]

@@ -40,4 +40,12 @@ Item {
             entity.advance(currentUpdateTime)
         }
     }
+
+    function clear() {
+        for(var i in entities) {
+            var entity = entities[i]
+            entity.destroy()
+        }
+        entities = []
+    }
 }

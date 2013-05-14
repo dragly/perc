@@ -8,6 +8,13 @@ EntityBase {
 
     property double moveInterval: 200
     property double lastTime: Date.now()
+    property Team team: null
+
+    Component.onCompleted: {
+        if(team === null) {
+            throw "Walker created without a team"
+        }
+    }
 
     smooth: true
 

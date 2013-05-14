@@ -2,6 +2,7 @@ import QtQuick 2.0
 import com.dragly.perc 1.0
 
 import "hud"
+import "menus"
 
 import "defaults.js" as Defaults
 import "logic.js" as Logic
@@ -9,32 +10,38 @@ import "logic.js" as Logic
 Item {
     id: viewRoot
 
-    signal returnToMainMenuClicked
+    signal exitToMainMenu
+    signal resume
+    signal restart
+    signal pause
     property double lastUpdateTime: Date.now()
-    property real energy: 0
+    property alias nRows: percolationSystem.nRows
+    property alias nCols: percolationSystem.nCols
+    readonly property alias percolationSystem: percolationSystem
+    readonly property alias entityManager: entityManager
+    property variant pressureSources: []
+    property Team playerTeam: Team{ isPlayer: true; name: "player"}
+    property list<Team> otherTeams
 
     width: 100
     height: 62
 
-    Component.onCompleted: {
-        percolationSystem.initialize()
-        for (var i = 0; i < 50; i++) {
-            Logic.createRandomWalker("raise")
-            Logic.createRandomWalker("lower")
-            Logic.createDirectionWalker("left")
-            Logic.createDirectionWalker("right")
-        }
+    state: "paused"
 
-        for(var i = 0; i < 50; i++) {
-            Logic.createPressureSource()
-        }
-
-        var plane = entityManager.createEntityFromUrl("planes/FighterPlane.qml")
-        percolationSystemShader.updateSourceRect()
+    onPause: {
+        state = "paused"
     }
 
-    function addEnergy(amount) {
-        energy += amount
+    onResume: {
+        state = "running"
+    }
+
+    onRestart: {
+        entityManager.clear()
+        pressureSources = []
+        percolationSystem.initialize()
+        percolationSystemShader.updateSourceRect()
+        state = "running"
     }
 
     onWidthChanged: {
@@ -43,6 +50,9 @@ Item {
 
     onHeightChanged: {
         percolationSystemShader.updateSourceRect()
+    }
+
+    Component.onCompleted: {
     }
 
     Rectangle {
@@ -55,8 +65,8 @@ Item {
         id: percolationSystem
         width: nCols
         height: nRows
-        nRows: 500
-        nCols: 500
+        nRows: 10
+        nCols: 10
         occupationTreshold: 0.55
         imageType: gameMenu.imageType
 
@@ -124,7 +134,7 @@ Item {
     Timer {
         property int triggers: 0
         id: advanceTimer
-        running: true
+        running: (state === "running")
         interval: 1000 / 60 // hoping for 60 FPS
         repeat: true
         onTriggered: {
@@ -133,12 +143,12 @@ Item {
             if(percolationSystem.tryLockUpdates()) {
                 if(currentInterval > 200) {
                     Logic.refreshPressures(currentInterval)
+                    lastUpdateTime = currentUpdateTime
                 }
                 entityManager.advance(currentUpdateTime)
 
                 percolationSystem.unlockUpdates()
                 percolationSystem.requestRecalculation()
-                lastUpdateTime = currentUpdateTime
             }
         }
     }
@@ -230,13 +240,42 @@ Item {
 
     GameMenu {
         id: gameMenu
-        onReturnToMainMenuClicked: {
-            viewRoot.returnToMainMenuClicked()
+        energy: playerTeam.energy
+        onPauseClicked: {
+            pause()
         }
     }
 
     SelectionMenu {
         id: gameObjectInfo
+    }
+
+    states: [
+        State {
+            name: "paused"
+            PropertyChanges {
+                target: inGameMenu
+                opacity: 1
+                enabled: true
+            }
+        },
+        State {
+            name: "running"
+        }
+    ]
+
+    InGameMenu {
+        id: inGameMenu
+        opacity: 0
+        enabled: false
+
+        onContinueClicked: {
+            resume()
+        }
+
+        onExitToMainMenuClicked: {
+            exitToMainMenu()
+        }
     }
 
 //    StatsMenu {

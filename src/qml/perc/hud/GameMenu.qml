@@ -7,7 +7,7 @@ Item {
 
     property int imageType: PercolationSystem.PressureImage
     property double energy
-    signal returnToMainMenuClicked
+    signal pauseClicked
 
     anchors.right: parent.right
     anchors.top: parent.top
@@ -120,7 +120,7 @@ Item {
             anchors.fill: parent
 
             onClicked: {
-                returnToMainMenuClicked()
+                pauseClicked()
             }
         }
     }
