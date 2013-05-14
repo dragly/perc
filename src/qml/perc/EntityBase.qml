@@ -8,27 +8,32 @@ Item {
     property int col: 0
     property string informationText: "Not set"
     property bool selected: false
+    property double lastTime: Date.now()
+    property double animationDuration: 1
     signal requestSelection(var object)
-    signal tick(real currentUpdateTime)
+    signal advance(real currentTime)
 
     x: col * Defaults.GRID_SIZE
     y: row * Defaults.GRID_SIZE
 
     Behavior on x {
         NumberAnimation {
-            duration: Defaults.TIME_STEP * 1.1
+            duration: entityRoot.animationDuration
+            easing.type: Easing.Linear
         }
     }
 
     Behavior on y {
         NumberAnimation {
-            duration: Defaults.TIME_STEP * 1.1
+            duration: entityRoot.animationDuration
+            easing.type: Easing.Linear
         }
     }
 
     Behavior on rotation {
         NumberAnimation {
-            duration: Defaults.TIME_STEP * 1.1
+            duration: entityRoot.animationDuration
+            easing.type: Easing.Linear
         }
     }
 

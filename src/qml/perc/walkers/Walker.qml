@@ -6,9 +6,8 @@ import "../defaults.js" as Defaults
 EntityBase {
     property string color
 
-    Component.onCompleted: {
-        tick.connect(move)
-    }
+    property double moveInterval: 200
+    property double lastTime: Date.now()
 
     smooth: true
 
@@ -18,8 +17,17 @@ EntityBase {
     x: col * Defaults.GRID_SIZE + (Defaults.GRID_SIZE - width) / 2
     y: row * Defaults.GRID_SIZE + (Defaults.GRID_SIZE - width) / 2
 
-    function move() {
-        console.log("Move not implemented for walker...")
+    onAdvance: {
+        var interval = currentTime - lastTime
+        if(interval > moveInterval) {
+            animationDuration = interval
+            move(currentTime)
+            lastTime = currentTime
+        }
+    }
+
+    function move(currentTime) {
+//        console.log("Move not implemented for walker...")
     }
 
     Image {

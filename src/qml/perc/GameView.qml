@@ -96,7 +96,7 @@ Item {
 
         onSelectedObjectsChanged: {
             if(selectedObjects.length > 1) {
-                gameObjectInfo.text = "Selected " + selectedObjects.length + " items"
+                gameObjectInfo.text = selectedObjects.length + " items selected"
                 gameObjectInfo.state = "active"
             } else if(selectedObjects.length > 0) {
                 for(var i in selectedObjects) {
@@ -130,17 +130,16 @@ Item {
         onTriggered: {
             var currentUpdateTime = Date.now()
             var currentInterval = currentUpdateTime - lastUpdateTime
-            if(currentInterval > 200) {
-                if(percolationSystem.tryLockUpdates()) {
-                    entityManager.tick(currentUpdateTime)
-//                    Logic.moveWalkers()
-//                    Logic.refreshPressures(currentInterval)
-                    percolationSystem.unlockUpdates()
-                    percolationSystem.requestRecalculation()
-                    lastUpdateTime = currentUpdateTime
+            if(percolationSystem.tryLockUpdates()) {
+                if(currentInterval > 200) {
+                    Logic.refreshPressures(currentInterval)
                 }
+                entityManager.advance(currentUpdateTime)
+
+                percolationSystem.unlockUpdates()
+                percolationSystem.requestRecalculation()
+                lastUpdateTime = currentUpdateTime
             }
-            //            selectionIndicator.refresh()
         }
     }
 

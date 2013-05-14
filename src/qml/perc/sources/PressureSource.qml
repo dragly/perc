@@ -11,6 +11,7 @@ EntityBase {
 //    signal requestSelect(var object)
 
     property double pressure: 1
+    property double lastTime: Date.now()
 
     //    radius: Defaults.GRID_SIZE
 
@@ -34,6 +35,11 @@ EntityBase {
         if(pressure < 0) {
             pressure = 0
         }
+    }
+
+    onAdvance: {
+        var interval = currentTime - lastTime
+        pressure = pressure - 0.0001 * interval / 1000
     }
 
     Timer {

@@ -34,10 +34,10 @@ Item {
         return entity
     }
 
-    function tick(currentUpdateTime) {
+    function advance(currentUpdateTime) {
         for(var i in entities) {
             var entity = entities[i]
-            entity.tick(currentUpdateTime)
+            entity.advance(currentUpdateTime)
         }
     }
 }

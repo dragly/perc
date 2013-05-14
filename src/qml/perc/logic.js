@@ -1,7 +1,7 @@
 var sites;
 //var walkers = [];
 //var clusters = [];
-//var pressureSources = [];
+var pressureSources = [];
 
 function createPressureSource() {
     var found = false;
@@ -32,7 +32,6 @@ function refreshPressures(timeDiff) {
     percolationSystem.clearPressureSources()
     for(var i in pressureSources) {
         var pressureSource = pressureSources[i]
-        pressureSource.pressure = pressureSource.pressure - 0.001 * timeDiff / 1000
         percolationSystem.addPressureSource(pressureSource)
     }
 }

@@ -14,7 +14,7 @@ Walker {
         }
     }
 
-    function move() {
+    function move(currentTime) {
         var found = false
         var directions = []
         directions[0] = [1,0]

@@ -14,7 +14,7 @@ Walker {
     }
 
     color: (type === "raise") ? "yellow" : "pink"
-    function move() {
+    function move(currentTime) {
         var randomIndex = parseInt(Math.random() * 4)
         var found = false
         var directions = []
