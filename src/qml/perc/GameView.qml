@@ -14,6 +14,7 @@ Item {
     signal resume
     signal restart
     signal pause
+    signal advance(real currentTime)
     property double lastUpdateTime: Date.now()
     property alias nRows: percolationSystem.nRows
     property alias nCols: percolationSystem.nCols
@@ -131,10 +132,10 @@ Item {
         interval: 1000 / 60 // hoping for 60 FPS
         repeat: true
         onTriggered: {
-            var currentUpdateTime = Date.now()
-            var currentInterval = currentUpdateTime - lastUpdateTime
+            var currentTime = Date.now()
+            advance(currentTime)
             if(percolationSystem.tryLockUpdates()) {
-                entityManager.advance(currentUpdateTime)
+                entityManager.advance(currentTime)
                 percolationSystem.unlockUpdates()
                 percolationSystem.requestRecalculation()
             }

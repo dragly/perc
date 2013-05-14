@@ -37,7 +37,7 @@ Walker {
                 if(type === "raise") {
                     var cost = percolationSystem.raiseValue(nextSiteRow,nextSiteCol)
                 } else {
-                    var gain = percolationSystem.lowerValue(nextSiteRow + directions[randomIndex][0], nextSiteCol + directions[randomIndex][1])
+                    var gain = percolationSystem.lowerValue(nextSiteRow,nextSiteCol)
                     collectedEnergy(gain)
                 }
             } else {
