@@ -9,19 +9,20 @@ Item {
     property string informationText: "Not set"
     property bool selected: false
     signal requestSelection(var object)
+    signal tick(real currentUpdateTime)
 
     x: col * Defaults.GRID_SIZE
     y: row * Defaults.GRID_SIZE
 
     Behavior on x {
         NumberAnimation {
-            duration: Defaults.TIME_STEP
+            duration: Defaults.TIME_STEP * 1.1
         }
     }
 
     Behavior on y {
         NumberAnimation {
-            duration: Defaults.TIME_STEP
+            duration: Defaults.TIME_STEP * 1.1
         }
     }
 

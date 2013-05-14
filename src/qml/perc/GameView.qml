@@ -132,8 +132,9 @@ Item {
             var currentInterval = currentUpdateTime - lastUpdateTime
             if(currentInterval > 200) {
                 if(percolationSystem.tryLockUpdates()) {
-                    Logic.moveWalkers()
-                    Logic.refreshPressures(currentInterval)
+                    entityManager.tick(currentUpdateTime)
+//                    Logic.moveWalkers()
+//                    Logic.refreshPressures(currentInterval)
                     percolationSystem.unlockUpdates()
                     percolationSystem.requestRecalculation()
                     lastUpdateTime = currentUpdateTime

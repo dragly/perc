@@ -33,4 +33,11 @@ Item {
         entity.requestSelection.connect(gameScene.requestSelection)
         return entity
     }
+
+    function tick(currentUpdateTime) {
+        for(var i in entities) {
+            var entity = entities[i]
+            entity.tick(currentUpdateTime)
+        }
+    }
 }

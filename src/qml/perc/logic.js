@@ -59,7 +59,7 @@ function createRandomWalker(type) {
 //            walker.lightSource = sceneRoot.lightSource
             walker.collectedEnergy.connect(viewRoot, addEnergy)
             found = true
-            walkers.push(walker)
+//            walkers.push(walker)
         }
         nAttempts += 1
     }
@@ -103,16 +103,16 @@ function createDirectionWalker(type) {
                 walker.row = i
                 walker.col = j
                 found = true
-                walkers.push(walker)
+//                walkers.push(walker)
             }
         }
         nAttempts += 1
     }
 }
 
-function moveWalkers() {
-    for(var i in walkers) {
-        var walker = walkers[i]
-        walker.move();
-    }
-}
+//function moveWalkers() {
+//    for(var i in walkers) {
+//        var walker = walkers[i]
+//        walker.move();
+//    }
+//}

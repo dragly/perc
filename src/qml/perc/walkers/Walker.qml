@@ -6,6 +6,28 @@ import "../defaults.js" as Defaults
 EntityBase {
     property string color
 
+    Component.onCompleted: {
+        tick.connect(move)
+    }
+
+    smooth: true
+
+    width: Defaults.GRID_SIZE * 0.7
+    height: Defaults.GRID_SIZE * 0.7
+
+    x: col * Defaults.GRID_SIZE + (Defaults.GRID_SIZE - width) / 2
+    y: row * Defaults.GRID_SIZE + (Defaults.GRID_SIZE - width) / 2
+
+    function move() {
+        console.log("Move not implemented for walker...")
+    }
+
+    Image {
+        id: rect
+        anchors.fill: parent
+        source: "walker.png"
+    }
+
 //    property alias lightSource: nMapEffect.lightSource
 
 //    Rectangle {
@@ -13,11 +35,6 @@ EntityBase {
 //        color: "#F03B20"
 //        anchors.fill: parent
 //    }
-    Image {
-        id: rect
-        anchors.fill: parent
-        source: "walker.png"
-    }
 
 //    NMapEffect {
 //        anchors.fill: parent
@@ -34,16 +51,4 @@ EntityBase {
 //        width: nMapEffect.originalWidth
 //        height: nMapEffect.originalHeight
 //    }
-
-    smooth: true
-
-    width: Defaults.GRID_SIZE * 0.7
-    height: Defaults.GRID_SIZE * 0.7
-
-    x: col * Defaults.GRID_SIZE + (Defaults.GRID_SIZE - width) / 2
-    y: row * Defaults.GRID_SIZE + (Defaults.GRID_SIZE - width) / 2
-
-    function move() {
-        console.log("Move not implemented for walker...")
-    }
 }
