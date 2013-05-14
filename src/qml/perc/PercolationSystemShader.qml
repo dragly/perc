@@ -24,8 +24,8 @@ ShaderEffect {
     property real colorizeAmount: 0.0
 
     /* Private */
-    property real _lightPosX: gameView.lastMouseX / (gameView.width)
-    property real _lightPosY: gameView.lastMouseY / (gameView.height)
+    property real lightPosX: 0
+    property real lightPosY: 0
 
     property variant _source: effectSource
 
@@ -35,9 +35,6 @@ ShaderEffect {
         mipmap: false
 
         textureSize: Qt.size(Math.min(sourceRect.width * root.samples, root.width), Math.min(sourceRect.height * root.samples, root.height))
-        onTextureSizeChanged: {
-            console.log(textureSize)
-        }
     }
     //    property variant _source2: ShaderEffectSource { sourceItem: percoItem; hideSource: true; mipmap: false }
 
@@ -46,8 +43,8 @@ varying highp vec2 qt_TexCoord0;
 uniform highp float qt_Opacity;
 uniform sampler2D _source;
 //uniform sampler2D _source2;
-uniform highp float _lightPosX;
-uniform highp float _lightPosY;
+uniform highp float lightPosX;
+uniform highp float lightPosY;
 uniform highp float diffuseBoost;
 uniform highp float ambient;
 uniform highp float lightIntensity;
@@ -62,8 +59,8 @@ void main(void)
 //    highp float lightness = sqrt(dot(pix2,pix2));
 //    highp vec3 normal = normalize(vec3(0,0,1) + pix2.rgb * 2.0 - 1.0);
     highp vec3 normal = normalize(vec3(0.0,0.0,1));
-    highp float xp = (_lightPosX - pixPos.x);
-    highp float yp = (_lightPosY - pixPos.y);
+    highp float xp = (lightPosX - pixPos.x);
+    highp float yp = (lightPosY - pixPos.y);
     highp vec3 light_pos = normalize(vec3(xp, yp, lightIntensity));
 
     highp float diffuse = max(dot(normal, light_pos), ambient);

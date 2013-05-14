@@ -9,6 +9,7 @@ Item {
     property string informationText: "Not set"
     property bool selected: false
     signal requestSelection(var object)
+
     x: col * Defaults.GRID_SIZE
     y: row * Defaults.GRID_SIZE
 
@@ -20,7 +21,7 @@ Item {
 
     Behavior on y {
         NumberAnimation {
-            duration: Defaults.TIME_STEP * 1.1
+            duration: Defaults.TIME_STEP
         }
     }
 

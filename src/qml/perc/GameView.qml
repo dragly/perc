@@ -5,14 +5,15 @@ import "hud"
 
 import "defaults.js" as Defaults
 
-Rectangle {
+Item {
     id: viewRoot
     width: 100
     height: 62
-    color: "red"
 
     property double lastMouseX: 0
     property double lastMouseY: 0
+
+    signal returnToMainMenuClicked
 
     Component.onCompleted: {
         percolationSystemShader.updateSourceRect()
@@ -24,6 +25,12 @@ Rectangle {
 
     onHeightChanged: {
         percolationSystemShader.updateSourceRect()
+    }
+
+    Rectangle {
+        id: backgroundRect
+        color: "grey"
+        anchors.fill: parent
     }
 
     PercolationSystem {
@@ -51,7 +58,7 @@ Rectangle {
         samples: 32 * Math.sqrt(gameScene.targetScale)
 
         function updateSourceRect() {
-            var newRect = gameView.mapToItem(gameScene,0,0,viewRoot.width,viewRoot.height)
+            var newRect = viewRoot.mapToItem(gameScene,0,0,viewRoot.width,viewRoot.height)
             sourceRect = Qt.rect(newRect.x / (Defaults.GRID_SIZE),
                                 newRect.y / (Defaults.GRID_SIZE),
                                 newRect.width / (Defaults.GRID_SIZE),
@@ -135,8 +142,8 @@ Rectangle {
             }
             prevX = mouse.x
             prevY = mouse.y
-            lastMouseX = mouse.x
-            lastMouseY = mouse.y
+            percolationSystemShader.lightPosX = mouse.x / (viewRoot.width)
+            percolationSystemShader.lightPosY = mouse.y / (viewRoot.height)
             var relativeMouse = mapToItem(gameScene, mouse.x, mouse.y)
             gameScene.lightSource.setLightPos(relativeMouse.x, relativeMouse.y)
 //            mouse.accepted = false
@@ -180,6 +187,9 @@ Rectangle {
     GameMenu {
         id: gameMenu
         energy: gameScene.energy
+        onReturnToMainMenuClicked: {
+            viewRoot.returnToMainMenuClicked()
+        }
     }
 
     SelectionMenu {

@@ -7,6 +7,7 @@ Item {
 
     property int imageType: PercolationSystem.PressureImage
     property double energy
+    signal returnToMainMenuClicked
 
     anchors.right: parent.right
     anchors.top: parent.top
@@ -87,8 +88,8 @@ Item {
     Rectangle {
         id: switchImageTypeButton
         anchors.horizontalCenter: parent.horizontalCenter
-        height: parent.width * 0.8
-        width: parent.width * 0.8
+        height: parent.width * 0.3
+        width: parent.width * 0.3
         anchors.top: parent.top
         anchors.topMargin: parent.width * 0.2
         color: "blue"
@@ -106,10 +107,28 @@ Item {
         }
     }
 
+    Rectangle {
+        id: returnToMainMenuButton
+        anchors.horizontalCenter: parent.horizontalCenter
+        height: parent.width * 0.3
+        width: parent.width * 0.3
+        anchors.top: switchImageTypeButton.bottom
+        anchors.topMargin: parent.width * 0.2
+        color: "red"
+
+        MouseArea {
+            anchors.fill: parent
+
+            onClicked: {
+                returnToMainMenuClicked()
+            }
+        }
+    }
+
     Text {
         text: "Energy: " + (Math.round(gameMenuRoot.energy * 100) / 100).toFixed(2)
         font.pixelSize: parent.width * 0.1
-        anchors.top: switchImageTypeButton.bottom
+        anchors.top: returnToMainMenuButton.bottom
         anchors.left: parent.left
         anchors.leftMargin: parent.width*0.2
     }
