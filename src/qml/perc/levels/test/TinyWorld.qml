@@ -21,14 +21,18 @@ GameView {
         }
         entityManager.createEntityFromUrl("sources/PressureSource.qml", properties);
 
-        site = Logic.randomSite(percolationSystem)
-        properties = {
-            type: "lower",
-            team: playerTeam,
-            row: site.row,
-            col: site.col
+
+        for(var i = 0; i < 10; i++) {
+            site = Logic.randomSite(percolationSystem)
+            properties = {
+                type: "lower",
+                team: playerTeam,
+                row: site.row,
+                col: site.col,
+                lightSource: gameScene.lightSource
+            }
+            entityManager.createEntityFromUrl("walkers/RandomWalker.qml", properties);
         }
-        entityManager.createEntityFromUrl("walkers/RandomWalker.qml", properties);
     }
 
     otherTeams: [

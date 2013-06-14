@@ -44,6 +44,7 @@ EntityBase {
     }
 
 //    property alias lightSource: nMapEffect.lightSource
+    property var lightSource
 
 //    Rectangle {
 //        id: rect

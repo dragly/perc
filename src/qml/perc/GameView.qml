@@ -15,6 +15,7 @@ Item {
     signal restart
     signal pause
     signal advance(real currentTime)
+    property alias gameScene: gameScene
     property double lastUpdateTime: Date.now()
     property alias nRows: percolationSystem.nRows
     property alias nCols: percolationSystem.nCols

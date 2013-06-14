@@ -16,6 +16,7 @@ GameView {
                 team: playerTeam,
                 row: site.row,
                 col: site.col
+//                lightSource: gameScene.lightSource
             }
             entityManager.createEntityFromUrl("walkers/RandomWalker.qml", properties);
         }
