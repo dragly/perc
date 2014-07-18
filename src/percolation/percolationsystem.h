@@ -27,8 +27,6 @@ public:
     double pressure;
 };
 
-class Cluster;
-
 class PercolationSystem : public QQuickPaintedItem
 {
     Q_OBJECT

@@ -78,18 +78,18 @@ EntityBase {
         }
     }
 
-    ParticleSystem {
-        id: particleSystem
-        ImageParticle {
-            groups: "test"
-            sprites: [
-                Sprite {
-                    name: "testsprite"
-                    source: "../particles/particle.png"
-                }
-            ]
-            //            entryEffect: ImageParticle.Scale
-        }
-    }
+//    ParticleSystem {
+//        id: particleSystem
+//        ImageParticle {
+//            groups: "test"
+//            sprites: [
+//                Sprite {
+//                    name: "testsprite"
+//                    source: "../particles/particle.png"
+//                }
+//            ]
+//            //            entryEffect: ImageParticle.Scale
+//        }
+//    }
 }
 

@@ -111,6 +111,14 @@ Item {
             percolationSystemShader.updateSourceRect()
         }
 
+        onXChanged: {
+            percolationSystemShader.updateSourceRect()
+        }
+
+        onYChanged: {
+            percolationSystemShader.updateSourceRect()
+        }
+
         smooth: true
     }
 
@@ -152,6 +160,9 @@ Item {
         hoverEnabled: true
         anchors.fill: parent
         acceptedButtons: Qt.MiddleButton
+
+        drag.target: gameScene
+
         onWheel: {
             //            var realGameSceneX = gameScene.scaleOriginX
 //            var currentScaleOrigin = mapFromItem(gameScene, gameScene.scaleOriginX, gameScene.scaleOriginY)
@@ -171,36 +182,35 @@ Item {
 //            percolationSystemShader.updateSourceRect()
         }
 
-        onPressed: {
-            console.log("mainViewMouseArea pressed")
-            isDragging = true
-            prevX = mouse.x
-            prevY = mouse.y
-        }
-
         onPositionChanged: {
-            if(isDragging) {
-                gameScene.x += mouse.x - prevX
-                gameScene.y += mouse.y - prevY
-                percolationSystemShader.updateSourceRect()
-            }
-            prevX = mouse.x
-            prevY = mouse.y
             percolationSystemShader.lightPosX = mouse.x / (gameViewRoot.width)
             percolationSystemShader.lightPosY = mouse.y / (gameViewRoot.height)
             var relativeMouse = mapToItem(gameScene, mouse.x, mouse.y)
             gameScene.lightSource.setLightPos(relativeMouse.x, relativeMouse.y)
-//            mouse.accepted = false
+//            if(isDragging) {
+//                gameScene.x += mouse.x - prevX
+//                gameScene.y += mouse.y - prevY
+//                percolationSystemShader.updateSourceRect()
+//            }
+//            prevX = mouse.x
+//            prevY = mouse.y
         }
 
-        onReleased: {
-            console.log("mainViewMouseArea released")
-            isDragging = false
-        }
+//        onReleased: {
+//            console.log("mainViewMouseArea released")
+//            isDragging = false
+//        }
 
-        onExited: {
-            isDragging = false
-        }
+//        onExited: {
+//            isDragging = false
+//        }
+
+//        onPressed: {
+//            console.log("mainViewMouseArea pressed")
+//            isDragging = true
+//            prevX = mouse.x
+//            prevY = mouse.y
+//        }
     }
 
     PinchArea {

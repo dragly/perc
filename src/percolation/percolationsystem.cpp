@@ -18,6 +18,8 @@
 #endif
 #include <iostream>
 
+// Test comment
+
 using namespace arma;
 using namespace std;
 

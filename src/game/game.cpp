@@ -12,7 +12,7 @@ Game::Game() :
 {
     m_viewer.setSurfaceType(QSurface::OpenGLSurface);
     QSurfaceFormat format;
-    format.setSamples(2);
+    format.setSamples(0);
     m_viewer.setFormat(format);
     m_viewer.setMainQmlFile(QStringLiteral("qml/perc/main.qml"));
 
@@ -34,7 +34,7 @@ Game::Game() :
 
 void Game::start()
 {
-    m_viewer.showExpanded();
+    m_viewer.showFullScreen();
 //    m_percolationSystem.initialize(10,10, 0.5);
 //    m_viewer.showExpanded();
 

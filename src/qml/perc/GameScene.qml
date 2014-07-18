@@ -127,6 +127,7 @@ Item {
             isDragging = true
             dragStart.x = mouse.x
             dragStart.y = mouse.y
+
         }
 
         onPositionChanged: {
@@ -147,6 +148,7 @@ Item {
                 }
             }
         }
+        z: 9999999
     }
 
     Rectangle {
