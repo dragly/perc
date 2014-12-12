@@ -38,7 +38,7 @@ EntityBase {
 
     Rectangle {
         id: rect
-        color: "#F03B20"
+        color: team.color
         anchors.fill: parent
     }
 }

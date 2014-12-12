@@ -17,7 +17,6 @@ GameView {
         properties.row = spawn.row
         properties.col = spawn.col
         properties.team = spawn.team
-        properties.type = "lower"
         var walker = entityManager.createEntityFromUrl("walkers/Soldier.qml", properties)
     }
 

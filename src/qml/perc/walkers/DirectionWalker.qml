@@ -4,16 +4,6 @@ Walker {
     property string type: "left"
     property int direction: 0
 
-    informationText: "Direction walker " + type + (team ? "\nteam: " + team.name : "")
-
-    color: (type === "left" ? "red" : "orange")
-    onTypeChanged: {
-        if(type !== "left" && type !== "right") {
-            console.log("ERROR! Type of walker must be left/right.")
-            direction = "left"
-        }
-    }
-
     function move(currentTime) {
         var found = false
         var directions = []
@@ -43,4 +33,13 @@ Walker {
             direction = (direction + 4) % 4
         }
     }
+
+    onTypeChanged: {
+        if(type !== "left" && type !== "right") {
+            console.log("ERROR! Type of walker must be left/right. Type was " + type)
+            type = "left"
+        }
+    }
+
+    informationText: "Direction walker " + type + (team ? "\nteam: " + team.name : "")
 }

@@ -19,7 +19,6 @@ Walker {
         }
     }
 
-    color: team.color
     function move(currentTime) {
         var randomIndex = parseInt(Math.random() * 4)
         var found = false

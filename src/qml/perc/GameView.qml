@@ -141,12 +141,6 @@ Item {
         smooth: true
     }
 
-    Binding {
-        id: myBinding
-        target: gameObjectInfo
-        property: "text"
-    }
-
     EntityManager {
         id: entityManager
         gameScene: gameScene
