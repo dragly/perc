@@ -1,13 +1,17 @@
 import QtQuick 2.0
 import "../.."
 import "../../logic.js" as Logic
+import "../../spawns"
 
 GameView {
     id: gameViewRoot
 
-    nRows: 5
-    nCols: 5
-    occupationTreshold: 0.8
+    nRows: 50
+    nCols: 50
+    occupationTreshold: 0.7
+
+    property Spawn playerSpawn: null
+    property Spawn enemySpawn: null
 
     function spawnWalker(spawn, properties) {
         properties.row = spawn.row
@@ -24,14 +28,14 @@ GameView {
             row: playerSpawnSite.row,
             col: playerSpawnSite.col
         }
-        var playerSpawn = entityManager.createEntityFromUrl("spawns/Spawn.qml", properties)
+        playerSpawn = entityManager.createEntityFromUrl("spawns/Spawn.qml", properties)
         var enemySpawnSite = Logic.randomSite(percolationSystem)
         properties = {
             team: enemyTeam,
             row: enemySpawnSite.row,
             col: enemySpawnSite.col
         }
-        var enemySpawn = entityManager.createEntityFromUrl("spawns/Spawn.qml", properties)
+        enemySpawn = entityManager.createEntityFromUrl("spawns/Spawn.qml", properties)
 
         playerSpawn.spawnedWalker.connect(spawnWalker)
         enemySpawn.spawnedWalker.connect(spawnWalker)
@@ -42,6 +46,26 @@ GameView {
             id: enemyTeam
             name: "enemy"
             color: "orange"
+        }
+    ]
+
+    winObjectives: [
+        Objective {
+            onTest: {
+                if(enemySpawn.healthPoints <= 0) {
+                    completed = true
+                }
+            }
+        }
+    ]
+
+    failObjectives: [
+        Objective {
+            onTest: {
+                if(playerSpawn.healthPoints <= 0) {
+                    completed = true
+                }
+            }
         }
     ]
 }

@@ -23,7 +23,7 @@ Item {
             var soldier = entity1
             var spawn = entity2
             if(soldier.team !== spawn.team) {
-                spawn.healthPoints -= 10
+                spawn.healthPoints -= 1
             }
         }
     }

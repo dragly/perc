@@ -23,13 +23,24 @@ Item {
     readonly property alias percolationSystem: percolationSystem
     readonly property alias entityManager: entityManager
 //    property alias pressureSources: percolationSystem.pressureSources
-    property Team playerTeam: Team{ isPlayer: true; name: "player"}
+    property Team playerTeam: playerTeamInternal
     property list<Team> otherTeams
+
+    property list<Objective> failObjectives
+    property list<Objective> winObjectives
 
     width: 100
     height: 62
 
     state: "paused"
+
+    function failGame() {
+        failGameDialog.visible = true
+    }
+
+    function winGame() {
+        winGameDialog.visible = true
+    }
 
     onPause: {
         state = "paused"
@@ -55,6 +66,14 @@ Item {
     }
 
     Component.onCompleted: {
+    }
+
+    Team {
+        id: playerTeamInternal
+        isPlayer: true
+        name: "player"
+        color: "#6a3d9a"
+        lightColor: "#cab2d6"
     }
 
     Rectangle {
@@ -132,23 +151,6 @@ Item {
         id: entityManager
         gameScene: gameScene
         gameView: gameViewRoot
-    }
-
-    Timer {
-        property int triggers: 0
-        id: advanceTimer
-        running: (state === "running")
-        interval: 1000 / 60 // hoping for 60 FPS
-        repeat: true
-        onTriggered: {
-            var currentTime = Date.now()
-            advance(currentTime)
-            if(percolationSystem.tryLockUpdates()) {
-                entityManager.advance(currentTime)
-                percolationSystem.unlockUpdates()
-                percolationSystem.requestRecalculation()
-            }
-        }
     }
 
     MouseArea {
@@ -238,6 +240,30 @@ Item {
         }
     }
 
+    Rectangle {
+        id: winGameDialog
+        anchors.centerIn: parent
+        width: parent.width * 0.8
+        height: parent.height * 0.8
+        visible: false
+        Text {
+            anchors.centerIn: parent
+            text: "You win!"
+        }
+    }
+
+    Rectangle {
+        id: failGameDialog
+        anchors.centerIn: parent
+        width: parent.width * 0.8
+        height: parent.height * 0.8
+        visible: false
+        Text {
+            anchors.centerIn: parent
+            text: "You fail!"
+        }
+    }
+
     ConstructionMenu {
         id: constructionMenu
         energy: playerTeam.energy
@@ -279,7 +305,39 @@ Item {
         }
     }
 
-//    StatsMenu {
-//        id: statsMenu
-//    }
+    Timer {
+        id: advanceTimer
+        property int triggers: 0
+        running: (state === "running")
+        interval: 1000 / 60 // hoping for 60 FPS
+        repeat: true
+        onTriggered: {
+            var currentTime = Date.now()
+            advance(currentTime)
+            if(percolationSystem.tryLockUpdates()) {
+                entityManager.advance(currentTime)
+                var fail = false
+                for(var i in failObjectives) {
+                    var failObjective = failObjectives[i]
+                    failObjective.test()
+                    fail = fail || failObjective.completed
+                }
+                var win = false
+                for(var i in winObjectives) {
+                    var winObjective = winObjectives[i]
+                    winObjective.test()
+                    win = win || winObjective.completed
+                }
+
+                if(win) {
+                    winGame()
+                } else if(fail) {
+                    failGame()
+                }
+
+                percolationSystem.unlockUpdates()
+                percolationSystem.requestRecalculation()
+            }
+        }
+    }
 }

@@ -9,22 +9,40 @@ EntityBase {
 
     property double healthPoints: 100.0
 
+    property double _colorValue: Math.max(0, Math.min(100, healthPoints)) / 100
+
     width: Defaults.GRID_SIZE
     height: Defaults.GRID_SIZE
 
     onHealthPointsChanged: {
         if(healthPoints < 0) {
+            healthPoints = 0
             spawnTimer.stop()
         }
     }
 
-    Rectangle {
+    Item {
         anchors.centerIn: parent
         width: parent.width * 1.2
         height: parent.height * 1.2
-        color: Qt.rgba(team.color.r * 0.8,
-                       team.color.g * 0.8,
-                       team.color.b * 0.8)
+        Rectangle {
+            anchors.fill: parent
+            opacity: _colorValue
+            color: "#b2df8a"
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            opacity: 1 - _colorValue
+            color: "#e31a1c"
+        }
+
+        Rectangle {
+            anchors.centerIn: parent
+            width: parent.width * 0.8
+            height: parent.height * 0.8
+            color: team.lightColor
+        }
     }
 
     Timer {
