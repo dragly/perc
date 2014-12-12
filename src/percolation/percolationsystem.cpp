@@ -73,8 +73,8 @@ void PercolationSystem::initialize() {
     m_pressureMatrix = zeros(m_nRows, m_nCols);
     m_pressureSourceMatrix = zeros(m_nRows, m_nCols);
     m_oldPressureMatrix = zeros(m_nRows, m_nCols);
+    recalculateMatricesAndUpdate();
     m_isInitialized = true;
-    requestRecalculation();
 }
 
 void PercolationSystem::generatePressureMatrix() {
