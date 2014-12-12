@@ -1,6 +1,7 @@
 import QtQuick 2.0
 
 Walker {
+    objectName: "RandomWalker"
     property string type: "raise"
     signal collectedEnergy(var amount)
 
@@ -18,7 +19,7 @@ Walker {
         }
     }
 
-    color: (type === "raise") ? "yellow" : "pink"
+    color: team.color
     function move(currentTime) {
         var randomIndex = parseInt(Math.random() * 4)
         var found = false

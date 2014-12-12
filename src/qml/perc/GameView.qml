@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import com.dragly.perc 1.0
+import org.dragly.perc 1.0
 
 import "hud"
 import "menus"
@@ -103,7 +103,7 @@ Item {
         height: percolationSystem.height * Defaults.GRID_SIZE
 
         objectName: "gameScene"
-        targetScale: 0.1
+        targetScale: 0.2
         percolationSystem: percolationSystem
 //        imageType: gameMenu.imageType
 

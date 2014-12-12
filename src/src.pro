@@ -17,8 +17,8 @@ QML_IMPORT_PATH =
 SOURCES += main.cpp \
     game/game.cpp \
     percolation/percolationsystem.cpp \
-    percolation/cluster.cpp \
-    simplematerial.cpp
+    simplematerial.cpp \
+    random.cpp
 
 # Installation path
 # target.path =
@@ -30,12 +30,13 @@ qtcAddDeployment()
 HEADERS += \
     game/game.h \
     percolation/percolationsystem.h \
-    percolation/cluster.h \
-    simplematerial.h
+    simplematerial.h \
+    random.h
 
 OTHER_FILES += \
     qml/perc/GameView.qml \
     qml/perc/PercolationSystemShader.qml \
-    qml/perc/hud/ConstructionMenu.qml
+    qml/perc/hud/ConstructionMenu.qml \
+    qml/perc/InteractionManager.qml
 
 TARGET = perc

@@ -12,6 +12,7 @@
 #include <QImage>
 #include <QFutureWatcher>
 #include <QMutex>
+#include <random.h>
 
 #ifdef Q_OS_ANDROID
 #include </home/svenni/apps/armadillo/armadillo>
@@ -42,6 +43,7 @@ public:
     //    void setPercolationSystemGraphics(PercolationSystemGraphics* graphics);
 
     enum ImageType {
+        OccupationImage,
         PressureImage,
         AreaImage
     };
@@ -71,7 +73,7 @@ public:
     Q_INVOKABLE double lowerValue(int row, int col);
     Q_INVOKABLE double raiseValue(int row, int col);
     void paint(QPainter *painter);
-    int labelSelfAndNeighbors(int row, int col, int label);
+    int labelCell(int row, int col, int label);
     bool isSite(int row, int col);
     Q_INVOKABLE int labelAt(int row, int col);
     double occupationTreshold() const
@@ -79,7 +81,7 @@ public:
         return m_occupationTreshold;
     }
 
-    bool isInitializedProperly();
+    void ensureInitialization();
 
 //    Q_INVOKABLE void addPressureSource(QObject *pressureSource);
 //    Q_INVOKABLE void clearPressureSources();
@@ -92,7 +94,7 @@ public:
     Q_INVOKABLE bool tryLockUpdates();
 
     ~PercolationSystem();
-    void randomizeMatrix();
+    Q_INVOKABLE void randomizeMatrix();
     QList<QObject*> pressureSources() const
     {
         return m_pressureSources;
@@ -169,13 +171,17 @@ protected:
     QList<QObject*> m_pressureSources;
 
     QImage m_image;
+    QImage m_prevImage;
 //    std::vector<Cluster*> m_clusters;
 
     bool m_isFinishedUpdating;
+    bool m_isInitialized;
 
     ImageType m_imageType;
 //    QFutureWatcher<void> watcher;
     QMutex m_updateMatrixMutex;
+    QMutex m_prevImageMutex;
+    Random m_random;
 };
 
 inline const arma::umat& PercolationSystem::occupationMatrix() {

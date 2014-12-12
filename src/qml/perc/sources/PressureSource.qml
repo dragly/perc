@@ -59,7 +59,7 @@ EntityBase {
 
     Emitter {
         shape: EllipseShape{}
-        system: particleSystem
+//        system: particleSystem
         anchors.centerIn: parent
         height: Defaults.GRID_SIZE * 0.2
         width: Defaults.GRID_SIZE * 0.2

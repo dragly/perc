@@ -60,5 +60,21 @@ Item {
                 }
             }
         }
+        Rectangle {
+            color: "blue"
+            width: 100
+            height: 100
+            Text {
+                text: "Map editor"
+                color: "white"
+                anchors.centerIn: parent
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    selectedLevel("LevelEditor.qml")
+                }
+            }
+        }
     }
 }

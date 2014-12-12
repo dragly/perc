@@ -4,7 +4,11 @@
 class Random
 {
 public:
-    Random();
+    Random(long seed = -1);
+    double ran2();
+private:
+    long m_idum;
+    long *idum;
 };
 
 #endif // RANDOM_H

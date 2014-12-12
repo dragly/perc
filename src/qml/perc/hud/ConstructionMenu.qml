@@ -1,11 +1,11 @@
 import QtQuick 2.0
 import QtGraphicalEffects 1.0
-import com.dragly.perc 1.0
+import org.dragly.perc 1.0
 
 Item {
     id: gameMenuRoot
 
-    property int imageType: PercolationSystem.PressureImage
+    property int imageType: PercolationSystem.AreaImage
     property double energy
     signal pauseClicked
 
@@ -99,8 +99,10 @@ Item {
 
             onClicked: {
                 if(imageType === PercolationSystem.PressureImage) {
+                    imageType = PercolationSystem.OccupationImage
+                } else if(imageType === PercolationSystem.OccupationImage) {
                     imageType = PercolationSystem.AreaImage
-                } else {
+                } else if(imageType === PercolationSystem.AreaImage) {
                     imageType = PercolationSystem.PressureImage
                 }
             }

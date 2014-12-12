@@ -6,8 +6,8 @@ import "menus"
 Rectangle {
     id: gameRoot
 
-    width: 1280
-    height: 720
+    width: 1920
+    height: 1080
 
     color: "grey"
 
@@ -25,11 +25,9 @@ Rectangle {
         enabled: false
         onLoaded: {
             gameRoot.state = "game"
-            console.log("Restart")
             levelLoader.item.restart()
-            console.log("Resume")
             levelLoader.item.resume()
-            item.exitToMainMenu.connect(gameRoot.testMe)
+            levelLoader.item.exitToMainMenu.connect(gameRoot.testMe)
         }
     }
 

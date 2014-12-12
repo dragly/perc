@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import com.dragly.perc 1.0
+import org.dragly.perc 1.0
 import "defaults.js" as Defaults
 
 /* Simple normal mapping shader */

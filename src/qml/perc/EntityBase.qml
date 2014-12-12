@@ -5,6 +5,7 @@ import "defaults.js" as Defaults
 Item {
     id: entityRoot
 //    property GameView gameView: null
+    property string objectName: "EntityBase"
     property int row: 0
     property int col: 0
     property string informationText: "Not set"
@@ -13,6 +14,7 @@ Item {
     property double animationDuration: 1
     signal requestSelection(var object)
     signal advance(real currentTime)
+    property Team team: null
 
     x: col * Defaults.GRID_SIZE
     y: row * Defaults.GRID_SIZE

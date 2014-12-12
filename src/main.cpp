@@ -6,8 +6,8 @@
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
-    qmlRegisterType<PercolationSystem>("com.dragly.perc", 1, 0, "PercolationSystem");
-    qmlRegisterType<Item>("com.dragly.perc", 1, 0, "SimpleMaterial");
+    qmlRegisterType<PercolationSystem>("org.dragly.perc", 1, 0, "PercolationSystem");
+//    qmlRegisterType<Item>("org.dragly.perc", 1, 0, "SimpleMaterial");
 
     Game game;
 

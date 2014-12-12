@@ -7,6 +7,10 @@ Item {
     property var components: []
     property var entities: []
 
+    function addInteraction(interaction) {
+        interactions.push(interaction)
+    }
+
     function createEntityFromUrl(url, properties) {
         if(properties === undefined) {
             properties = {}
@@ -40,6 +44,17 @@ Item {
     }
 
     function advance(currentUpdateTime) {
+        for(var i = 0; i < entities.length; i++) {
+            var entity1 = entities[i]
+            for(var j = i + 1; j < entities.length; j++) {
+                var entity2 = entities[j]
+                if(entity1.row !== entity2.row || entity1.col !== entity2.col) {
+                    continue
+                }
+                interactionManager.interact(entity1, entity2)
+            }
+        }
+
         for(var i in entities) {
             var entity = entities[i]
             entity.advance(currentUpdateTime)
@@ -52,5 +67,9 @@ Item {
             entity.destroy()
         }
         entities = []
+    }
+
+    InteractionManager {
+        id: interactionManager
     }
 }

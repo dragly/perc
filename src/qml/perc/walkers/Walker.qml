@@ -4,11 +4,14 @@ import ".."
 import "../defaults.js" as Defaults
 
 EntityBase {
-    property string color
-
+    objectName: "Walker"
+    property alias color: rect.color
     property double moveInterval: 200
     property double lastTime: Date.now()
-    property Team team: null
+
+    function move(currentTime) {
+        console.log("Move not implemented for walker...")
+    }
 
     Component.onCompleted: {
         if(team === null) {
@@ -33,38 +36,9 @@ EntityBase {
         }
     }
 
-    function move(currentTime) {
-//        console.log("Move not implemented for walker...")
-    }
-
-    Image {
+    Rectangle {
         id: rect
+        color: "#F03B20"
         anchors.fill: parent
-        source: "walker.png"
     }
-
-//    property alias lightSource: nMapEffect.lightSource
-    property var lightSource
-
-//    Rectangle {
-//        id: rect
-//        color: "#F03B20"
-//        anchors.fill: parent
-//    }
-
-//    NMapEffect {
-//        anchors.fill: parent
-//        id: nMapEffect
-//        anchors.centerIn: parent
-//        elementPositionX: parent.x // + parent.width / 2
-//        elementPositionY: parent.y // + parent.height / 2
-//        sourceImage: "images/ape.png"
-//        normalsImage: "images/apen.png"
-////        lightSource: lightSource
-//        diffuseBoost: 0.4
-//        switchX: false
-//        switchY: false
-//        width: nMapEffect.originalWidth
-//        height: nMapEffect.originalHeight
-//    }
 }

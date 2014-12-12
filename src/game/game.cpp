@@ -34,9 +34,9 @@ Game::Game() :
 
 void Game::start()
 {
-    m_viewer.showFullScreen();
+//    m_viewer.showFullScreen();
 //    m_percolationSystem.initialize(10,10, 0.5);
-//    m_viewer.showExpanded();
+    m_viewer.showExpanded();
 
 //    m_advanceTimer.start();
 }
