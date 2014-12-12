@@ -6,7 +6,7 @@ import "../defaults.js" as Defaults
 EntityBase {
     objectName: "Walker"
     property alias color: rect.color
-    property double moveInterval: 200
+    property double moveInterval: 100
     property double lastTime: Date.now()
 
     function move(currentTime) {

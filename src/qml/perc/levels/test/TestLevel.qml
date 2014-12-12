@@ -8,7 +8,7 @@ GameView {
 
     nRows: 50
     nCols: 50
-    occupationTreshold: 0.7
+    occupationTreshold: 0.6
 
     property Spawn playerSpawn: null
     property Spawn enemySpawn: null
@@ -21,14 +21,15 @@ GameView {
     }
 
     onRestart: {
-        var playerSpawnSite = Logic.randomSite(percolationSystem)
+        console.log("Spawn")
+        var playerSpawnSite = Logic.randomSiteOnLargestCluster(percolationSystem)
         var properties = {
             team: playerTeam,
             row: playerSpawnSite.row,
             col: playerSpawnSite.col
         }
         playerSpawn = entityManager.createEntityFromUrl("spawns/Spawn.qml", properties)
-        var enemySpawnSite = Logic.randomSite(percolationSystem)
+        var enemySpawnSite = Logic.randomSiteOnLargestCluster(percolationSystem)
         properties = {
             team: enemyTeam,
             row: enemySpawnSite.row,

@@ -1,3 +1,22 @@
+function randomSiteOnLargestCluster(percolationSystem) {
+    var largestArea = percolationSystem.maxArea()
+    console.log(largestArea)
+    var found = false
+    var nAttempts = 0
+    while(!found) {
+        if(nAttempts > 10000) {
+            console.log("Could not find random site!")
+            return {row: 0, col: 0}
+        }
+        var i = parseInt(Math.random() * percolationSystem.nRows)
+        var j = parseInt(Math.random() * percolationSystem.nCols)
+        if(percolationSystem.area(i,j) === largestArea) {
+            return { row: i, col: j }
+        }
+        nAttempts += 1
+    }
+}
+
 function randomSite(percolationSystem) {
     var found = false;
     var nAttempts = 0;

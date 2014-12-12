@@ -1,6 +1,5 @@
 import QtQuick 2.0
 
-DirectionWalker {
-    type: "left"
+RandomWalker {
     objectName: "Soldier"
 }
