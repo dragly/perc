@@ -1,11 +1,16 @@
 import QtQuick 2.0
 
+import ".."
 import "../movement"
+import "../defaults.js" as Defaults
 
-Walker {
+EntityBase {
     objectName: "RandomWalker"
     property string type: "raise"
     signal collectedEnergy(var amount)
+
+    width: Defaults.GRID_SIZE
+    height: Defaults.GRID_SIZE
 
     informationText: "Collector walker " + type + (team ? "\nteam: " + team.name : "")
 
@@ -22,5 +27,14 @@ Walker {
 
     RandomMover {
         id: mover
+    }
+
+    Rectangle {
+        id: rect
+        color: team.color
+        anchors.centerIn: parent
+
+        width: Defaults.GRID_SIZE * 0.7
+        height: Defaults.GRID_SIZE * 0.7
     }
 }
