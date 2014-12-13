@@ -3,12 +3,17 @@ import ".."
 
 Mover {
     property var path: []
+    property var grid: []
     property EntityBase target: null
 
     onMove: {
         if(!target) {
             return
         }
+        if(target.row === parent.row && target.col === parent.col) {
+            return
+        }
+
         if(path.length === 0) {
             path = findPath(Qt.point(parent.row, parent.col), Qt.point(target.row, target.col))
         }
@@ -17,14 +22,38 @@ Mover {
         parent.col = next.y
     }
 
-    function containsSquare(list, square) {
-        for(var i in list) {
-            var otherSquare = list[i]
-            if(square.i === otherSquare.i && square.j === otherSquare.j) {
-                return otherSquare
+    function createGrid() {
+        var tmp = new Array(percolationSystem.nRows)
+        for(var i = 0; i < percolationSystem.nRows; i++) {
+            tmp[i] = new Array(percolationSystem.nCols)
+        }
+        grid = tmp
+    }
+
+    function resetGrid() {
+        for(var i = 0; i < percolationSystem.nRows; i++) {
+            for(var j = 0; j < percolationSystem.nCols; j++) {
+                grid[i][j] = {
+                    i: i,
+                    j: j,
+                    G: 0,
+                    H: 0,
+                    F: 0,
+                    cameFrom: null
+                }
             }
         }
-        return false
+    }
+
+    function containsSquare(list, square) {
+//        for(var i in list) {
+//            var otherSquare = list[i]
+//            if(square.i === otherSquare.i && square.j === otherSquare.j) {
+//                return otherSquare
+//            }
+//        }
+        return (list.indexOf(square) !== -1);
+//        return false
     }
 
     function square(i,j) {
@@ -32,54 +61,56 @@ Mover {
     }
 
     function findPath(startPoint, targetPoint) {
+        var startTime = Date.now()
+        createGrid()
+        resetGrid();
+        var endTime = Date.now()
+        var diff = endTime - startTime
         var currentTime = Date.now()
-        console.log("Finding path!")
-        var start = square(startPoint.x, startPoint.y)
-        var target = square(targetPoint.x, targetPoint.y)
-        var current = square(start.i, start.j)
+
+        var start = grid[startPoint.x][startPoint.y]
+        var target = grid[targetPoint.x][targetPoint.y]
+        var current = grid[start.i][start.j]
+
         var openList = []
         var closedList = []
         openList.push(current)
+        closedList.push(current)
         while(openList.length > 0) {
             if(current.i === target.i && current.j === target.j) {
                 break
             }
             for(var di = -1; di < 2; di++) {
                 for(var dj = -1; dj < 2; dj++) {
-                    var i = current.i + di
-                    var j = current.j + dj
-                    var adjacent = square(i,j)
-                    adjacent.cameFrom = current
-                    if(!percolationSystem.inBounds(i,j)) {
+                    // Don't include our own site
+                    if(di === 0 && dj === 0) {
                         continue
                     }
-                    if(containsSquare(closedList, adjacent)) {
+                    // No diagonal movement
+                    if(!(di === 0 || dj === 0)) {
+                        continue
+                    }
+
+                    var i = current.i + di
+                    var j = current.j + dj
+                    if(!percolationSystem.inBounds(i,j)) {
                         continue
                     }
                     if(!percolationSystem.isOccupied(i,j)) {
                         continue
                     }
-                    // Disallow corner crossing
-                    if(!(di === 0 || dj === 0)) {
-                        var alti = current.i + di
-                        var altj = current.j
-                        if(!percolationSystem.isOccupied(alti, altj)) {
-                            continue
-                        }
-                        alti = current.i
-                        altj = current.j + dj
-                        if(!percolationSystem.isOccupied(alti, altj)) {
-                            continue
-                        }
+                    var adjacent = grid[i][j]
+                    if(containsSquare(closedList, adjacent)) {
+                        continue
                     }
-
+                    adjacent.cameFrom = current
                     adjacent.G = current.G + Math.sqrt(di*di + dj*dj)
                     var deltaRow = target.i - adjacent.i
                     var deltaColumn = target.j - adjacent.j
                     adjacent.H = Math.sqrt(deltaRow*deltaRow + deltaColumn*deltaColumn)
                     adjacent.F = adjacent.G + adjacent.H
                     var existingSquare = containsSquare(openList, adjacent)
-                    if(existingSquare) {
+                    if(containsSquare(openList, adjacent)) {
                         if(adjacent.F < existingSquare.F) {
                             openList.splice(openList.indexOf(existingSquare), 1)
                             openList.push(adjacent)
@@ -97,14 +128,14 @@ Mover {
         }
 
         var path = []
+        path.push(Qt.point(target.i, target.j))
         while(current.cameFrom !== null) {
             current = current.cameFrom
             path.push(Qt.point(current.i, current.j))
         }
-        path.push(Qt.point(target.i, target.j))
         var finalTime = Date.now()
         var difference = finalTime - currentTime
-        console.log("Found path in " + difference)
+        console.log("Found path in " + difference + " ms")
         return path
     }
 }
