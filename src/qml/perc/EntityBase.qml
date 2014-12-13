@@ -1,10 +1,15 @@
 import QtQuick 2.0
+import org.dragly.perc 1.0
 
 import "defaults.js" as Defaults
 
 Item {
     id: entityRoot
-//    property GameView gameView: null
+
+    signal requestSelection(var object)
+    signal advance(real currentTime)
+    signal move(real currentTime)
+
     property string objectName: "EntityBase"
     property int row: 0
     property int col: 0
@@ -12,8 +17,8 @@ Item {
     property bool selected: false
     property double lastTime: Date.now()
     property double animationDuration: 1
-    signal requestSelection(var object)
-    signal advance(real currentTime)
+    property var entityManager: null
+    property var percolationSystem: null
     property Team team: null
 
     x: col * Defaults.GRID_SIZE

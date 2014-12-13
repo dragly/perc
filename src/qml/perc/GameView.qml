@@ -145,6 +145,7 @@ Item {
         id: entityManager
         gameScene: gameScene
         gameView: gameViewRoot
+        percolationSystem: percolationSystem
     }
 
     MouseArea {

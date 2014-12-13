@@ -33,10 +33,4 @@ HEADERS += \
     simplematerial.h \
     random.h
 
-OTHER_FILES += \
-    qml/perc/GameView.qml \
-    qml/perc/PercolationSystemShader.qml \
-    qml/perc/hud/ConstructionMenu.qml \
-    qml/perc/InteractionManager.qml
-
 TARGET = perc

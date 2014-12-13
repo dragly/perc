@@ -125,7 +125,8 @@ public slots:
     }
     void setPressureSources(const QList<QObject *> &pressureSources);
 
-    void setImageType(ImageType arg);
+    void setImageType(ImageType arg);    
+    bool inBounds(int row, int column) const;
 
 signals:
     void nRowsChanged(int arg);

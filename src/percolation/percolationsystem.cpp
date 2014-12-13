@@ -32,7 +32,7 @@ PercolationSystem::PercolationSystem(QQuickPaintedItem *parent) :
     m_nClusters(0),
     m_imageType(OccupationImage),
     m_isInitialized(false),
-    m_random(time(NULL))
+    m_random(0)
 {
     connect(this, SIGNAL(readyToUpdate()), this, SLOT(update()));
     connect(this, SIGNAL(imageTypeChanged(ImageType)), this, SLOT(requestRecalculation()));
@@ -61,6 +61,11 @@ void PercolationSystem::randomizeMatrix() {
     if(m_isInitialized) {
         requestRecalculation();
     }
+}
+
+bool PercolationSystem::inBounds(int row, int column) const
+{
+    return !(row < 0 || row >= m_valueMatrix.n_rows || column < 0 || column >= m_valueMatrix.n_cols);
 }
 
 void PercolationSystem::initialize() {

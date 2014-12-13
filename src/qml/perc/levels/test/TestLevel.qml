@@ -17,19 +17,28 @@ GameView {
         properties.row = spawn.row
         properties.col = spawn.col
         properties.team = spawn.team
+        if(properties.team === playerTeam) {
+            properties.target = enemySpawn
+        } else {
+            properties.target = playerSpawn
+        }
+
         var walker = entityManager.createEntityFromUrl("walkers/Soldier.qml", properties)
+//        var walker = entityManager.createEntityFromUrl("walkers/RandomWalker.qml", properties)
     }
 
     onRestart: {
         console.log("Spawn")
-        var playerSpawnSite = Logic.randomSiteOnLargestCluster(percolationSystem)
+//        var playerSpawnSite = Logic.randomSiteOnLargestCluster(percolationSystem)
+        var playerSpawnSite = {row: 43, col: 0}
         var properties = {
             team: playerTeam,
             row: playerSpawnSite.row,
             col: playerSpawnSite.col
         }
         playerSpawn = entityManager.createEntityFromUrl("spawns/Spawn.qml", properties)
-        var enemySpawnSite = Logic.randomSiteOnLargestCluster(percolationSystem)
+//        var enemySpawnSite = Logic.randomSiteOnLargestCluster(percolationSystem)
+        var enemySpawnSite = {row: 49, col: 49}
         properties = {
             team: enemyTeam,
             row: enemySpawnSite.row,

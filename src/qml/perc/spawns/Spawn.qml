@@ -47,7 +47,7 @@ EntityBase {
 
     Timer {
         id: spawnTimer
-        interval: 5000
+        interval: 60000
         triggeredOnStart: true
         repeat: true
         running: true

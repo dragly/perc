@@ -1,11 +1,16 @@
 import QtQuick 2.0
+import org.dragly.perc 1.0
 
 Item {
+    id: entityManagerRoot
     property var gameView: null
     property GameScene gameScene: null
+    property PercolationSystem percolationSystem: null
     property var componentUrls: []
     property var components: []
     property var entities: []
+    property double moveInterval: 100
+    property double lastTime: Date.now()
 
     function addInteraction(interaction) {
         interactions.push(interaction)
@@ -17,6 +22,8 @@ Item {
         }
 
         properties.gameView = gameView
+        properties.entityManager = entityManagerRoot
+        properties.percolationSystem = percolationSystem
 
         var component = null
         for(var i in componentUrls) {
@@ -53,6 +60,16 @@ Item {
                 }
                 interactionManager.interact(entity1, entity2)
             }
+        }
+
+        var interval = currentUpdateTime - lastTime
+        if(interval > moveInterval) {
+            for(var i in entities) {
+                var entity = entities[i]
+                entity.animationDuration = interval
+                entity.move(currentUpdateTime)
+            }
+            lastTime = currentUpdateTime
         }
 
         for(var i in entities) {
