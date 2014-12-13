@@ -6,6 +6,12 @@ Mover {
     property var grid: []
     property EntityBase target: null
 
+    onPercolationSystemChanged: {
+        // TODO: Do this when number of rows or columns change too
+        createGrid()
+        resetGrid();
+    }
+
     onMove: {
         if(!target) {
             return
@@ -62,8 +68,6 @@ Mover {
 
     function findPath(startPoint, targetPoint) {
         var startTime = Date.now()
-        createGrid()
-        resetGrid();
         var endTime = Date.now()
         var diff = endTime - startTime
         var currentTime = Date.now()
