@@ -18,6 +18,7 @@ GameView {
         properties.col = spawn.col
         properties.team = spawn.team
         if(properties.team === playerTeam) {
+            properties.healthPoints = 120
             properties.target = enemySpawn
         } else {
             properties.target = playerSpawn
