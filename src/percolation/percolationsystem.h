@@ -60,7 +60,7 @@ public:
         return m_nCols;
     }
 
-    Q_INVOKABLE bool isOccupied(int row, int col);
+    Q_INVOKABLE double movementCost(int row, int col);
 
     Q_INVOKABLE double value(int row, int col);
     Q_INVOKABLE uint label(int row, int col);
@@ -157,7 +157,7 @@ protected:
     double m_occupationTreshold;
 
     arma::mat m_valueMatrix;
-    arma::umat m_occupationMatrix;
+    arma::umat m_movementCostMatrix;
     arma::umat m_labelMatrix;
     arma::umat m_areaMatrix;
     arma::mat m_pressureMatrix;
@@ -186,7 +186,7 @@ protected:
 };
 
 inline const arma::umat& PercolationSystem::occupationMatrix() {
-    return m_occupationMatrix;
+    return m_movementCostMatrix;
 }
 
 inline const arma::mat& PercolationSystem::probabilityMatrix() {

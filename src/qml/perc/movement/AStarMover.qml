@@ -100,7 +100,7 @@ Mover {
                     if(!percolationSystem.inBounds(i,j)) {
                         continue
                     }
-                    if(!percolationSystem.isOccupied(i,j)) {
+                    if(!percolationSystem.movementCost(i,j) > 0) {
                         continue
                     }
                     var adjacent = grid[i][j]

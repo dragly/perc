@@ -73,7 +73,7 @@ void PercolationSystem::initialize() {
     m_valueMatrix = zeros(m_nRows, m_nCols);
     randomizeMatrix();
     m_areaMatrix = zeros<umat>(m_nRows, m_nCols);
-    m_occupationMatrix = zeros<umat>(m_nRows, m_nCols);
+    m_movementCostMatrix = zeros<umat>(m_nRows, m_nCols);
     m_flowMatrix = zeros(m_nRows, m_nCols);
     m_pressureMatrix = zeros(m_nRows, m_nCols);
     m_pressureSourceMatrix = zeros(m_nRows, m_nCols);
@@ -101,7 +101,7 @@ void PercolationSystem::generatePressureMatrix() {
         m_oldPressureMatrix = m_pressureMatrix;
         for(int i = 0; i < m_nRows; i++) {
             for(int j = 0; j < m_nCols; j++) {
-                if(isOccupied(i,j)) {
+                if(movementCost(i,j)) {
                     int label = labelAt(i, j);
                     if(m_pressureSourceMatrix(i,j) > 0) {
                         m_pressureMatrix(i,j) = m_pressures(label); // set the source to the pressure based on the area
@@ -109,19 +109,19 @@ void PercolationSystem::generatePressureMatrix() {
                         m_pressureMatrix(i,j) = m_oldPressureMatrix(i,j);
                         double fromOthers = 0;
                         int nOthers = 0;
-                        if(isOccupied(i - 1, j)) {
+                        if(movementCost(i - 1, j)) {
                             fromOthers += m_oldPressureMatrix(i - 1,j);
                             nOthers += 1;
                         }
-                        if(isOccupied(i + 1, j)) {
+                        if(movementCost(i + 1, j)) {
                             fromOthers += m_oldPressureMatrix(i + 1,j);
                             nOthers += 1;
                         }
-                        if(isOccupied(i, j - 1)) {
+                        if(movementCost(i, j - 1)) {
                             fromOthers += m_oldPressureMatrix(i,j - 1);
                             nOthers += 1;
                         }
-                        if(isOccupied(i, j + 1)) {
+                        if(movementCost(i, j + 1)) {
                             fromOthers += m_oldPressureMatrix(i,j + 1);
                             nOthers += 1;
                         }
@@ -210,7 +210,7 @@ void PercolationSystem::setImageType(ImageType arg)
 }
 
 double PercolationSystem::lowerValue(int row, int col) {
-    if(isOccupied(row,col)) {
+    if(movementCost(row,col)) {
         //        m_valueMatrix(row, col) = fmax(m_valueMatrix(row,col) - 0.05, 0);
         m_valueMatrix(row, col) = fmax(m_occupationTreshold - 0.05, 0);
         return 0.05;
@@ -231,7 +231,7 @@ double PercolationSystem::lowerValue(int row, int col) {
 }
 
 double PercolationSystem::raiseValue(int row, int col) {
-    if(isOccupied(row,col)) {
+    if(movementCost(row,col)) {
         m_valueMatrix(row, col) = fmin(m_valueMatrix(row,col) + 0.05, 1);
         return 0.05;
     }
@@ -241,7 +241,7 @@ double PercolationSystem::raiseValue(int row, int col) {
 void PercolationSystem::generateOccupationMatrix() {
     //    cout << "Generating occupation matrix..." << endl;
     double p = 1 - m_occupationTreshold;
-    m_occupationMatrix = m_valueMatrix > p;
+    m_movementCostMatrix = m_valueMatrix > p;
 
 }
 
@@ -249,7 +249,7 @@ void PercolationSystem::ensureInitialization()
 {
     if(!m_valueMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
             !m_areaMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
-            !m_occupationMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
+            !m_movementCostMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
             !m_flowMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
             !m_pressureMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
             !m_pressureSourceMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
@@ -258,12 +258,12 @@ void PercolationSystem::ensureInitialization()
     }
 }
 
-bool PercolationSystem::isOccupied(int row, int col)
+double PercolationSystem::movementCost(int row, int col)
 {
     if(row < 0 || col < 0 || row >= m_nRows || col >= m_nCols) {
         return false;
     }
-    if(m_occupationMatrix(row, col) == 1) {
+    if(m_movementCostMatrix(row, col) == 1) {
         return true;
     } else {
         return false;
@@ -343,7 +343,7 @@ void PercolationSystem::generateLabelMatrix() {
                 if(!m_labelMatrix.in_range(row, col)) {
                     continue;
                 }
-                if(m_labelMatrix(row,col) > 0 || m_occupationMatrix(row, col) < 1) {
+                if(m_labelMatrix(row,col) > 0 || m_movementCostMatrix(row, col) < 1) {
                     // Site already visited or not occupied, nothing to do here
                     continue;
                 }
@@ -382,14 +382,14 @@ void PercolationSystem::generateImage() {
         for(int j = 0; j < m_nCols; j++) {
             switch(m_imageType) {
             case OccupationImage:
-                if(isOccupied(i,j)) {
+                if(movementCost(i,j)) {
                     color = foreground;
                 } else {
                     color = background;
                 }
                 break;
             case PressureImage:
-                if(isOccupied(i,j)) {
+                if(movementCost(i,j)) {
                     double maxPressureLocal;
                     double pressureRatio;
                     maxPressureLocal = 1. / 100.;
@@ -400,7 +400,7 @@ void PercolationSystem::generateImage() {
                 }
                 break;
             case AreaImage:
-                if(isOccupied(i,j)) {
+                if(movementCost(i,j)) {
                     double areaRatio;
                     areaRatio = 1. / 3. + (m_areaMatrix(i,j) / maxAreaLocal) * 2. / 3.;
                     color.setRed((1-areaRatio) * background.red() + areaRatio * foreground.red());

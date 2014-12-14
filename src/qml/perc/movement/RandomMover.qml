@@ -18,7 +18,7 @@ Mover {
         for(var attempt = 0; attempt < 4 && !found; attempt++) {
             var nextSiteRow = parent.row + directions[randomIndex][0]
             var nextSiteCol = parent.col + directions[randomIndex][1]
-            if(percolationSystem.isOccupied(nextSiteRow, nextSiteCol)) {
+            if(percolationSystem.movementCost(nextSiteRow, nextSiteCol) > 0) {
                 parent.row = nextSiteRow;
                 parent.col = nextSiteCol;
                 found = true

@@ -27,7 +27,7 @@ function randomSite(percolationSystem) {
         }
         var i = parseInt(Math.random() * percolationSystem.nRows)
         var j = parseInt(Math.random() * percolationSystem.nCols)
-        if(percolationSystem.isOccupied(i,j)) {
+        if(percolationSystem.movementCost(i,j) > 0) {
             return { row: i, col: j }
         }
         nAttempts += 1
@@ -87,18 +87,18 @@ function createDirectionWalker(type, team) {
 
         var i = parseInt(Math.random() * percolationSystem.nRows)
         var j = parseInt(Math.random() * percolationSystem.nCols)
-        if(percolationSystem.isOccupied(i,j)) {
+        if(percolationSystem.movementCost(i,j) > 0) {
             var occupiedNeighbors = 0;
-            if(percolationSystem.isOccupied(i + 1,j)) {
+            if(percolationSystem.movementCost(i + 1,j) > 0) {
                 occupiedNeighbors += 1
             }
-            if(percolationSystem.isOccupied(i - 1,j)) {
+            if(percolationSystem.movementCost(i - 1,j) > 0) {
                 occupiedNeighbors += 1
             }
-            if(percolationSystem.isOccupied(i,j + 1)) {
+            if(percolationSystem.movementCost(i,j + 1) > 0) {
                 occupiedNeighbors += 1
             }
-            if(percolationSystem.isOccupied(i,j - 1)) {
+            if(percolationSystem.movementCost(i,j - 1) > 0) {
                 occupiedNeighbors += 1
             }
             if(occupiedNeighbors < 2) { // only one way out - otherwise we might get stuck
