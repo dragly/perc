@@ -4,11 +4,42 @@ Item {
     id: inGameMenuRoot
 
     signal continueClicked
+    signal restartClicked
     signal exitToMainMenuClicked
 
     property double defaultMargin: width * 0.01
 
     anchors.fill: parent
+
+    state: "hidden"
+
+    function hide() {
+        state = "hidden"
+    }
+
+    function show() {
+        state = "visible"
+    }
+
+    states: [
+        State {
+            name: "hidden"
+            PropertyChanges {
+                target: inGameMenuRoot
+                enabled: false
+                opacity: 0.0
+            }
+        },
+        State {
+            name: "visible"
+            PropertyChanges {
+                target: inGameMenuRoot
+                enabled: true
+                opacity: 1.0
+            }
+        }
+
+    ]
 
     Rectangle {
         anchors.fill: parent
@@ -41,6 +72,25 @@ Item {
                     anchors.fill: parent
                     onClicked: {
                         continueClicked()
+                    }
+                }
+            }
+            Rectangle {
+                id: restartButton
+                width: parent.width
+                height: 50
+
+                color: "blue"
+                Text {
+                    anchors.centerIn: parent
+                    text: "Restart"
+                    color: "white"
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        restartClicked()
                     }
                 }
             }

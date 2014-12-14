@@ -55,6 +55,7 @@ Item {
         entityManager.clear()
         percolationSystem.initialize()
         percolationSystemShader.updateSourceRect()
+        resume()
     }
 
     onWidthChanged: {
@@ -277,12 +278,15 @@ Item {
             name: "paused"
             PropertyChanges {
                 target: inGameMenu
-                opacity: 1
-                enabled: true
+                state: "visible"
             }
         },
         State {
             name: "running"
+            PropertyChanges {
+                target: inGameMenu
+                state: "hidden"
+            }
         }
     ]
 
@@ -293,6 +297,10 @@ Item {
 
         onContinueClicked: {
             resume()
+        }
+
+        onRestartClicked: {
+            restart()
         }
 
         onExitToMainMenuClicked: {

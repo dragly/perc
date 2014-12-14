@@ -9,6 +9,7 @@ Item {
     signal requestSelection(var object)
     signal advance(real currentTime)
     signal move(real currentTime)
+    signal killed(var object)
 
     property string objectName: "EntityBase"
     property int row: 0
@@ -20,9 +21,15 @@ Item {
     property var entityManager: null
     property var percolationSystem: null
     property Team team: null
+    property bool _isKilled: false
 
     x: col * Defaults.GRID_SIZE
     y: row * Defaults.GRID_SIZE
+
+    function kill() {
+        _isKilled = true
+        killed(entityRoot)
+    }
 
     Behavior on x {
         NumberAnimation {

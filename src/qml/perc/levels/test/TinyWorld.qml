@@ -9,7 +9,7 @@ GameView {
     nCols: 50
     occupationTreshold: 0.6
 
-    playerTeam.energy: 10
+//    playerTeam.energy: 10
 
     onRestart: {
         console.log("Restart")
