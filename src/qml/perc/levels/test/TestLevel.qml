@@ -32,14 +32,16 @@ GameView {
         var properties = {
             team: playerTeam,
             row: playerSpawnSite.row,
-            col: playerSpawnSite.col
+            col: playerSpawnSite.col,
+            interval: 1000
         }
         playerSpawn = entityManager.createEntityFromUrl("spawns/Spawn.qml", properties)
         var enemySpawnSite = Logic.randomSiteOnLargestCluster(percolationSystem)
         properties = {
             team: enemyTeam,
             row: enemySpawnSite.row,
-            col: enemySpawnSite.col
+            col: enemySpawnSite.col,
+            interval: 900
         }
         enemySpawn = entityManager.createEntityFromUrl("spawns/Spawn.qml", properties)
 

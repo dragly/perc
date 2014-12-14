@@ -7,6 +7,7 @@ EntityBase {
     objectName: "Spawn"
     signal spawnedWalker(var spawn, var properties)
 
+    property alias interval: spawnTimer.interval
     property double healthPoints: 100.0
 
     property double _colorValue: Math.max(0, Math.min(100, healthPoints)) / 100
