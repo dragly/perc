@@ -12,11 +12,12 @@ Item {
 
 //    property alias imageType: percolationSystem.imageType
     property PercolationSystem percolationSystem: null
-    property real targetScale: scale
-    readonly property alias currentScale: scaleTransform.yScale
+    property real targetScale: 1.0
+    property real currentScale: 1.0
     property alias scaleOriginX: scaleTransform.origin.x
     property alias scaleOriginY: scaleTransform.origin.y
     property alias lightSource: lightSource
+    property int scaleDuration: 200
 
     Component.onCompleted: {
         if(percolationSystem === null) {
@@ -30,30 +31,25 @@ Item {
         if(targetScale > 1) {
             targetScale = 1
         }
-        console.log(targetScale)
-        scaleTransform.xScale = targetScale
-        scaleTransform.yScale = targetScale
+        scaleAnimation.from = currentScale
+        scaleAnimation.to = targetScale
+        scaleAnimation.restart()
+    }
+
+    PropertyAnimation {
+        id: scaleAnimation
+        target: sceneRoot
+        properties: "currentScale"
+        duration: scaleDuration
+        easing.type: Easing.OutQuad
     }
 
     transform: [
         Scale {
             id: scaleTransform
 
-            property int scaleDuration: 200
-
-            Behavior on xScale {
-                NumberAnimation {
-                    duration: scaleTransform.scaleDuration
-                    easing.type: Easing.OutQuad
-                }
-            }
-
-            Behavior on yScale {
-                NumberAnimation {
-                    duration: scaleTransform.scaleDuration
-                    easing.type: Easing.OutQuad
-                }
-            }
+            xScale: currentScale
+            yScale: currentScale
         }
     ]
 

@@ -70,6 +70,15 @@ Item {
         occupationGrid.initialize()
         percolationSystemShader.updateSourceRect()
         resume()
+
+        var newScale = 0.2
+        gameScene.scaleOriginX = 0.0
+        gameScene.scaleOriginY = 0.0
+        gameScene.currentScale = newScale
+        var gameSceneRect = gameViewRoot.mapFromItem(gameScene, 0, 0, gameScene.width, gameScene.height)
+        gameScene.x = gameViewRoot.width / 2 - gameSceneRect.width / 2
+        gameScene.y = gameViewRoot.height / 2 - gameSceneRect.height / 2
+        gameScene.targetScale = newScale
     }
 
     onWidthChanged: {
@@ -97,19 +106,6 @@ Item {
         anchors.fill: parent
     }
 
-    PercolationSystem {
-        id: percolationSystem
-        width: nCols
-        height: nRows
-        nRows: 10
-        nCols: 10
-        traversability: 0.55
-        imageType: constructionMenu.imageType
-//        pressureSources: pressureSources
-
-        smooth: false
-    }
-
     MainGrid {
         id: mainGrid
         columnCount: percolationSystem.nCols
@@ -119,6 +115,19 @@ Item {
     OccupationGrid {
         id: occupationGrid
         mainGrid: mainGrid
+    }
+
+    PercolationSystem {
+        id: percolationSystem
+        width: nRows
+        height: nCols
+        nRows: 10
+        nCols: 10
+        traversability: 0.55
+        imageType: constructionMenu.imageType
+//        pressureSources: pressureSources
+
+        smooth: false
     }
 
     PercolationSystemShader {
@@ -304,8 +313,10 @@ Item {
             gameScene.scaleOriginX = relativeMouse.x
             gameScene.scaleOriginY = relativeMouse.y
             if(wheel.angleDelta.y > 0) {
+//                gameScene.currentScale *= 1.5
                 gameScene.targetScale *= 1.5
             } else if(wheel.angleDelta.y < 0) {
+//                gameScene.currentScale /= 1.5
                 gameScene.targetScale /= 1.5
             }
             var newPosition = mapFromItem(gameScene, relativeMouse.x, relativeMouse.y)
