@@ -1,3 +1,4 @@
+ROOT_DIR = $$PWD
 SRC_DIR = $$PWD/src
 INCLUDEPATH += $$PWD
 
@@ -7,6 +8,9 @@ DEFINES += ARMA_NO_DEBUG
 
 QMAKE_CXXFLAGS += -std=c++0x
 
+win {
+    INCLUDEPATH += $$ROOT_DIR/armadillo
+}
 
 #DEFINES += ARMA_HAVE_STD_SNPRINTF
 
