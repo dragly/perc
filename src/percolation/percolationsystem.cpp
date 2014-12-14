@@ -50,10 +50,10 @@ int PercolationSystem::nCols() const
 
 PercolationSystem::~PercolationSystem() {
     m_isInitialized = false;
-    //    m_updateMatrixMutex.lock();
-    //    m_updateMatrixMutex.unlock();
-    //    m_prevImageMutex.lock();
-    //    m_prevImageMutex.unlock();
+    m_updateMatrixMutex.lock();
+    m_updateMatrixMutex.unlock();
+    m_prevImageMutex.lock();
+    m_prevImageMutex.unlock();
 }
 
 void PercolationSystem::setPressureSources(const QList<QObject *> &pressureSources) {
@@ -460,11 +460,11 @@ void PercolationSystem::paint(QPainter *painter)
         return;
     }
     if(m_updateMatrixMutex.tryLock()) {
-        painter->drawImage(0, 0, m_image);
+        painter->drawImage(contentsBoundingRect(), m_image);
         m_updateMatrixMutex.unlock();
     } else {
         m_prevImageMutex.lock();
-        painter->drawImage(0, 0, m_prevImage);
+        painter->drawImage(contentsBoundingRect(), m_prevImage);
         m_prevImageMutex.unlock();
     }
 }
