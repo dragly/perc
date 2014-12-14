@@ -97,10 +97,15 @@ Item {
         smooth: false
     }
 
+    MainGrid {
+        id: mainGrid
+        columnCount: percolationSystem.nCols
+        rowCount: percolationSystem.nRows
+    }
+
     OccupationGrid {
         id: occupationGrid
-        rowCount: percolationSystem.nRows
-        columnCount: percolationSystem.nCols
+        mainGrid: mainGrid
     }
 
     PercolationSystemShader {
@@ -154,6 +159,7 @@ Item {
         gameScene: gameScene
         gameView: gameViewRoot
         percolationSystem: percolationSystem
+        occupationGrid: occupationGrid
     }
 
     MouseArea {

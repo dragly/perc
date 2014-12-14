@@ -6,6 +6,7 @@ Item {
     property var gameView: null
     property GameScene gameScene: null
     property PercolationSystem percolationSystem: null
+    property OccupationGrid occupationGrid: null
     property var componentUrls: []
     property var components: []
     property var entities: []
@@ -25,6 +26,7 @@ Item {
         properties.gameView = gameView
         properties.entityManager = entityManagerRoot
         properties.percolationSystem = percolationSystem
+        properties.occupationGrid = occupationGrid
 
         var component = null
         for(var i in componentUrls) {
@@ -69,10 +71,10 @@ Item {
 
         deadEntities = []
 
-        percolationSystem.clearOccupation()
+        occupationGrid.clearOccupation()
         for(var i in entities) {
             var entity = entities[i]
-            percolationSystem.occupy(entity.row, entity.col)
+            occupationGrid.occupy(entity.row, entity.col)
         }
 
         var interval = currentUpdateTime - lastTime

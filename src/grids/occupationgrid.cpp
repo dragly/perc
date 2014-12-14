@@ -1,29 +1,48 @@
 #include "occupationgrid.h"
 
+#include "maingrid.h"
+
+#include <QDebug>
 #include <armadillo>
 
 using namespace arma;
 
 OccupationGrid::OccupationGrid(QObject *parent) :
     QObject(parent),
-    m_rowCount(0),
-    m_columnCount(0)
+    m_mainGrid(0),
+    m_initialized(false)
 {
+}
+
+void OccupationGrid::gridSizeChanged() {
+    if(m_initialized) {
+        qWarning() << "WARNING: The size of the grid changed, but OccupationGrid does not yet support this!";
+    }
 }
 
 void OccupationGrid::initialize()
 {
-    m_occupationMatrix = zeros<umat>(m_rowCount, m_columnCount);
+    m_occupationMatrix = zeros<umat>(mainGrid()->rowCount(), mainGrid()->columnCount());
+    m_initialized = true;
 }
 
-int OccupationGrid::columnCount() const
+void OccupationGrid::setMainGrid(MainGrid *arg)
 {
-    return m_columnCount;
+    if (m_mainGrid != arg) {
+        if(m_mainGrid) {
+            disconnect(m_mainGrid, &MainGrid::columnCountChanged, this, &OccupationGrid::gridSizeChanged);
+            disconnect(m_mainGrid, &MainGrid::rowCountChanged, this, &OccupationGrid::gridSizeChanged);
+        }
+        m_mainGrid = arg;
+        connect(m_mainGrid, &MainGrid::columnCountChanged, this, &OccupationGrid::gridSizeChanged);
+        connect(m_mainGrid, &MainGrid::rowCountChanged, this, &OccupationGrid::gridSizeChanged);
+        emit mainGridChanged(arg);
+    }
 }
 
-int OccupationGrid::rowCount() const
+MainGrid *OccupationGrid::mainGrid() const
 {
-    return m_rowCount;
+    return m_mainGrid;
 }
 
 
@@ -41,22 +60,6 @@ void OccupationGrid::unOccupy(int row, int col)
         return;
     }
     m_occupationMatrix(row, col) = false;
-}
-
-void OccupationGrid::setColumnCount(int arg)
-{
-    if (m_columnCount != arg) {
-        m_columnCount = arg;
-        emit columnCountChanged(arg);
-    }
-}
-
-void OccupationGrid::setRowCount(int arg)
-{
-    if (m_rowCount != arg) {
-        m_rowCount = arg;
-        emit rowCountChanged(arg);
-    }
 }
 
 void OccupationGrid::clearOccupation()

@@ -7,6 +7,7 @@ Item {
     signal move(var currentTime)
     property EntityBase owner: parent
     property var percolationSystem: parent.percolationSystem
+    property var occupationGrid: parent.occupationGrid
     property var oldOwner: null
 
     function moveIfAvailable(row, col) {
@@ -15,13 +16,13 @@ Item {
         if(percolationSystem.movementCost(row, col) < 1) {
             return false
         }
-        if(percolationSystem.isOccupied(row, col)) {
+        if(occupationGrid.isOccupied(row, col)) {
             return false
         }
-        percolationSystem.unOccupy(previousRow, previousCol)
+        occupationGrid.unOccupy(previousRow, previousCol)
         parent.row = row
         parent.col = col
-        percolationSystem.occupy(row, col)
+        occupationGrid.occupy(row, col)
         return true
     }
 

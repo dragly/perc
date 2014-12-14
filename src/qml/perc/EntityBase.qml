@@ -20,6 +20,7 @@ Item {
     property double animationDuration: 1
     property var entityManager: null
     property var percolationSystem: null
+    property var occupationGrid: null
     property Team team: null
     property bool _isKilled: false
 

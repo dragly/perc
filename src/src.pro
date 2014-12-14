@@ -19,7 +19,9 @@ SOURCES += main.cpp \
     percolation/percolationsystem.cpp \
     simplematerial.cpp \
     random.cpp \
-    grids/occupationgrid.cpp
+    grids/occupationgrid.cpp \
+    grids/gridspecification.cpp \
+    grids/maingrid.cpp
 
 # Installation path
 # target.path =
@@ -33,6 +35,8 @@ HEADERS += \
     percolation/percolationsystem.h \
     simplematerial.h \
     random.h \
-    grids/occupationgrid.h
+    grids/occupationgrid.h \
+    grids/gridspecification.h \
+    grids/maingrid.h
 
 TARGET = perc

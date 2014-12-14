@@ -4,23 +4,24 @@
 #include <QObject>
 #include <armadillo>
 
+class MainGrid;
+
 using namespace arma;
 
 class OccupationGrid : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(int rowCount READ rowCount WRITE setRowCount NOTIFY rowCountChanged)
-    Q_PROPERTY(int columnCount READ columnCount WRITE setColumnCount NOTIFY columnCountChanged)
+    Q_PROPERTY(MainGrid* mainGrid READ mainGrid WRITE setMainGrid NOTIFY mainGridChanged)
 public:
     explicit OccupationGrid(QObject *parent = 0);
 
     int columnCount() const;
-
     int rowCount() const;
 
+    MainGrid* mainGrid() const;
+
 signals:
-    void columnCountChanged(int arg);
-    void rowCountChanged(int arg);
+    void mainGridChanged(MainGrid* arg);
 
 public slots:
     void occupy(int row, int col);
@@ -29,15 +30,17 @@ public slots:
     bool isOccupied(int row, int col) const;
     bool inBounds(int row, int column) const;
 
-    void setColumnCount(int arg);
-    void setRowCount(int arg);
-
     void initialize();
+    void setMainGrid(MainGrid* arg);
+
+private slots:
+    void gridSizeChanged();
 private:
     arma::umat m_occupationMatrix;
 
-    int m_columnCount;
-    int m_rowCount;
+    MainGrid* m_mainGrid;
+
+    bool m_initialized;
 };
 
 #endif // OCCUPATIONGRID_H
