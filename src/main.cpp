@@ -4,6 +4,7 @@
 #include "src/simplematerial.h"
 #include "src/grids/occupationgrid.h"
 #include "src/grids/maingrid.h"
+#include "src/astarmover.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,6 +12,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<PercolationSystem>("org.dragly.perc", 1, 0, "PercolationSystem");
     qmlRegisterType<OccupationGrid>("org.dragly.perc", 1, 0, "OccupationGrid");
     qmlRegisterType<MainGrid>("org.dragly.perc", 1, 0, "MainGrid");
+    qmlRegisterType<AStar>("org.dragly.perc", 1, 0, "AStar");
 //    qmlRegisterType<Item>("org.dragly.perc", 1, 0, "SimpleMaterial");
 
     Game game;

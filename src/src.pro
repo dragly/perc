@@ -21,7 +21,8 @@ SOURCES += main.cpp \
     random.cpp \
     grids/occupationgrid.cpp \
     grids/gridspecification.cpp \
-    grids/maingrid.cpp
+    grids/maingrid.cpp \
+    astarmover.cpp
 
 # Installation path
 # target.path =
@@ -37,6 +38,7 @@ HEADERS += \
     random.h \
     grids/occupationgrid.h \
     grids/gridspecification.h \
-    grids/maingrid.h
+    grids/maingrid.h \
+    astarmover.h
 
 TARGET = perc
