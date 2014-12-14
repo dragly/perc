@@ -69,12 +69,10 @@ Item {
 
         deadEntities = []
 
-        for(var i = 0; i < entities.length; i++) {
-            var entity1 = entities[i]
-            for(var j = i + 1; j < entities.length; j++) {
-                var entity2 = entities[j]
-                interactionManager.interact(entity1, entity2)
-            }
+        percolationSystem.clearOccupation()
+        for(var i in entities) {
+            var entity = entities[i]
+            percolationSystem.occupy(entity.row, entity.col)
         }
 
         var interval = currentUpdateTime - lastTime
@@ -84,12 +82,21 @@ Item {
                 entity.animationDuration = interval
                 entity.move(currentUpdateTime)
             }
-            lastTime = currentUpdateTime
-        }
 
-        for(var i in entities) {
-            var entity = entities[i]
-            entity.advance(currentUpdateTime)
+            for(var i in entities) {
+                var entity = entities[i]
+                entity.advance(currentUpdateTime)
+            }
+
+            for(var i = 0; i < entities.length; i++) {
+                var entity1 = entities[i]
+                for(var j = i + 1; j < entities.length; j++) {
+                    var entity2 = entities[j]
+                    interactionManager.interact(entity1, entity2)
+                }
+            }
+
+            lastTime = currentUpdateTime
         }
     }
 

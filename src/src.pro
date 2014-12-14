@@ -18,7 +18,8 @@ SOURCES += main.cpp \
     game/game.cpp \
     percolation/percolationsystem.cpp \
     simplematerial.cpp \
-    random.cpp
+    random.cpp \
+    grids/occupationgrid.cpp
 
 # Installation path
 # target.path =
@@ -31,6 +32,7 @@ HEADERS += \
     game/game.h \
     percolation/percolationsystem.h \
     simplematerial.h \
-    random.h
+    random.h \
+    grids/occupationgrid.h
 
 TARGET = perc

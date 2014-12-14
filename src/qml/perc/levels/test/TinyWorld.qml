@@ -7,7 +7,7 @@ GameView {
 
     nRows: 50
     nCols: 50
-    occupationTreshold: 0.6
+    traversability: 0.6
 
 //    playerTeam.energy: 10
 

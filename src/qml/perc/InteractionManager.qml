@@ -12,7 +12,8 @@ Item {
                     spawn.healthPoints -= 1
                 }
             }
-        },
+        }
+        ,
         Interaction {
             entityType1: "Soldier"
             entityType2: "Soldier"
@@ -20,8 +21,8 @@ Item {
                 var soldier1 = entity1
                 var soldier2 = entity2
                 if(soldier1.team !== soldier2.team) {
-                    soldier1.kill(soldier1)
-                    soldier2.kill(soldier2)
+                    soldier1.healthPoints -= 20.0
+                    soldier2.healthPoints -= 20.0
                 }
             }
         }

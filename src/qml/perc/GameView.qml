@@ -19,7 +19,7 @@ Item {
     property double lastUpdateTime: Date.now()
     property alias nRows: percolationSystem.nRows
     property alias nCols: percolationSystem.nCols
-    property alias occupationTreshold: percolationSystem.occupationTreshold
+    property alias traversability: percolationSystem.traversability
     readonly property alias percolationSystem: percolationSystem
     readonly property alias entityManager: entityManager
 //    property alias pressureSources: percolationSystem.pressureSources
@@ -54,6 +54,7 @@ Item {
         percolationSystem.pressureSources = []
         entityManager.clear()
         percolationSystem.initialize()
+        occupationGrid.initialize()
         percolationSystemShader.updateSourceRect()
         resume()
     }
@@ -89,11 +90,17 @@ Item {
         height: nRows
         nRows: 10
         nCols: 10
-        occupationTreshold: 0.55
+        traversability: 0.55
         imageType: constructionMenu.imageType
 //        pressureSources: pressureSources
 
         smooth: false
+    }
+
+    OccupationGrid {
+        id: occupationGrid
+        rowCount: percolationSystem.nRows
+        columnCount: percolationSystem.nCols
     }
 
     PercolationSystemShader {

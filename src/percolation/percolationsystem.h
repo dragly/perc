@@ -34,7 +34,7 @@ class PercolationSystem : public QQuickPaintedItem
     Q_ENUMS(ImageType)
     Q_PROPERTY(int nRows READ nRows WRITE setNRows NOTIFY nRowsChanged)
     Q_PROPERTY(int nCols READ nCols WRITE setNCols NOTIFY nColsChanged)
-    Q_PROPERTY(double occupationTreshold READ occupationTreshold WRITE setOccupationTreshold NOTIFY occupationTresholdChanged)
+    Q_PROPERTY(double traversability READ traversability WRITE setTraversability NOTIFY traversabilityChanged)
     Q_PROPERTY(ImageType imageType READ imageType WRITE setImageType NOTIFY imageTypeChanged)
     Q_PROPERTY(QList<QObject*> pressureSources READ pressureSources WRITE setPressureSources NOTIFY pressureSourcesChanged)
 
@@ -43,42 +43,23 @@ public:
     //    void setPercolationSystemGraphics(PercolationSystemGraphics* graphics);
 
     enum ImageType {
-        OccupationImage,
+        MovementCostImage,
         PressureImage,
         AreaImage
     };
 
-    const arma::umat &occupationMatrix();
+    const arma::mat &movementCostMatrix();
     const arma::mat& probabilityMatrix();
-    int nRows() const
-    {
-        return m_nRows;
-    }
+    int nRows() const;
 
-    int nCols() const
-    {
-        return m_nCols;
-    }
+    int nCols() const;
 
-    Q_INVOKABLE double movementCost(int row, int col);
-
-    Q_INVOKABLE double value(int row, int col);
-    Q_INVOKABLE uint label(int row, int col);
-    Q_INVOKABLE uint area(int row, int col);
-    Q_INVOKABLE uint maxLabel();
-    Q_INVOKABLE uint maxArea();
-    Q_INVOKABLE double maxFlow();
-    Q_INVOKABLE double pressure(int row, int col);
-    Q_INVOKABLE double flow(int row, int col);
-    Q_INVOKABLE double lowerValue(int row, int col);
-    Q_INVOKABLE double raiseValue(int row, int col);
     void paint(QPainter *painter);
     int labelCell(int row, int col, int label);
     bool isSite(int row, int col);
-    Q_INVOKABLE int labelAt(int row, int col);
-    double occupationTreshold() const
+    double traversability() const
     {
-        return m_occupationTreshold;
+        return m_traversableThreshold;
     }
 
     void ensureInitialization();
@@ -90,49 +71,49 @@ public:
         return m_imageType;
     }
 
-    Q_INVOKABLE void unlockUpdates();
-    Q_INVOKABLE bool tryLockUpdates();
-
     ~PercolationSystem();
-    Q_INVOKABLE void randomizeMatrix();
     QList<QObject*> pressureSources() const
     {
         return m_pressureSources;
     }
 
 public slots:
+    double movementCost(int row, int col);
+
+    double value(int row, int col);
+    uint label(int row, int col);
+    uint area(int row, int col);
+    uint maxLabel();
+    uint maxArea();
+    double maxFlow();
+    double pressure(int row, int col);
+    double flow(int row, int col);
+    double lowerValue(int row, int col);
+    double raiseValue(int row, int col);
+
+    void unlockUpdates();
+    bool tryLockUpdates();
+    void randomizeMatrix();
+    int labelAt(int row, int col);
 //    void update();
     void setFinishedUpdating();
     void initialize();
     void recalculateMatricesAndUpdate();
-    void setOccupationTreshold(double arg);
+    void setTraversability(double arg);
     void requestRecalculation();
 
-    void setNCols(int arg)
-    {
-        if (m_nCols != arg) {
-            m_nCols = arg;
-            emit nColsChanged(arg);
-        }
-    }
+    void setNCols(int arg);
 
-    void setNRows(int arg)
-    {
-        if (m_nRows != arg) {
-            m_nRows = arg;
-            emit nRowsChanged(arg);
-        }
-    }
+    void setNRows(int arg);
     void setPressureSources(const QList<QObject *> &pressureSources);
 
     void setImageType(ImageType arg);    
     bool inBounds(int row, int column) const;
-
 signals:
     void nRowsChanged(int arg);
     void nColsChanged(int arg);
 
-    void occupationTresholdChanged(double arg);
+    void traversabilityChanged(double arg);
 
     void imageTypeChanged(ImageType arg);
 
@@ -146,7 +127,7 @@ protected:
     void generateAreaMatrix();
     void generatePressureMatrix();
 //    void generatePressureAndFlowMatrices();
-    void generateOccupationMatrix();
+    void generateMovementCostMatrix();
 
     QThread thread;
 
@@ -154,10 +135,10 @@ protected:
     int m_nRows;
     int m_nCols;
     int m_nClusters;
-    double m_occupationTreshold;
+    double m_traversableThreshold;
 
     arma::mat m_valueMatrix;
-    arma::umat m_movementCostMatrix;
+    arma::mat m_movementCostMatrix;
     arma::umat m_labelMatrix;
     arma::umat m_areaMatrix;
     arma::mat m_pressureMatrix;
@@ -185,7 +166,7 @@ protected:
     Random m_random;
 };
 
-inline const arma::umat& PercolationSystem::occupationMatrix() {
+inline const arma::mat& PercolationSystem::movementCostMatrix() {
     return m_movementCostMatrix;
 }
 

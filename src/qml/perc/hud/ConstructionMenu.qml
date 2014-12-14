@@ -99,8 +99,8 @@ Item {
 
             onClicked: {
                 if(imageType === PercolationSystem.PressureImage) {
-                    imageType = PercolationSystem.OccupationImage
-                } else if(imageType === PercolationSystem.OccupationImage) {
+                    imageType = PercolationSystem.MovementCostImage
+                } else if(imageType === PercolationSystem.MovementCostImage) {
                     imageType = PercolationSystem.AreaImage
                 } else if(imageType === PercolationSystem.AreaImage) {
                     imageType = PercolationSystem.PressureImage

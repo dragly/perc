@@ -43,7 +43,7 @@ Rectangle {
         scale: 1
         nRows: 1000
         nCols: 1000
-        occupationTreshold: pSlider.value
+        traversability: pSlider.value
         imageType: constructionMenu.imageType
         smooth: false
     }

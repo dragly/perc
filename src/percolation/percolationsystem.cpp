@@ -27,15 +27,25 @@ PercolationSystem::PercolationSystem(QQuickPaintedItem *parent) :
     QQuickPaintedItem(parent),
     m_nRows(0),
     m_nCols(0),
-    m_occupationTreshold(0.5),
+    m_traversableThreshold(0.5),
     m_isFinishedUpdating(true),
     m_nClusters(0),
-    m_imageType(OccupationImage),
+    m_imageType(MovementCostImage),
     m_isInitialized(false),
     m_random(time(NULL))
 {
     connect(this, SIGNAL(readyToUpdate()), this, SLOT(update()));
     connect(this, SIGNAL(imageTypeChanged(ImageType)), this, SLOT(requestRecalculation()));
+}
+
+int PercolationSystem::nRows() const
+{
+    return m_nRows;
+}
+
+int PercolationSystem::nCols() const
+{
+    return m_nCols;
 }
 
 PercolationSystem::~PercolationSystem() {
@@ -73,7 +83,7 @@ void PercolationSystem::initialize() {
     m_valueMatrix = zeros(m_nRows, m_nCols);
     randomizeMatrix();
     m_areaMatrix = zeros<umat>(m_nRows, m_nCols);
-    m_movementCostMatrix = zeros<umat>(m_nRows, m_nCols);
+    m_movementCostMatrix = zeros<mat>(m_nRows, m_nCols);
     m_flowMatrix = zeros(m_nRows, m_nCols);
     m_pressureMatrix = zeros(m_nRows, m_nCols);
     m_pressureSourceMatrix = zeros(m_nRows, m_nCols);
@@ -144,10 +154,26 @@ void PercolationSystem::requestRecalculation() {
     }
 }
 
+void PercolationSystem::setNCols(int arg)
+{
+    if (m_nCols != arg) {
+        m_nCols = arg;
+        emit nColsChanged(arg);
+    }
+}
+
+void PercolationSystem::setNRows(int arg)
+{
+    if (m_nRows != arg) {
+        m_nRows = arg;
+        emit nRowsChanged(arg);
+    }
+}
+
 void PercolationSystem::recalculateMatricesAndUpdate() {
     QMutexLocker updateMatrixLocker(&m_updateMatrixMutex);
     ensureInitialization();
-    generateOccupationMatrix();
+    generateMovementCostMatrix();
     generateLabelMatrix();
     generateAreaMatrix();
     generatePressureMatrix();
@@ -178,16 +204,16 @@ void PercolationSystem::setFinishedUpdating() {
     m_isFinishedUpdating = true;
 }
 
-void PercolationSystem::setOccupationTreshold(double arg)
+void PercolationSystem::setTraversability(double arg)
 {
-    if(m_occupationTreshold >= 0 && m_occupationTreshold <= 1) {
-        if (m_occupationTreshold != arg) {
-            m_occupationTreshold = arg;
-            emit occupationTresholdChanged(arg);
+    if(m_traversableThreshold >= 0 && m_traversableThreshold <= 1) {
+        if (m_traversableThreshold != arg) {
+            m_traversableThreshold = arg;
+            emit traversabilityChanged(arg);
             requestRecalculation();
         }
     } else {
-        qWarning() << "Occupation treshold must be between 0 and 1.";
+        qWarning() << "Traversable treshold must be between 0 and 1.";
     }
 }
 
@@ -212,7 +238,7 @@ void PercolationSystem::setImageType(ImageType arg)
 double PercolationSystem::lowerValue(int row, int col) {
     if(movementCost(row,col)) {
         //        m_valueMatrix(row, col) = fmax(m_valueMatrix(row,col) - 0.05, 0);
-        m_valueMatrix(row, col) = fmax(m_occupationTreshold - 0.05, 0);
+        m_valueMatrix(row, col) = fmax(m_traversableThreshold - 0.05, 0);
         return 0.05;
     }
     return 0;
@@ -238,11 +264,10 @@ double PercolationSystem::raiseValue(int row, int col) {
     return 0;
 }
 
-void PercolationSystem::generateOccupationMatrix() {
-    //    cout << "Generating occupation matrix..." << endl;
-    double p = 1 - m_occupationTreshold;
-    m_movementCostMatrix = m_valueMatrix > p;
-
+void PercolationSystem::generateMovementCostMatrix() {
+    double p = 1 - m_traversableThreshold;
+    umat aboveP = 1.0 * (m_valueMatrix > p);
+    m_movementCostMatrix = conv_to<mat>::from(aboveP);
 }
 
 void PercolationSystem::ensureInitialization()
@@ -263,11 +288,7 @@ double PercolationSystem::movementCost(int row, int col)
     if(row < 0 || col < 0 || row >= m_nRows || col >= m_nCols) {
         return false;
     }
-    if(m_movementCostMatrix(row, col) == 1) {
-        return true;
-    } else {
-        return false;
-    }
+    return m_movementCostMatrix(row, col);
 }
 
 double PercolationSystem::value(int row, int col) {
@@ -381,7 +402,7 @@ void PercolationSystem::generateImage() {
     for(int i = 0; i < m_nRows; i++) {
         for(int j = 0; j < m_nCols; j++) {
             switch(m_imageType) {
-            case OccupationImage:
+            case MovementCostImage:
                 if(movementCost(i,j)) {
                     color = foreground;
                 } else {

@@ -8,7 +8,7 @@ GameView {
 
     nRows: 50
     nCols: 50
-    occupationTreshold: 0.6
+    traversability: 0.6
 
     property Spawn playerSpawn: null
     property Spawn enemySpawn: null

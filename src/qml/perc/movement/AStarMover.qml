@@ -23,9 +23,10 @@ Mover {
         if(path.length === 0) {
             path = findPath(Qt.point(parent.row, parent.col), Qt.point(target.row, target.col))
         }
-        var next = path.pop()
-        parent.row = next.x
-        parent.col = next.y
+        var next = path[path.length - 1]
+        if(moveIfAvailable(next.x, next.y)) {
+            path.pop()
+        }
     }
 
     function createGrid() {
@@ -133,7 +134,7 @@ Mover {
 
         var path = []
         path.push(Qt.point(target.i, target.j))
-        while(current.cameFrom !== null) {
+        while(current.cameFrom !== start) {
             current = current.cameFrom
             path.push(Qt.point(current.i, current.j))
         }
