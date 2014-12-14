@@ -16,7 +16,7 @@ Item {
     property real currentScale: 1.0
     property alias scaleOriginX: scaleTransform.origin.x
     property alias scaleOriginY: scaleTransform.origin.y
-    property alias lightSource: lightSource
+//    property alias lightSource: lightSource
     property int scaleDuration: 200
 
     Component.onCompleted: {
@@ -52,11 +52,4 @@ Item {
             yScale: currentScale
         }
     ]
-
-    NMapLightSource {
-        id: lightSource
-        z: 10
-        lightIntensity: 0.5
-        anchors.centerIn: parent
-    }
 }

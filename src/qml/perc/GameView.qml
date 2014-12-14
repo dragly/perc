@@ -68,7 +68,7 @@ Item {
         entityManager.clear()
         percolationSystem.initialize()
         occupationGrid.initialize()
-        percolationSystemShader.updateSourceRect()
+//        percolationSystemShader.updateSourceRect()
         resume()
 
         var newScale = 0.2
@@ -82,11 +82,11 @@ Item {
     }
 
     onWidthChanged: {
-        percolationSystemShader.updateSourceRect()
+//        percolationSystemShader.updateSourceRect()
     }
 
     onHeightChanged: {
-        percolationSystemShader.updateSourceRect()
+//        percolationSystemShader.updateSourceRect()
     }
 
     Component.onCompleted: {
@@ -117,63 +117,35 @@ Item {
         mainGrid: mainGrid
     }
 
-    PercolationSystem {
-        id: percolationSystem
-        width: nRows
-        height: nCols
-        nRows: 10
-        nCols: 10
-        traversability: 0.55
-        imageType: constructionMenu.imageType
-//        pressureSources: pressureSources
-
-        smooth: false
-    }
-
-    PercolationSystemShader {
-        id: percolationSystemShader
-        source: percolationSystem
-
-        anchors.fill: parent
-
-        lightIntensity: 10 * gameScene.targetScale
-
-        smooth: true
-        samples: 32 * Math.sqrt(gameScene.targetScale)
-
-        function updateSourceRect() {
-            var newRect = gameViewRoot.mapToItem(gameScene,0,0,gameViewRoot.width,gameViewRoot.height)
-            sourceRect = Qt.rect(newRect.x / (Defaults.GRID_SIZE),
-                                newRect.y / (Defaults.GRID_SIZE),
-                                newRect.width / (Defaults.GRID_SIZE),
-                                newRect.height / (Defaults.GRID_SIZE))
-        }
-    }
-
     GameScene {
         id: gameScene
 
-        width: percolationSystem.width * Defaults.GRID_SIZE
-        height: percolationSystem.height * Defaults.GRID_SIZE
+        width: percolationSystem.nCols * Defaults.GRID_SIZE
+        height: percolationSystem.nRows * Defaults.GRID_SIZE
 
         objectName: "gameScene"
         targetScale: 0.2
         percolationSystem: percolationSystem
-//        imageType: gameMenu.imageType
 
-        onCurrentScaleChanged: {
-            percolationSystemShader.updateSourceRect()
+        PercolationSystem {
+            id: percolationSystem
+            width: nCols
+            height: nRows
+            nRows: 10
+            nCols: 10
+            traversability: 0.55
+            imageType: constructionMenu.imageType
+            smooth: false
         }
 
-        onXChanged: {
-            percolationSystemShader.updateSourceRect()
+        ShaderEffectSource {
+            sourceItem: percolationSystem
+            hideSource: true
+            width: nCols * Defaults.GRID_SIZE
+            height: nRows * Defaults.GRID_SIZE
+            mipmap: false
+            smooth: false
         }
-
-        onYChanged: {
-            percolationSystemShader.updateSourceRect()
-        }
-
-        smooth: true
     }
 
     EntityManager {
@@ -218,10 +190,7 @@ Item {
         }
 
         onPositionChanged: {
-            percolationSystemShader.lightPosX = mouse.x / (gameViewRoot.width)
-            percolationSystemShader.lightPosY = mouse.y / (gameViewRoot.height)
             var relativeMouse = mapToItem(gameScene, mouse.x, mouse.y)
-            gameScene.lightSource.setLightPos(relativeMouse.x, relativeMouse.y)
 
             // Selection
             if(isSelecting && mouse.buttons & Qt.LeftButton && mouse.modifiers & Qt.ShiftModifier) {
@@ -246,7 +215,7 @@ Item {
             if(isDragging && mouse.buttons & Qt.LeftButton) {
                 gameScene.x += mouse.x - prevX
                 gameScene.y += mouse.y - prevY
-                percolationSystemShader.updateSourceRect()
+//                percolationSystemShader.updateSourceRect()
             }
             prevX = mouse.x
             prevY = mouse.y
