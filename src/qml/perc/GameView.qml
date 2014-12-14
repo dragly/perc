@@ -117,6 +117,17 @@ Item {
         mainGrid: mainGrid
     }
 
+    PercolationSystem {
+        id: percolationSystem
+        width: nCols
+        height: nRows
+        nRows: 10
+        nCols: 10
+        traversability: 0.55
+        imageType: constructionMenu.imageType
+        smooth: false
+    }
+
     GameScene {
         id: gameScene
 
@@ -126,17 +137,6 @@ Item {
         objectName: "gameScene"
         targetScale: 0.2
         percolationSystem: percolationSystem
-
-        PercolationSystem {
-            id: percolationSystem
-            width: nCols
-            height: nRows
-            nRows: 10
-            nCols: 10
-            traversability: 0.55
-            imageType: constructionMenu.imageType
-            smooth: false
-        }
 
         ShaderEffectSource {
             sourceItem: percolationSystem
@@ -215,7 +215,6 @@ Item {
             if(isDragging && mouse.buttons & Qt.LeftButton) {
                 gameScene.x += mouse.x - prevX
                 gameScene.y += mouse.y - prevY
-//                percolationSystemShader.updateSourceRect()
             }
             prevX = mouse.x
             prevY = mouse.y
@@ -274,24 +273,17 @@ Item {
         }
 
         onWheel: {
-            //            var realGameSceneX = gameScene.scaleOriginX
-//            var currentScaleOrigin = mapFromItem(gameScene, gameScene.scaleOriginX, gameScene.scaleOriginY)
             var relativeMouse = mapToItem(gameScene, wheel.x, wheel.y)
-            //            gameScene.x += wheel.x - currentScaleOrigin.x
-            //            gameScene.y += wheel.y - currentScaleOrigin.y
             gameScene.scaleOriginX = relativeMouse.x
             gameScene.scaleOriginY = relativeMouse.y
             if(wheel.angleDelta.y > 0) {
-//                gameScene.currentScale *= 1.5
                 gameScene.targetScale *= 1.5
             } else if(wheel.angleDelta.y < 0) {
-//                gameScene.currentScale /= 1.5
                 gameScene.targetScale /= 1.5
             }
             var newPosition = mapFromItem(gameScene, relativeMouse.x, relativeMouse.y)
             gameScene.x += wheel.x - newPosition.x
             gameScene.y += wheel.y - newPosition.y
-//            percolationSystemShader.updateSourceRect()
         }
     }
 
@@ -300,8 +292,6 @@ Item {
         border.width: 1
         border.color: "white"
         color: Qt.rgba(1,1,1,0.4)
-        //        color: "white"
-        //        opacity: 0.1
         width: 0
         height: 0
         visible: mainViewMouseArea.isSelecting
