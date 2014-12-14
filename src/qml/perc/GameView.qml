@@ -25,6 +25,7 @@ Item {
 //    property alias pressureSources: percolationSystem.pressureSources
     property Team playerTeam: playerTeamInternal
     property list<Team> otherTeams
+    property var selectedObjects: []
 
     property list<Objective> failObjectives
     property list<Objective> winObjectives
@@ -40,6 +41,18 @@ Item {
 
     function winGame() {
         winGameDialog.visible = true
+    }
+
+    function requestSelection(object) {
+        for(var i in entityManager.entities) {
+            var other = entityManager.entities[i]
+            other.selected = false
+        }
+        var objects = []
+        objects.push(object)
+        object.selected = true
+
+        selectedObjects = objects
     }
 
     onPause: {
@@ -160,19 +173,127 @@ Item {
         gameView: gameViewRoot
         percolationSystem: percolationSystem
         occupationGrid: occupationGrid
+        onKilledEntity: {
+            var newSelection = selectedObjects
+            var index = gameViewRoot.selectedObjects.indexOf(entity)
+            if(index !== -1) {
+                gameViewRoot.selectedObjects.splice(index, 1)
+            }
+            selectedObjects = newSelection
+        }
     }
 
     MouseArea {
         id: mainViewMouseArea
         property bool isDragging: false
+        property bool isSelecting: false
+        property point selectionStart
         property double prevX: 0
         property double prevY: 0
         propagateComposedEvents: true
         hoverEnabled: true
         anchors.fill: parent
-        acceptedButtons: Qt.MiddleButton
+//        drag.target: gameScene
 
-        drag.target: gameScene
+        onPressed: {
+            if(mouse.buttons & Qt.LeftButton && mouse.modifiers & Qt.ShiftModifier) {
+                console.log("Started selection")
+                selectionStart.x = mouse.x
+                selectionStart.y = mouse.y
+                isSelecting = true
+            } else if(mouse.buttons & Qt.LeftButton) {
+                isDragging = true
+                prevX = mouse.x
+                prevY = mouse.y
+            }
+        }
+
+        onPositionChanged: {
+            percolationSystemShader.lightPosX = mouse.x / (gameViewRoot.width)
+            percolationSystemShader.lightPosY = mouse.y / (gameViewRoot.height)
+            var relativeMouse = mapToItem(gameScene, mouse.x, mouse.y)
+            gameScene.lightSource.setLightPos(relativeMouse.x, relativeMouse.y)
+
+            // Selection
+            if(isSelecting && mouse.buttons & Qt.LeftButton && mouse.modifiers & Qt.ShiftModifier) {
+                if(mouse.x > selectionStart.x) {
+                    selectionRectangle.x = selectionStart.x
+                    selectionRectangle.width = mouse.x - selectionStart.x
+                } else {
+                    selectionRectangle.x = mouse.x
+                    selectionRectangle.width = selectionStart.x - mouse.x
+                }
+                if(mouse.y > selectionStart.y) {
+                    selectionRectangle.y = selectionStart.y
+                    selectionRectangle.height = mouse.y - selectionStart.y
+                } else {
+                    selectionRectangle.y = mouse.y
+                    selectionRectangle.height = selectionStart.y - mouse.y
+                }
+            }
+
+
+            // Dragging
+            if(isDragging && mouse.buttons & Qt.LeftButton) {
+                gameScene.x += mouse.x - prevX
+                gameScene.y += mouse.y - prevY
+                percolationSystemShader.updateSourceRect()
+            }
+            prevX = mouse.x
+            prevY = mouse.y
+        }
+
+        onReleased: {
+            //  && mouse.buttons & Qt.LeftButton && mouse.modifiers & Qt.ShiftModifier
+            if(isSelecting) {
+                var newSelection;
+                if(mouse.modifiers & Qt.ShiftModifier) {
+                    newSelection = selectedObjects
+                } else {
+                    newSelection = []
+                }
+                for(var i in entityManager.entities) {
+                    var entity = entityManager.entities[i]
+                    var entityPos = gameViewRoot.mapFromItem(gameScene, entity.x, entity.y)
+                    console.log(entityPos.x, entityPos.y)
+                    var rect = selectionRectangle
+                    console.log(selectionRectangle.x, selectionRectangle.y)
+                    if(entityPos.x > rect.x && entityPos.x < rect.x + rect.width
+                            && entityPos.y > rect.y && entityPos.y < rect.y + rect.height) {
+                        newSelection.push(entity)
+                    } else {
+                        entity.selected = false
+                    }
+                }
+                for(var i in newSelection) {
+                    var entity = newSelection[i]
+                    entity.selected = true
+                }
+
+                selectedObjects = newSelection
+                isSelecting = false
+            }
+
+            if(!isSelecting && !(mouse.modifiers & Qt.ShiftModifier)) {
+                var deltaX = mouse.x - prevX
+                var deltaY = mouse.y - prevY
+                if(Math.sqrt(deltaX*deltaX + deltaY*deltaY) < 10) {
+                    for(var i in selectedObjects) {
+                        var entity = selectedObjects[i]
+                        if(entity) {
+                            entity.selected = false
+                        }
+                    }
+
+                    selectedObjects = []
+                }
+            }
+
+            isDragging = false
+            isSelecting = false
+            selectionRectangle.width = 1
+            selectionRectangle.height = 1
+        }
 
         onWheel: {
             //            var realGameSceneX = gameScene.scaleOriginX
@@ -192,36 +313,18 @@ Item {
             gameScene.y += wheel.y - newPosition.y
 //            percolationSystemShader.updateSourceRect()
         }
+    }
 
-        onPositionChanged: {
-            percolationSystemShader.lightPosX = mouse.x / (gameViewRoot.width)
-            percolationSystemShader.lightPosY = mouse.y / (gameViewRoot.height)
-            var relativeMouse = mapToItem(gameScene, mouse.x, mouse.y)
-            gameScene.lightSource.setLightPos(relativeMouse.x, relativeMouse.y)
-//            if(isDragging) {
-//                gameScene.x += mouse.x - prevX
-//                gameScene.y += mouse.y - prevY
-//                percolationSystemShader.updateSourceRect()
-//            }
-//            prevX = mouse.x
-//            prevY = mouse.y
-        }
-
-//        onReleased: {
-//            console.log("mainViewMouseArea released")
-//            isDragging = false
-//        }
-
-//        onExited: {
-//            isDragging = false
-//        }
-
-//        onPressed: {
-//            console.log("mainViewMouseArea pressed")
-//            isDragging = true
-//            prevX = mouse.x
-//            prevY = mouse.y
-//        }
+    Rectangle {
+        id: selectionRectangle
+        border.width: 1
+        border.color: "white"
+        color: Qt.rgba(1,1,1,0.4)
+        //        color: "white"
+        //        opacity: 0.1
+        width: 0
+        height: 0
+        visible: mainViewMouseArea.isSelecting
     }
 
     PinchArea {
@@ -283,7 +386,7 @@ Item {
 
     SelectionMenu {
         id: gameObjectInfo
-        selectedObjects: gameScene.selectedObjects
+        selectedObjects: gameViewRoot.selectedObjects
     }
 
     states: [

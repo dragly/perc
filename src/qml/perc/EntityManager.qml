@@ -3,6 +3,8 @@ import org.dragly.perc 1.0
 
 Item {
     id: entityManagerRoot
+    signal killedEntity(var entity)
+
     property var gameView: null
     property GameScene gameScene: null
     property PercolationSystem percolationSystem: null
@@ -49,7 +51,7 @@ Item {
         }
 
         entities.push(entity)
-        entity.requestSelection.connect(gameScene.requestSelection)
+        entity.requestSelection.connect(gameView.requestSelection)
         entity.killed.connect(killLater)
         return entity
     }
@@ -62,6 +64,7 @@ Item {
         // remove dead entities
         for(var i in deadEntities) {
             var deadEntity = deadEntities[i]
+            killedEntity(deadEntity)
             var index = entities.indexOf(deadEntity)
             if(index !== -1) {
                 entities.splice(index, 1)
