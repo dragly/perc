@@ -156,6 +156,48 @@ Item {
         objectName: "gameScene"
         targetScale: 0.2
         percolationSystem: percolationSystem
+
+        onCurrentScaleChanged: {
+            ensureWithinBounds()
+        }
+
+        function ensureWithinBounds() {
+            return
+            var gameSceneRect = gameViewRoot.mapFromItem(gameScene, 0, 0, gameScene.width, gameScene.height)
+            var xDiffRight = gameSceneRect.x + gameSceneRect.width - gameViewRoot.width
+            var yDiffBottom = gameSceneRect.y + gameSceneRect.height - gameViewRoot.height
+            if(gameSceneRect.width > gameViewRoot.width) {
+                if(gameSceneRect.x > 0) {
+                    gameScene.x -= gameSceneRect.x
+                }
+                if(xDiffRight < 0) {
+                    gameScene.x -= xDiffRight
+                }
+            } else {
+                if(gameSceneRect.x < 0) {
+                    gameScene.x -= gameSceneRect.x
+                }
+                if(xDiffRight > 0) {
+                    gameScene.x -= xDiffRight
+                }
+            }
+
+            if(gameSceneRect.height > gameViewRoot.height) {
+                if(gameSceneRect.y > 0) {
+                    gameScene.y -= gameSceneRect.y
+                }
+                if(yDiffBottom < 0) {
+                    gameScene.y -= yDiffBottom
+                }
+            } else {
+                if(gameSceneRect.y < 0) {
+                    gameScene.y -= gameSceneRect.y
+                }
+                if(yDiffBottom > 0) {
+                    gameScene.y -= yDiffBottom
+                }
+            }
+        }
     }
 
     EntityManager {
@@ -220,11 +262,11 @@ Item {
                 }
             }
 
-
             // Dragging
             if(isDragging && mouse.buttons & Qt.LeftButton) {
                 gameScene.x += mouse.x - prevX
                 gameScene.y += mouse.y - prevY
+                gameScene.ensureWithinBounds()
             }
             prevX = mouse.x
             prevY = mouse.y
@@ -287,9 +329,9 @@ Item {
             gameScene.scaleOriginX = relativeMouse.x
             gameScene.scaleOriginY = relativeMouse.y
             if(wheel.angleDelta.y > 0) {
-                gameScene.targetScale *= 1.5
+                gameScene.targetScale *= 1.3
             } else if(wheel.angleDelta.y < 0) {
-                gameScene.targetScale /= 1.5
+                gameScene.targetScale /= 1.3
             }
             var newPosition = mapFromItem(gameScene, relativeMouse.x, relativeMouse.y)
             gameScene.x += wheel.x - newPosition.x
