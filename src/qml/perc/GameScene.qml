@@ -28,9 +28,8 @@ Item {
     }
 
     onTargetScaleChanged: {
-        if(targetScale > 1) {
-            targetScale = 1
-        }
+        targetScale = Math.max(0.1, Math.min(1.0, targetScale))
+
         scaleAnimation.from = currentScale
         scaleAnimation.to = targetScale
         scaleAnimation.restart()
