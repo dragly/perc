@@ -11,6 +11,7 @@ Item {
     signal move(real currentTime)
     signal killed(var object)
 
+    property bool blocking: true
     property string objectName: "EntityBase"
     property int row: 0
     property int col: 0

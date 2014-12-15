@@ -98,12 +98,10 @@ Item {
             anchors.fill: parent
 
             onClicked: {
-                if(imageType === PercolationSystem.PressureImage) {
-                    imageType = PercolationSystem.MovementCostImage
-                } else if(imageType === PercolationSystem.MovementCostImage) {
+                if(imageType === PercolationSystem.MovementCostImage) {
                     imageType = PercolationSystem.AreaImage
                 } else if(imageType === PercolationSystem.AreaImage) {
-                    imageType = PercolationSystem.PressureImage
+                    imageType = PercolationSystem.MovementCostImage
                 }
             }
         }

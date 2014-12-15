@@ -51,7 +51,6 @@ Item {
         }
 
         entities.push(entity)
-        entity.requestSelection.connect(gameView.requestSelection)
         entity.killed.connect(killLater)
         return entity
     }
@@ -77,7 +76,9 @@ Item {
         occupationGrid.clearOccupation()
         for(var i in entities) {
             var entity = entities[i]
-            occupationGrid.occupy(entity.row, entity.col)
+            if(entity.blocking) {
+                occupationGrid.occupy(entity.row, entity.col)
+            }
         }
 
         var interval = currentUpdateTime - lastTime

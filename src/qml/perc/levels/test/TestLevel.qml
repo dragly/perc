@@ -12,6 +12,8 @@ GameView {
 
     property Spawn playerSpawn: null
     property Spawn enemySpawn: null
+    property EntityBase hero: null
+    property EntityBase decoy: null
 
     function spawnWalker(spawn, properties) {
         properties.row = spawn.row
@@ -19,7 +21,7 @@ GameView {
         properties.team = spawn.team
         if(properties.team === playerTeam) {
             properties.healthPoints = 120
-            properties.target = enemySpawn
+            properties.target = hero
         } else {
             properties.target = playerSpawn
         }
@@ -27,18 +29,45 @@ GameView {
         var walker = entityManager.createEntityFromUrl("walkers/Soldier.qml", properties)
     }
 
+    onClicked: {
+        if(hero) {
+            var site = mapPointToSite(mouse)
+            decoy.row = site.row
+            decoy.col = site.col
+        }
+    }
+
     onRestart: {
+        var properties
         for(var i = 0; i < 10; i++) {
             var site = Logic.randomSiteOnLargestCluster(percolationSystem)
-            var properties = {
+            properties = {
                 team: playerTeam,
                 row: site.row,
                 col: site.col
             }
             entityManager.createEntityFromUrl("walkers/DirectionWalker.qml", properties);
         }
+
+        var mainSoldierSite = Logic.randomSiteOnLargestCluster(percolationSystem)
+        properties = {
+            team: playerTeam,
+            row: mainSoldierSite.row,
+            col: mainSoldierSite.col
+        }
+        hero = entityManager.createEntityFromUrl("walkers/Hero.qml", properties)
+
+        var decoySite = Logic.randomSiteOnLargestCluster(percolationSystem)
+        properties = {
+            row: decoySite.row,
+            col: decoySite.col,
+            blocking: false
+        }
+        decoy = entityManager.createEntityFromUrl("EntityBase.qml", properties)
+        hero.target = decoy
+
         var playerSpawnSite = Logic.randomSiteOnLargestCluster(percolationSystem)
-        var properties = {
+        properties = {
             team: playerTeam,
             row: playerSpawnSite.row,
             col: playerSpawnSite.col,

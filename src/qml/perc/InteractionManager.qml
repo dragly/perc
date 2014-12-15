@@ -50,6 +50,18 @@ Item {
                 }
             }
         }
+        ,
+        Interaction {
+            entityType1: "Hero"
+            entityType2: "Soldier"
+            onInteract: {
+                var hero = entity1
+                var soldier = entity2
+                if(hero.team !== soldier.team) {
+                    soldier.kill()
+                }
+            }
+        }
     ]
 
     function interact(entity1, entity2) {

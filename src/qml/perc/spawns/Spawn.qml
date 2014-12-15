@@ -15,6 +15,8 @@ EntityBase {
     width: Defaults.GRID_SIZE
     height: Defaults.GRID_SIZE
 
+    blocking: false
+
     onHealthPointsChanged: {
         if(healthPoints < 0) {
             healthPoints = 0

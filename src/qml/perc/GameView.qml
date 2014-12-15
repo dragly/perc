@@ -16,6 +16,7 @@ Item {
     signal restart
     signal pause
     signal advance(real currentTime)
+    signal clicked(var mouse)
     property alias gameScene: gameScene
     property double lastUpdateTime: Date.now()
     property alias nRows: percolationSystem.nRows
@@ -23,7 +24,7 @@ Item {
     property alias traversability: percolationSystem.traversability
     readonly property alias percolationSystem: percolationSystem
     readonly property alias entityManager: entityManager
-//    property alias pressureSources: percolationSystem.pressureSources
+    //    property alias pressureSources: percolationSystem.pressureSources
     property Team playerTeam: playerTeamInternal
     property list<Team> otherTeams
     property var selectedObjects: []
@@ -44,16 +45,13 @@ Item {
         winGameDialog.visible = true
     }
 
-    function requestSelection(object) {
-        for(var i in entityManager.entities) {
-            var other = entityManager.entities[i]
-            other.selected = false
+    function mapPointToSite(point) {
+        var gameScenePoint = gameViewRoot.mapToItem(gameScene, point.x, point.y)
+        var site = {
+            row: gameScenePoint.y / Defaults.GRID_SIZE,
+            col: gameScenePoint.x / Defaults.GRID_SIZE
         }
-        var objects = []
-        objects.push(object)
-        object.selected = true
-
-        selectedObjects = objects
+        return site
     }
 
     onPause: {
@@ -94,11 +92,11 @@ Item {
     }
 
     onWidthChanged: {
-//        percolationSystemShader.updateSourceRect()
+        //        percolationSystemShader.updateSourceRect()
     }
 
     onHeightChanged: {
-//        percolationSystemShader.updateSourceRect()
+        //        percolationSystemShader.updateSourceRect()
     }
 
     Component.onCompleted: {
@@ -239,9 +237,9 @@ Item {
             } else if(mouse.buttons & Qt.LeftButton) {
                 for(var i in entityManager.entities) {
                     var entity = entityManager.entities[i]
-                    var entityPos = gameViewRoot.mapFromItem(gameScene, entity.x, entity.y)
-                    if(entityPos.x < mouse.x && entityPos.x + entity.width > mouse.x
-                            && entityPos.y < mouse.y && entityPos.y + entity.height > mouse.y) {
+                    var entityRect = gameViewRoot.mapFromItem(gameScene, entity.x, entity.y, entity.width, entity.height)
+                    if(entityRect.x < mouse.x && entityRect.x + entityRect.width > mouse.x
+                            && entityRect.y < mouse.y && entityRect.y + entityRect.height > mouse.y) {
                         pressedObject = entity
                         break
                     }
@@ -325,6 +323,7 @@ Item {
                 var deltaX = mouse.x - prevX
                 var deltaY = mouse.y - prevY
                 if(Math.sqrt(deltaX*deltaX + deltaY*deltaY) < 10 && timeDiff < 300) {
+                    // Clear selection
                     for(var i in selectedObjects) {
                         var entity = selectedObjects[i]
                         if(entity) {
@@ -333,6 +332,7 @@ Item {
                     }
 
                     selectedObjects = []
+                    gameViewRoot.clicked(mouse)
                 }
             }
 
