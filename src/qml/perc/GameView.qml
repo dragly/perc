@@ -220,21 +220,37 @@ Item {
         id: mainViewMouseArea
         property bool isDragging: false
         property bool isSelecting: false
-        property point selectionStart
+        property real pressedTime: Date.now()
         property double prevX: 0
         property double prevY: 0
-        propagateComposedEvents: true
-        hoverEnabled: true
+        property var pressedObject: null
+        property point pressedPoint
+        property point previousPoint
+//        propagateComposedEvents: true
+//        hoverEnabled: true
         anchors.fill: parent
 //        drag.target: gameScene
 
         onPressed: {
+            pressedTime = Date.now()
+            pressedObject = null
+            previousPoint = Qt.point(mouse.x, mouse.y)
+            pressedPoint = Qt.point(mouse.x, mouse.y)
+
             if(mouse.buttons & Qt.LeftButton && mouse.modifiers & Qt.ShiftModifier) {
                 console.log("Started selection")
-                selectionStart.x = mouse.x
-                selectionStart.y = mouse.y
                 isSelecting = true
             } else if(mouse.buttons & Qt.LeftButton) {
+                for(var i in entityManager.entities) {
+                    var entity = entityManager.entities[i]
+                    var entityPos = gameViewRoot.mapFromItem(gameScene, entity.x, entity.y)
+                    if(entityPos.x < mouse.x && entityPos.x + entity.width > mouse.x
+                            && entityPos.y < mouse.y && entityPos.y + entity.height > mouse.y) {
+                        pressedObject = entity
+                        break
+                    }
+                }
+
                 isDragging = true
                 prevX = mouse.x
                 prevY = mouse.y
@@ -246,19 +262,19 @@ Item {
 
             // Selection
             if(isSelecting && mouse.buttons & Qt.LeftButton && mouse.modifiers & Qt.ShiftModifier) {
-                if(mouse.x > selectionStart.x) {
-                    selectionRectangle.x = selectionStart.x
-                    selectionRectangle.width = mouse.x - selectionStart.x
+                if(mouse.x > pressedPoint.x) {
+                    selectionRectangle.x = pressedPoint.x
+                    selectionRectangle.width = mouse.x - pressedPoint.x
                 } else {
                     selectionRectangle.x = mouse.x
-                    selectionRectangle.width = selectionStart.x - mouse.x
+                    selectionRectangle.width = pressedPoint.x - mouse.x
                 }
-                if(mouse.y > selectionStart.y) {
-                    selectionRectangle.y = selectionStart.y
-                    selectionRectangle.height = mouse.y - selectionStart.y
+                if(mouse.y > pressedPoint.y) {
+                    selectionRectangle.y = pressedPoint.y
+                    selectionRectangle.height = mouse.y - pressedPoint.y
                 } else {
                     selectionRectangle.y = mouse.y
-                    selectionRectangle.height = selectionStart.y - mouse.y
+                    selectionRectangle.height = pressedPoint.y - mouse.y
                 }
             }
 
@@ -272,7 +288,15 @@ Item {
             prevY = mouse.y
         }
 
+        function uniqueArray(a) {
+            return a.filter(function(item, pos, self) {
+                return self.indexOf(item) == pos;
+            })
+        }
+
         onReleased: {
+            var currentTime = Date.now()
+            var timeDiff = currentTime - pressedTime
             //  && mouse.buttons & Qt.LeftButton && mouse.modifiers & Qt.ShiftModifier
             if(isSelecting) {
                 var newSelection;
@@ -298,7 +322,7 @@ Item {
                     var entity = newSelection[i]
                     entity.selected = true
                 }
-
+                newSelection = uniqueArray(newSelection)
                 selectedObjects = newSelection
                 isSelecting = false
             }
@@ -306,7 +330,7 @@ Item {
             if(!isSelecting && !(mouse.modifiers & Qt.ShiftModifier)) {
                 var deltaX = mouse.x - prevX
                 var deltaY = mouse.y - prevY
-                if(Math.sqrt(deltaX*deltaX + deltaY*deltaY) < 10) {
+                if(Math.sqrt(deltaX*deltaX + deltaY*deltaY) < 10 && timeDiff < 300) {
                     for(var i in selectedObjects) {
                         var entity = selectedObjects[i]
                         if(entity) {
@@ -316,6 +340,14 @@ Item {
 
                     selectedObjects = []
                 }
+            }
+
+            var deltaX = mouse.x - pressedPoint.x
+            var deltaY = mouse.y - pressedPoint.y
+
+            if(pressedObject && Math.sqrt(deltaX*deltaX + deltaY*deltaY) < 10 && timeDiff < 300) {
+                pressedObject.selected = true
+                selectedObjects = [pressedObject]
             }
 
             isDragging = false
