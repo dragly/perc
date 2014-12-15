@@ -116,14 +116,18 @@ Item {
                         abs(pix[0]-pix[8])+
                         abs(pix[2]-pix[6]));
 
-                return delta > 0.0;
+                if(delta > 0.0) {
+                    return 1.0;
+                } else {
+                    return 0.0;
+                }
             }
 
             void main()
             {
                 vec2 centerOriginCoord = qt_TexCoord0 - vec2(0.5, 0.5);
                 float gradient = 0.7 + 0.3 * (1.0 - length(centerOriginCoord));
-                vec3 color = texture2D(src, qt_TexCoord0);
+                vec3 color = texture2D(src, qt_TexCoord0).rgb;
                 vec4 colorAlpha = vec4(1.0, 1.0, 1.0, 1.0);
                 float edge = IsEdge(qt_TexCoord0.xy);
                 colorAlpha.rgb = color * gradient * (1.0 - edge);
