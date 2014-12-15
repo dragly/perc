@@ -24,8 +24,8 @@ EntityBase {
 
     Item {
         anchors.centerIn: parent
-        width: parent.width * 1.2
-        height: parent.height * 1.2
+        width: parent.width * 0.9
+        height: parent.height * 0.9
         Rectangle {
             anchors.fill: parent
             opacity: _colorValue
