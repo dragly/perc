@@ -7,7 +7,7 @@ GameView {
     id: levelRoot
 
     nRows: 50
-    nCols: 50
+    nCols: 70
     traversability: 0.6
 
     property Spawn playerSpawn: null

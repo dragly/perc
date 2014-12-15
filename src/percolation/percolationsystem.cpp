@@ -65,9 +65,10 @@ void PercolationSystem::setPressureSources(const QList<QObject *> &pressureSourc
 void PercolationSystem::randomizeMatrix() {
     for(uint i = 0; i < m_valueMatrix.n_rows; i++) {
         for(uint j = 0; j < m_valueMatrix.n_cols; j++) {
-            m_valueMatrix(j, i) = m_random.ran2();
+            m_valueMatrix(i, j) = m_random.ran2();
         }
     }
+    cout << m_valueMatrix << endl;
     if(m_isInitialized) {
         requestRecalculation();
     }
