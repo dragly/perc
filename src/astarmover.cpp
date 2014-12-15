@@ -119,7 +119,7 @@ bool AStar::findPath(QPoint startPoint, QPoint targetPoint)
 
     m_path.clear();
     m_path.append(target);
-    while(current->cameFrom != start) {
+    while(current->cameFrom != start && current->cameFrom != 0) {
         current = current->cameFrom;
         m_path.append(current);
     }
