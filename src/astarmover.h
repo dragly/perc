@@ -38,6 +38,7 @@ public slots:
     QPoint next();
     void pop();
     bool isEmpty();
+    void clear();
 
 private:
     PercolationSystem* m_percolationSystem;

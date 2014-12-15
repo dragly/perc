@@ -21,6 +21,11 @@ bool AStar::isEmpty()
     return m_path.isEmpty();
 }
 
+void AStar::clear()
+{
+    m_path.clear();
+}
+
 QPoint AStar::next()
 {
     Site* last = m_path.last();
@@ -78,7 +83,7 @@ bool AStar::findPath(QPoint startPoint, QPoint targetPoint)
                 if(!m_percolationSystem->inBounds(i,j)) {
                     continue;
                 }
-                if(!m_percolationSystem->movementCost(i,j) > 0) {
+                if(!(m_percolationSystem->movementCost(i,j) > 0)) {
                     continue;
                 }
                 Site *adjacent = &(m_grid[i][j]);
