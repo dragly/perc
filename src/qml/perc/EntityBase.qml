@@ -72,26 +72,4 @@ Item {
             ColorAnimation { target: selectionIndicator; property: "border.color"; from: "black"; to: "white"; duration: 200; easing.type: Easing.InOutQuad }
         }
     }
-
-//    MouseArea {
-//        anchors.centerIn: parent
-//        width: parent.width + Defaults.GRID_SIZE * 0.25
-//        height: parent.height + Defaults.GRID_SIZE * 0.25
-//        property real pressedTime: Date.now()
-//        propagateComposedEvents: true
-
-//        onPressed: {
-//            console.log("Pressed")
-//            pressedTime = Date.now()
-//        }
-
-//        onReleased: {
-//            var currentTime = Date.now()
-//            var timeDiff = currentTime - pressedTime
-//            console.log(timeDiff)
-//            if(timeDiff < 300) {
-//                requestSelection(entityRoot)
-//            }
-//        }
-//    }
 }

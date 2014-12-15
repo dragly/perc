@@ -226,10 +226,7 @@ Item {
         property var pressedObject: null
         property point pressedPoint
         property point previousPoint
-//        propagateComposedEvents: true
-//        hoverEnabled: true
         anchors.fill: parent
-//        drag.target: gameScene
 
         onPressed: {
             pressedTime = Date.now()

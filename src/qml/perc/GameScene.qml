@@ -57,8 +57,8 @@ Item {
         id: shaderEffectSource
         sourceItem: percolationSystem
         hideSource: true
-        width: nCols * Defaults.GRID_SIZE
-        height: nRows * Defaults.GRID_SIZE
+        width: nCols
+        height: nRows
         mipmap: false
         smooth: false
         visible: false
@@ -116,20 +116,17 @@ Item {
                         abs(pix[0]-pix[8])+
                         abs(pix[2]-pix[6]));
 
-                return delta > 0;
+                return delta > 0.0;
             }
 
             void main()
             {
-//                vec3 color = vec3(1.0, 1.0, 1.0);
-                  vec3 color = texture2D(src, qt_TexCoord0);
-                float intensity = 0.0 + avg_intensity(texture2D(src, qt_TexCoord0));
-//                intensity = intensity * (intensity > 0.2);
-//                color *= intensity;
+                vec2 centerOriginCoord = qt_TexCoord0 - vec2(0.5, 0.5);
+                float gradient = 0.7 + 0.3 * (1.0 - length(centerOriginCoord));
+                vec3 color = texture2D(src, qt_TexCoord0);
                 vec4 colorAlpha = vec4(1.0, 1.0, 1.0, 1.0);
                 float edge = IsEdge(qt_TexCoord0.xy);
-                colorAlpha.rgb = color * (1.0 - edge);
-//                colorAlpha *= intensity;
+                colorAlpha.rgb = color * gradient * (1.0 - edge);
                 gl_FragColor = colorAlpha;
             }
             "
