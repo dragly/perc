@@ -17,7 +17,6 @@ Item {
         Interaction {
             entityType1: "Soldier"
             entityType2: "Soldier"
-            maximumDistance: 5
             onInteract: {
                 var soldier1 = entity1
                 var soldier2 = entity2

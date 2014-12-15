@@ -16,7 +16,7 @@ GameView {
     property EntityBase decoy: null
 
     onClicked: {
-        if(hero) {
+        if(hero !== null) {
             var site = mapPointToSite(mouse)
             decoy.row = site.row
             decoy.col = site.col
