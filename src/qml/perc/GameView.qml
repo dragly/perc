@@ -64,11 +64,23 @@ Item {
     }
 
     onRestart: {
-        percolationSystem.pressureSources = []
+        for(var i in winObjectives) {
+            var objective = winObjectives[i]
+            objective.completed = false
+        }
+        for(var i in failObjectives) {
+            var objective = failObjectives[i]
+            objective.completed = false
+        }
+
+        console.log("Restarting!")
+        winGameDialog.visible = false
+        failGameDialog.visible = false
+
         entityManager.clear()
+        percolationSystem.pressureSources = []
         percolationSystem.initialize()
         occupationGrid.initialize()
-//        percolationSystemShader.updateSourceRect()
         resume()
 
         var newScale = 0.2
@@ -419,8 +431,10 @@ Item {
                 }
 
                 if(win) {
+                    console.log("Game won")
                     winGame()
                 } else if(fail) {
+                    console.log("Game failed")
                     failGame()
                 }
 
