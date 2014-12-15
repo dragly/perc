@@ -24,13 +24,18 @@ class AStar : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(PercolationSystem* percolationSystem READ percolationSystem WRITE setPercolationSystem NOTIFY percolationSystemChanged)
+    Q_PROPERTY(double heuristicScale READ heuristicScale WRITE setHeuristicScale NOTIFY heuristicScaleChanged)
 public:
     explicit AStar(QObject *parent = 0);
 
     PercolationSystem* percolationSystem() const;
 
+    double heuristicScale() const;
+
 signals:
     void percolationSystemChanged(PercolationSystem* arg);
+
+    void heuristicScaleChanged(double arg);
 
 public slots:
     bool findPath(QPoint start, QPoint target);
@@ -40,10 +45,13 @@ public slots:
     bool isEmpty();
     void clear();
 
+    void setHeuristicScale(double arg);
+
 private:
     PercolationSystem* m_percolationSystem;
     QList<QList<Site> > m_grid;
     QList<Site*> m_path;
+    double m_heuristicScale;
 };
 
 #endif // ASTARMOVER_H

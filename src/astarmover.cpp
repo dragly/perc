@@ -3,13 +3,19 @@
 
 AStar::AStar(QObject *parent) :
     QObject(parent),
-    m_percolationSystem(0)
+    m_percolationSystem(0),
+    m_heuristicScale(1.0)
 {
 }
 
 PercolationSystem *AStar::percolationSystem() const
 {
     return m_percolationSystem;
+}
+
+double AStar::heuristicScale() const
+{
+    return m_heuristicScale;
 }
 
 void AStar::pop() {
@@ -24,6 +30,14 @@ bool AStar::isEmpty()
 void AStar::clear()
 {
     m_path.clear();
+}
+
+void AStar::setHeuristicScale(double arg)
+{
+    if (m_heuristicScale != arg) {
+        m_heuristicScale = arg;
+        emit heuristicScaleChanged(arg);
+    }
 }
 
 QPoint AStar::next()
@@ -97,7 +111,7 @@ bool AStar::findPath(QPoint startPoint, QPoint targetPoint)
                 double G = current->G + abs(di) + abs(dj);
                 int deltaRow = target->i - i;
                 int deltaColumn = target->j - j;
-                double H = abs(deltaRow) + abs(deltaColumn);
+                double H = m_heuristicScale * abs(deltaRow) + abs(deltaColumn);
                 double F = G + H;
                 bool alreadyInOpenList = openList.contains(adjacent);
                 bool setValues = false;
