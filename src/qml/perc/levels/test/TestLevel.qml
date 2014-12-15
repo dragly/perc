@@ -15,20 +15,6 @@ GameView {
     property EntityBase hero: null
     property EntityBase decoy: null
 
-    function spawnWalker(spawn, properties) {
-        properties.row = spawn.row
-        properties.col = spawn.col
-        properties.team = spawn.team
-        if(properties.team === playerTeam) {
-            properties.healthPoints = 120
-            properties.target = hero
-        } else {
-            properties.target = playerSpawn
-        }
-
-        var walker = entityManager.createEntityFromUrl("walkers/Soldier.qml", properties)
-    }
-
     onClicked: {
         if(hero) {
             var site = mapPointToSite(mouse)
@@ -69,8 +55,7 @@ GameView {
         properties = {
             team: playerTeam,
             row: playerSpawnSite.row,
-            col: playerSpawnSite.col,
-            interval: 1000
+            col: playerSpawnSite.col
         }
         playerSpawn = entityManager.createEntityFromUrl("spawns/Spawn.qml", properties)
         var enemySpawnSite = Logic.randomSiteOnLargestCluster(percolationSystem)
@@ -82,8 +67,12 @@ GameView {
         }
         enemySpawn = entityManager.createEntityFromUrl("spawns/Spawn.qml", properties)
 
-        playerSpawn.spawnedWalker.connect(spawnWalker)
-        enemySpawn.spawnedWalker.connect(spawnWalker)
+        playerSpawn.defaultProperties = {
+            target: enemySpawn
+        }
+        enemySpawn.defaultProperties = {
+            target: playerSpawn
+        }
     }
 
     otherTeams: [

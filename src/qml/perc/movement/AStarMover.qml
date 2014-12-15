@@ -9,6 +9,7 @@ Mover {
     property var grid: []
     property EntityBase target: null
     property bool pathDirty: true
+    property alias heuristicScale: astar.heuristicScale
 
     function resetPath() {
         if(!percolationSystem) {

@@ -9,13 +9,52 @@ EntityBase {
 
     property alias interval: spawnTimer.interval
     property double healthPoints: 100.0
-
     property double _colorValue: Math.max(0, Math.min(100, healthPoints)) / 100
+    property int maximumSpawnCount: 1
+    property var spawnedUnits: []
+    property var defaultProperties
 
     width: Defaults.GRID_SIZE
     height: Defaults.GRID_SIZE
 
     occupying: false
+
+    function addUnit(entity) {
+        var newList = spawnedUnits
+        newList.push(entity)
+        spawnedUnits = newList
+    }
+
+    function removeUnitFromList(entity) {
+        var newList = spawnedUnits
+        var index = newList.indexOf(entity)
+        if(index !== -1) {
+            newList.splice(index, 1)
+            spawnedUnits = newList
+        }
+    }
+
+    function spawnWalker() {
+        spawnTimer.interval = 600 + Math.random() * 2000
+
+        var properties = defaultProperties
+        properties.row = spawnRoot.row
+        properties.col = spawnRoot.col
+        properties.team = spawnRoot.team
+
+        var walker = entityManager.createEntityFromUrl("walkers/Soldier.qml", properties)
+        addUnit(walker)
+        walker.killed.connect(spawnRoot.removeUnitFromList)
+        spawnedWalker(spawnRoot, walker)
+    }
+
+    onSpawnedUnitsChanged: {
+        if(spawnedUnits.length > maximumSpawnCount) {
+            spawnTimer.stop()
+        } else {
+            spawnTimer.start()
+        }
+    }
 
     onHealthPointsChanged: {
         if(healthPoints < 0) {
@@ -57,8 +96,7 @@ EntityBase {
         repeat: true
         running: true
         onTriggered: {
-            spawnedWalker(spawnRoot, {})
-            interval = 600 + Math.random() * 2000
+            spawnWalker()
         }
     }
 }

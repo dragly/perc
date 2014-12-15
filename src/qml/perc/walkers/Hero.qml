@@ -22,6 +22,7 @@ EntityBase {
     AStarMover {
         id: astar
         ignoreOccupation: true
+        heuristicScale: 10.0
     }
 
     Item {

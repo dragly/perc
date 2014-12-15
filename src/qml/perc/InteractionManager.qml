@@ -17,6 +17,7 @@ Item {
         Interaction {
             entityType1: "Soldier"
             entityType2: "Soldier"
+            maximumDistance: 5
             onInteract: {
                 var soldier1 = entity1
                 var soldier2 = entity2
@@ -76,10 +77,10 @@ Item {
 
             if(interaction.entityType1 === entity1.objectName &&
                     interaction.entityType2 === entity2.objectName) {
-                interaction.interact(entity1, entity2)
+                interaction.interact(entity1, entity2, distance)
             } else if(interaction.entityType2 === entity1.objectName &&
                       interaction.entityType1 === entity2.objectName) {
-                interaction.interact(entity2, entity1)
+                interaction.interact(entity2, entity1, distance)
             }
         }
     }
