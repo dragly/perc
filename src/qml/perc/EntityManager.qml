@@ -13,7 +13,7 @@ Item {
     property var components: []
     property var entities: []
     property var deadEntities: []
-    property double moveInterval: 100
+    property double moveInterval: 200
     property double lastTime: Date.now()
 
     function addInteraction(interaction) {
@@ -108,7 +108,7 @@ Item {
     function clear() {
         for(var i in entities) {
             var entity = entities[i]
-            entity.destroy()
+            entity.destroy(1)
         }
         entities = []
     }
