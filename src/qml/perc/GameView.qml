@@ -505,7 +505,7 @@ Item {
                 }
 
                 percolationSystem.unlockUpdates()
-                percolationSystem.requestRecalculation()
+//                percolationSystem.requestRecalculation()
             }
         }
     }
