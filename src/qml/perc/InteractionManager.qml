@@ -26,6 +26,30 @@ Item {
                 }
             }
         }
+        ,
+        Interaction {
+            entityType1: "Soldier"
+            entityType2: "DirectionWalker"
+            onInteract: {
+                var soldier = entity1
+                var walker = entity2
+                if(soldier.team !== walker.team) {
+                    walker.kill()
+                }
+            }
+        }
+        ,
+        Interaction {
+            entityType1: "Soldier"
+            entityType2: "RandomWalker"
+            onInteract: {
+                var soldier = entity1
+                var walker = entity2
+                if(soldier.team !== walker.team) {
+                    walker.kill()
+                }
+            }
+        }
     ]
 
     function interact(entity1, entity2) {

@@ -19,9 +19,9 @@ Mover {
             var nextSiteRow = parent.row + directions[randomIndex][0]
             var nextSiteCol = parent.col + directions[randomIndex][1]
             if(percolationSystem.movementCost(nextSiteRow, nextSiteCol) > 0) {
-                parent.row = nextSiteRow;
-                parent.col = nextSiteCol;
-                found = true
+                if(moveIfAvailable(nextSiteRow, nextSiteCol)) {
+                    found = true
+                }
             } else {
                 randomIndex += 1
                 randomIndex = (randomIndex + 4) % 4

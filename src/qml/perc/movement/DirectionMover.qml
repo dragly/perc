@@ -27,9 +27,11 @@ Mover {
             var nextSiteRow = parent.row + directions[direction][0]
             var nextSiteCol = parent.col + directions[direction][1]
             if(percolationSystem.movementCost(nextSiteRow, nextSiteCol) > 0) {
-                parent.row = nextSiteRow;
-                parent.col = nextSiteCol;
-                found = true
+                if(moveIfAvailable(nextSiteRow, nextSiteCol)) {
+                    found = true
+                }
+            }
+            if(found) {
                 if(directionName === "right") {
                     direction -= 1
                 } else {
@@ -42,6 +44,7 @@ Mover {
                     direction -= 1
                 }
             }
+
             direction = (direction + 4) % 4
         }
     }

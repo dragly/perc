@@ -54,7 +54,7 @@ EntityBase {
         running: true
         onTriggered: {
             spawnedWalker(spawnRoot, {})
-            interval = 300 + Math.random() * 1000
+            interval = 600 + Math.random() * 2000
         }
     }
 }

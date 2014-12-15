@@ -4,7 +4,7 @@ import "../../logic.js" as Logic
 import "../../spawns"
 
 GameView {
-    id: gameViewRoot
+    id: levelRoot
 
     nRows: 50
     nCols: 50
@@ -28,7 +28,15 @@ GameView {
     }
 
     onRestart: {
-        console.log("Spawn")
+        for(var i = 0; i < 10; i++) {
+            var site = Logic.randomSiteOnLargestCluster(percolationSystem)
+            var properties = {
+                team: playerTeam,
+                row: site.row,
+                col: site.col
+            }
+            entityManager.createEntityFromUrl("walkers/DirectionWalker.qml", properties);
+        }
         var playerSpawnSite = Logic.randomSiteOnLargestCluster(percolationSystem)
         var properties = {
             team: playerTeam,

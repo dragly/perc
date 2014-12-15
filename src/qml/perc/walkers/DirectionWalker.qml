@@ -5,12 +5,9 @@ import "../movement"
 import "../defaults.js" as Defaults
 
 EntityBase {
-//    property alias directon: mover.directonName
-
+    objectName: "DirectionWalker"
     width: Defaults.GRID_SIZE
     height: Defaults.GRID_SIZE
-
-//    informationText: "Direction walker " + direction + (team ? "\nteam: " + team.name : "")
 
     DirectionMover {
         id: mover
