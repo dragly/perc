@@ -79,7 +79,6 @@ Item {
         failGameDialog.visible = false
 
         entityManager.clear()
-        percolationSystem.pressureSources = []
         percolationSystem.initialize()
         occupationGrid.initialize()
         resume()
@@ -305,9 +304,7 @@ Item {
                 for(var i in entityManager.entities) {
                     var entity = entityManager.entities[i]
                     var entityPos = gameViewRoot.mapFromItem(gameScene, entity.x, entity.y)
-                    console.log(entityPos.x, entityPos.y)
                     var rect = selectionRectangle
-                    console.log(selectionRectangle.x, selectionRectangle.y)
                     if(entityPos.x > rect.x && entityPos.x < rect.x + rect.width
                             && entityPos.y > rect.y && entityPos.y < rect.y + rect.height) {
                         newSelection.push(entity)

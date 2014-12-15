@@ -56,19 +56,12 @@ PercolationSystem::~PercolationSystem() {
     m_prevImageMutex.unlock();
 }
 
-void PercolationSystem::setPressureSources(const QList<QObject *> &pressureSources) {
-    QMutexLocker updateMatrixLocker(&m_updateMatrixMutex);
-    m_pressureSources = pressureSources;
-    emit pressureSourcesChanged(m_pressureSources);
-}
-
 void PercolationSystem::randomizeMatrix() {
     for(uint i = 0; i < m_valueMatrix.n_rows; i++) {
         for(uint j = 0; j < m_valueMatrix.n_cols; j++) {
             m_valueMatrix(i, j) = m_random.ran2();
         }
     }
-    cout << m_valueMatrix << endl;
     if(m_isInitialized) {
         requestRecalculation();
     }
@@ -85,68 +78,8 @@ void PercolationSystem::initialize() {
     randomizeMatrix();
     m_areaMatrix = zeros<umat>(m_nRows, m_nCols);
     m_movementCostMatrix = zeros<mat>(m_nRows, m_nCols);
-    m_flowMatrix = zeros(m_nRows, m_nCols);
-    m_pressureMatrix = zeros(m_nRows, m_nCols);
-    m_pressureSourceMatrix = zeros(m_nRows, m_nCols);
-    m_oldPressureMatrix = zeros(m_nRows, m_nCols);
     recalculateMatricesAndUpdate();
     m_isInitialized = true;
-}
-
-void PercolationSystem::generatePressureMatrix() {
-    //    qDebug() << "Generating pressure matrix";
-    m_pressureSourceMatrix.zeros();
-    m_pressures = zeros(m_nClusters);
-    for(QObject* pressureSource : m_pressureSources) {
-        int row = pressureSource->property("row").toInt();
-        int col = pressureSource->property("col").toInt();
-        double pressure = pressureSource->property("pressure").toDouble();
-        int label = labelAt(row, col);
-        m_pressures(label) += pressure;
-        m_pressureSourceMatrix(row, col) = pressure;
-    }
-    double kappa = 0.01;
-    int iterations = 1;
-    kappa = 0.9;
-    for(int it = 0; it < iterations; it++) {
-        m_oldPressureMatrix = m_pressureMatrix;
-        for(int i = 0; i < m_nRows; i++) {
-            for(int j = 0; j < m_nCols; j++) {
-                if(movementCost(i,j)) {
-                    int label = labelAt(i, j);
-                    if(m_pressureSourceMatrix(i,j) > 0) {
-                        m_pressureMatrix(i,j) = m_pressures(label); // set the source to the pressure based on the area
-                    } else {
-                        m_pressureMatrix(i,j) = m_oldPressureMatrix(i,j);
-                        double fromOthers = 0;
-                        int nOthers = 0;
-                        if(movementCost(i - 1, j)) {
-                            fromOthers += m_oldPressureMatrix(i - 1,j);
-                            nOthers += 1;
-                        }
-                        if(movementCost(i + 1, j)) {
-                            fromOthers += m_oldPressureMatrix(i + 1,j);
-                            nOthers += 1;
-                        }
-                        if(movementCost(i, j - 1)) {
-                            fromOthers += m_oldPressureMatrix(i,j - 1);
-                            nOthers += 1;
-                        }
-                        if(movementCost(i, j + 1)) {
-                            fromOthers += m_oldPressureMatrix(i,j + 1);
-                            nOthers += 1;
-                        }
-                        //                        fromOthers -= nOthers * m_oldPressureMatrix(i,j);
-                        if(nOthers > 0) {
-                            fromOthers /= nOthers;
-                        }
-                        m_pressureMatrix(i,j) = m_pressureMatrix(i,j) * (1 - kappa);
-                        m_pressureMatrix(i,j) += kappa * fromOthers;
-                    }
-                }
-            }
-        }
-    }
 }
 
 void PercolationSystem::requestRecalculation() {
@@ -177,7 +110,6 @@ void PercolationSystem::recalculateMatricesAndUpdate() {
     generateMovementCostMatrix();
     generateLabelMatrix();
     generateAreaMatrix();
-    generatePressureMatrix();
     generateImage();
     QMutexLocker prevImageLocker(&m_prevImageMutex);
     m_prevImage = m_image;
@@ -275,11 +207,7 @@ void PercolationSystem::ensureInitialization()
 {
     if(!m_valueMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
             !m_areaMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
-            !m_movementCostMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
-            !m_flowMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
-            !m_pressureMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
-            !m_pressureSourceMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
-            !m_oldPressureMatrix.in_range(m_nRows - 1, m_nCols - 1)) {
+            !m_movementCostMatrix.in_range(m_nRows - 1, m_nCols - 1)) {
         initialize();
     }
 }
@@ -313,13 +241,6 @@ uint PercolationSystem::maxLabel()
 uint PercolationSystem::maxArea()
 {
     return m_areaMatrix.max();
-}
-
-double PercolationSystem::maxFlow()
-{
-    cout << "m_flowMatrix.max()" << endl;
-    cout << m_flowMatrix.max() << endl;
-    return m_flowMatrix.max();
 }
 
 void PercolationSystem::generateLabelMatrix() {
@@ -410,17 +331,6 @@ void PercolationSystem::generateImage() {
                     color = background;
                 }
                 break;
-            case PressureImage:
-                if(movementCost(i,j)) {
-                    double maxPressureLocal;
-                    double pressureRatio;
-                    maxPressureLocal = 1. / 100.;
-                    pressureRatio = fmin(0.3 + (m_pressureMatrix(i,j) / maxPressureLocal) * 2. / 3., 1);
-                    color = QColor(240, pressureRatio*249, 232);
-                } else {
-                    color = background;
-                }
-                break;
             case AreaImage:
                 if(movementCost(i,j)) {
                     double areaRatio;
@@ -445,14 +355,6 @@ void PercolationSystem::generateAreaMatrix() {
             m_areaMatrix(i,j) = m_areas(labelAt(i,j));
         }
     }
-}
-
-double PercolationSystem::pressure(int row, int col) {
-    return m_pressureMatrix(row, col);
-}
-
-double PercolationSystem::flow(int row, int col) {
-    return m_flowMatrix(row, col);
 }
 
 void PercolationSystem::paint(QPainter *painter)

@@ -21,13 +21,6 @@
 #endif
 #include <iostream>
 
-class PressureSource {
-public:
-    int row;
-    int col;
-    double pressure;
-};
-
 class PercolationSystem : public QQuickPaintedItem
 {
     Q_OBJECT
@@ -36,7 +29,6 @@ class PercolationSystem : public QQuickPaintedItem
     Q_PROPERTY(int nCols READ nCols WRITE setNCols NOTIFY nColsChanged)
     Q_PROPERTY(double traversability READ traversability WRITE setTraversability NOTIFY traversabilityChanged)
     Q_PROPERTY(ImageType imageType READ imageType WRITE setImageType NOTIFY imageTypeChanged)
-    Q_PROPERTY(QList<QObject*> pressureSources READ pressureSources WRITE setPressureSources NOTIFY pressureSourcesChanged)
 
 public:
     PercolationSystem(QQuickPaintedItem *parent = 0);
@@ -44,7 +36,6 @@ public:
 
     enum ImageType {
         MovementCostImage,
-        PressureImage,
         AreaImage
     };
 
@@ -64,18 +55,12 @@ public:
 
     void ensureInitialization();
 
-//    Q_INVOKABLE void addPressureSource(QObject *pressureSource);
-//    Q_INVOKABLE void clearPressureSources();
     ImageType imageType() const
     {
         return m_imageType;
     }
 
     ~PercolationSystem();
-    QList<QObject*> pressureSources() const
-    {
-        return m_pressureSources;
-    }
 
 public slots:
     double movementCost(int row, int col);
@@ -85,9 +70,6 @@ public slots:
     uint area(int row, int col);
     uint maxLabel();
     uint maxArea();
-    double maxFlow();
-    double pressure(int row, int col);
-    double flow(int row, int col);
     double lowerValue(int row, int col);
     double raiseValue(int row, int col);
 
@@ -105,7 +87,6 @@ public slots:
     void setNCols(int arg);
 
     void setNRows(int arg);
-    void setPressureSources(const QList<QObject *> &pressureSources);
 
     void setImageType(ImageType arg);    
     bool inBounds(int row, int column) const;
@@ -119,14 +100,10 @@ signals:
 
     void readyToUpdate();
 
-    void pressureSourcesChanged(QList<QObject*> arg);
-
 protected:
     void generateImage();
     void generateLabelMatrix();
     void generateAreaMatrix();
-    void generatePressureMatrix();
-//    void generatePressureAndFlowMatrices();
     void generateMovementCostMatrix();
 
     QThread thread;
@@ -141,16 +118,10 @@ protected:
     arma::mat m_movementCostMatrix;
     arma::umat m_labelMatrix;
     arma::umat m_areaMatrix;
-    arma::mat m_pressureMatrix;
-    arma::mat m_oldPressureMatrix;
-    arma::mat m_pressureSourceMatrix;
-    arma::mat m_flowMatrix;
 
     arma::imat m_visitDirections;
 
     arma::vec m_areas;
-    arma::vec m_pressures;
-    QList<QObject*> m_pressureSources;
 
     QImage m_image;
     QImage m_prevImage;

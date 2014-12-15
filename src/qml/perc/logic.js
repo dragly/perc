@@ -1,6 +1,5 @@
 function randomSiteOnLargestCluster(percolationSystem) {
     var largestArea = percolationSystem.maxArea()
-    console.log(largestArea)
     var found = false
     var nAttempts = 0
     while(!found) {
