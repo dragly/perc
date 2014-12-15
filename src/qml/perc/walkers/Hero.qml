@@ -8,7 +8,6 @@ EntityBase {
     objectName: "Hero"
     property alias target: astar.target
     property real healthPoints: 100.0
-
     property double _colorValue: Math.max(0, Math.min(100, healthPoints)) / 100
 
     width: Defaults.GRID_SIZE
@@ -22,6 +21,7 @@ EntityBase {
 
     AStarMover {
         id: astar
+        ignoreOccupation: true
     }
 
     Item {

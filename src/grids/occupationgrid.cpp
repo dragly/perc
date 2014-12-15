@@ -22,7 +22,7 @@ void OccupationGrid::gridSizeChanged() {
 
 void OccupationGrid::initialize()
 {
-    m_occupationMatrix = zeros<umat>(mainGrid()->rowCount(), mainGrid()->columnCount());
+    m_occupationMatrix = zeros(mainGrid()->rowCount(), mainGrid()->columnCount());
     m_initialized = true;
 }
 
@@ -51,7 +51,7 @@ void OccupationGrid::occupy(int row, int col)
     if(!inBounds(row, col)) {
         return;
     }
-    m_occupationMatrix(row, col) = true;
+    m_occupationMatrix(row, col) += 1;
 }
 
 void OccupationGrid::unOccupy(int row, int col)
@@ -59,7 +59,7 @@ void OccupationGrid::unOccupy(int row, int col)
     if(!inBounds(row, col)) {
         return;
     }
-    m_occupationMatrix(row, col) = false;
+    m_occupationMatrix(row, col) -= 1;
 }
 
 void OccupationGrid::clearOccupation()

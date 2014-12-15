@@ -45,7 +45,10 @@ Mover {
 
     onMove: {
         if(astar.isEmpty() || pathDirty) {
-            resetPath();
+            resetPath()
+        }
+        if(astar.isEmpty()) {
+            return
         }
         var next = astar.next()
         if(moveIfAvailable(next.x, next.y)) {

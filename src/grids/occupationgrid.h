@@ -36,7 +36,7 @@ public slots:
 private slots:
     void gridSizeChanged();
 private:
-    arma::umat m_occupationMatrix;
+    arma::mat m_occupationMatrix;
 
     MainGrid* m_mainGrid;
 

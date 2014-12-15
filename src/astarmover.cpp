@@ -28,6 +28,10 @@ void AStar::clear()
 
 QPoint AStar::next()
 {
+    if(m_path.isEmpty()) {
+        qWarning() << "WARNING: Requested next on empty A* path!";
+        return QPoint(-1, -1);
+    }
     Site* last = m_path.last();
     return QPoint(last->i, last->j);
 }

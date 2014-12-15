@@ -76,7 +76,7 @@ Item {
         occupationGrid.clearOccupation()
         for(var i in entities) {
             var entity = entities[i]
-            if(entity.blocking) {
+            if(entity.occupying) {
                 occupationGrid.occupy(entity.row, entity.col)
             }
         }

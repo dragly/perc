@@ -57,10 +57,9 @@ GameView {
         }
         hero = entityManager.createEntityFromUrl("walkers/Hero.qml", properties)
 
-        var decoySite = Logic.randomSiteOnLargestCluster(percolationSystem)
         properties = {
-            row: decoySite.row,
-            col: decoySite.col,
+            row: mainSoldierSite.row,
+            col: mainSoldierSite.col,
             blocking: false
         }
         decoy = entityManager.createEntityFromUrl("EntityBase.qml", properties)

@@ -9,6 +9,7 @@ Item {
     property var percolationSystem: parent.percolationSystem
     property var occupationGrid: parent.occupationGrid
     property var oldOwner: null
+    property bool ignoreOccupation: false
 
     function moveIfAvailable(row, col) {
         var previousRow = parent.row
@@ -16,7 +17,7 @@ Item {
         if(percolationSystem.movementCost(row, col) < 1) {
             return false
         }
-        if(occupationGrid.isOccupied(row, col)) {
+        if(!ignoreOccupation && occupationGrid.isOccupied(row, col)) {
             return false
         }
         occupationGrid.unOccupy(previousRow, previousCol)
