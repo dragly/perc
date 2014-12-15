@@ -52,6 +52,7 @@ Item {
         }
     ]
 
+    // Draws the map from the percolation system
     ShaderEffectSource {
         id: shaderEffectSource
         sourceItem: percolationSystem
@@ -60,14 +61,17 @@ Item {
         height: nRows * Defaults.GRID_SIZE
         mipmap: false
         smooth: false
+        visible: false
     }
 
     ShaderEffect {
+//        visible: false
         width: nCols * Defaults.GRID_SIZE
         height: nRows * Defaults.GRID_SIZE
         property variant src: shaderEffectSource
 
         smooth: true
+        blending: true
         fragmentShader: "
             varying highp vec2 qt_TexCoord0;
             uniform sampler2D src;
@@ -113,11 +117,15 @@ Item {
 
             void main()
             {
-                vec3 color = vec3(1.0, 1.0, 1.0);
-                float intensity = 0.5 + 0.5 * avg_intensity(texture2D(src, qt_TexCoord0));
-                color *= intensity;
+//                vec3 color = vec3(1.0, 1.0, 1.0);
+                  vec3 color = texture2D(src, qt_TexCoord0);
+                float intensity = 0.0 + avg_intensity(texture2D(src, qt_TexCoord0));
+//                intensity = intensity * (intensity > 0.2);
+//                color *= intensity;
                 vec4 colorAlpha = vec4(1.0, 1.0, 1.0, 1.0);
-                colorAlpha.rgb = color * (1.0 - IsEdge(qt_TexCoord0.xy));
+                float edge = IsEdge(qt_TexCoord0.xy);
+                colorAlpha.rgb = color * (1.0 - edge);
+//                colorAlpha *= intensity;
                 gl_FragColor = colorAlpha;
             }
             "

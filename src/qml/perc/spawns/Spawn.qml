@@ -24,25 +24,27 @@ EntityBase {
 
     Item {
         anchors.centerIn: parent
-        width: parent.width * 0.9
-        height: parent.height * 0.9
-        Rectangle {
-            anchors.fill: parent
-            opacity: _colorValue
-            color: "#b2df8a"
-        }
+        width: parent.width * 0.7
+        height: parent.height * 0.7
 
         Rectangle {
             anchors.fill: parent
-            opacity: 1 - _colorValue
-            color: "#e31a1c"
-        }
-
-        Rectangle {
-            anchors.centerIn: parent
-            width: parent.width * 0.8
-            height: parent.height * 0.8
+            radius: parent.width * 0.2
             color: team.lightColor
+        }
+
+        Rectangle {
+            anchors {
+                left: parent.left
+                top: parent.top
+                margins: 15.0
+            }
+            width: parent.width * 0.2
+            height: width
+            radius: width / 2
+
+            opacity: 1.0 - _colorValue
+            color: "#e31a1c"
         }
     }
 

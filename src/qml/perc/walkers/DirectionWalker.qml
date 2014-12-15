@@ -15,10 +15,13 @@ EntityBase {
 
     Rectangle {
         id: rect
-        color: team.color
-        anchors.centerIn: parent
+        width: Defaults.GRID_SIZE * 0.6
+        height: width
+        radius: width / 2
+        color: "transparent"
 
-        width: Defaults.GRID_SIZE * 0.7
-        height: Defaults.GRID_SIZE * 0.7
+        border.color: team.color
+        border.width: parent.width * 0.1
+        anchors.centerIn: parent
     }
 }

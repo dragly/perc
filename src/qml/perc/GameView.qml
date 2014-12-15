@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import QtGraphicalEffects 1.0
 import org.dragly.perc 1.0
 
 import "hud"
@@ -114,7 +115,13 @@ Item {
 
     Rectangle {
         id: backgroundRect
-        color: "grey"
+        RadialGradient {
+            anchors.fill: parent
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#9ecae1" }
+                GradientStop { position: 1.0; color: "#6baed6" }
+            }
+        }
         anchors.fill: parent
     }
 
