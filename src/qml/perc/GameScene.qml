@@ -69,12 +69,16 @@ Item {
         width: nCols * Defaults.GRID_SIZE
         height: nRows * Defaults.GRID_SIZE
         property variant src: shaderEffectSource
+        property real thickness: Defaults.GRID_SIZE * 0.07
+        property vector2d directionalThickness: Qt.vector2d(thickness / width,
+                                                 thickness / height)
 
         smooth: true
         blending: true
         fragmentShader: "
             varying highp vec2 qt_TexCoord0;
             uniform sampler2D src;
+            uniform vec2 directionalThickness;
             float threshold(in float thr1, in float thr2 , in float val) {
                 if (val < thr1) {return 0.0;}
                 if (val > thr2) {return 1.0;}
@@ -92,8 +96,8 @@ Item {
 
             // returns pixel color
             float IsEdge(in vec2 coords){
-                float dxtex = 1.0 / 1024.0 /*image width*/;
-                float dytex = 1.0 / 1024.0 /*image height*/;
+                float dxtex = directionalThickness.x;
+                float dytex = directionalThickness.y;
                 float pix[9];
                 int k = -1;
                 float delta;
