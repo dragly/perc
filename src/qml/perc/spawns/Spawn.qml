@@ -7,7 +7,7 @@ EntityBase {
     objectName: "Spawn"
     signal spawnedWalker(var spawn, var properties)
 
-    property alias interval: spawnTimer.interval
+    property double interval: spawnTimer.interval
     property double healthPoints: 100.0
     property double _colorValue: Math.max(0, Math.min(100, healthPoints)) / 100
     property int maximumSpawnCount: 1
@@ -35,8 +35,6 @@ EntityBase {
     }
 
     function spawnWalker() {
-        spawnTimer.interval = 600 + Math.random() * 2000
-
         var properties = defaultProperties
         properties.row = spawnRoot.row
         properties.col = spawnRoot.col
@@ -52,7 +50,9 @@ EntityBase {
         if(spawnedUnits.length > maximumSpawnCount) {
             spawnTimer.stop()
         } else {
-            spawnTimer.start()
+            if(spawnTimer.running === false) {
+                spawnTimer.start()
+            }
         }
     }
 
@@ -92,7 +92,6 @@ EntityBase {
     Timer {
         id: spawnTimer
         interval: 1000
-        triggeredOnStart: true
         repeat: true
         running: true
         onTriggered: {
