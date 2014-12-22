@@ -25,16 +25,6 @@ GameView {
 
     onRestart: {
         var properties
-        for(var i = 0; i < 10; i++) {
-            var site = Logic.randomSiteOnLargestCluster(percolationSystem)
-            properties = {
-                team: playerTeam,
-                row: site.row,
-                col: site.col
-            }
-            entityManager.createEntityFromUrl("walkers/DirectionWalker.qml", properties);
-        }
-
         var mainSoldierSite = Logic.randomSiteOnLargestCluster(percolationSystem)
         properties = {
             team: playerTeam,
