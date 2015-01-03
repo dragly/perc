@@ -78,7 +78,6 @@ Item {
         fragmentShader: "
             varying highp vec2 qt_TexCoord0;
             uniform sampler2D src;
-            uniform vec2 directionalThickness;
             void main()
             {
                 gl_FragColor = texture2D(src, qt_TexCoord0);
