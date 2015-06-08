@@ -20,6 +20,9 @@ SOURCES += main.cpp \
     simplematerial.cpp \
     random.cpp
 
+LIBS += -L/home/svenni/apps/armadillo/armadillo-5.200.1 -lblas -llapack -larmadillo
+INCLUDEPATH += /home/svenni/apps/armadillo/armadillo-5.200.1/include
+
 # Installation path
 # target.path =
 

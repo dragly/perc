@@ -5,7 +5,7 @@ import org.dragly.perc 1.0
 Item {
     id: gameMenuRoot
 
-    property int imageType: PercolationSystem.AreaImage
+    property int imageType: PercolationSystem.FlowImage
     property double energy
     signal pauseClicked
 

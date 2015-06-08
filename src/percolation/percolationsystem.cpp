@@ -25,8 +25,8 @@ using namespace std;
 
 PercolationSystem::PercolationSystem(QQuickPaintedItem *parent) :
     QQuickPaintedItem(parent),
-    m_nRows(0),
-    m_nCols(0),
+    m_rowCount(0),
+    m_columnCount(0),
     m_occupationTreshold(0.5),
     m_isFinishedUpdating(true),
     m_nClusters(0),
@@ -70,14 +70,14 @@ bool PercolationSystem::inBounds(int row, int column) const
 
 void PercolationSystem::initialize() {
     m_isInitialized = false;
-    m_valueMatrix = zeros(m_nRows, m_nCols);
+    m_valueMatrix = zeros(m_rowCount, m_columnCount);
     randomizeMatrix();
-    m_areaMatrix = zeros<umat>(m_nRows, m_nCols);
-    m_movementCostMatrix = zeros<umat>(m_nRows, m_nCols);
-    m_flowMatrix = zeros(m_nRows, m_nCols);
-    m_pressureMatrix = zeros(m_nRows, m_nCols);
-    m_pressureSourceMatrix = zeros(m_nRows, m_nCols);
-    m_oldPressureMatrix = zeros(m_nRows, m_nCols);
+    m_areaMatrix = zeros<umat>(m_rowCount, m_columnCount);
+    m_movementCostMatrix = zeros(m_rowCount, m_columnCount);
+    m_flowMatrix = zeros(m_rowCount, m_columnCount);
+    m_pressureMatrix = zeros(m_rowCount, m_columnCount);
+    m_pressureSourceMatrix = zeros(m_rowCount, m_columnCount);
+    m_oldPressureMatrix = zeros(m_rowCount, m_columnCount);
     recalculateMatricesAndUpdate();
     m_isInitialized = true;
 }
@@ -99,8 +99,8 @@ void PercolationSystem::generatePressureMatrix() {
     kappa = 0.9;
     for(int it = 0; it < iterations; it++) {
         m_oldPressureMatrix = m_pressureMatrix;
-        for(int i = 0; i < m_nRows; i++) {
-            for(int j = 0; j < m_nCols; j++) {
+        for(int i = 0; i < m_rowCount; i++) {
+            for(int j = 0; j < m_columnCount; j++) {
                 if(movementCost(i,j)) {
                     int label = labelAt(i, j);
                     if(m_pressureSourceMatrix(i,j) > 0) {
@@ -152,13 +152,14 @@ void PercolationSystem::recalculateMatricesAndUpdate() {
     generateAreaMatrix();
     generatePressureMatrix();
     generateImage();
+    solveFlow();
     QMutexLocker prevImageLocker(&m_prevImageMutex);
     m_prevImage = m_image;
     emit readyToUpdate();
 }
 
 bool PercolationSystem::isSite(int row, int col) {
-    if(row < 0 || col < 0 || row >= m_nRows || col >= m_nCols) {
+    if(row < 0 || col < 0 || row >= m_rowCount || col >= m_columnCount) {
         return false;
     }
     return true;
@@ -241,26 +242,27 @@ double PercolationSystem::raiseValue(int row, int col) {
 void PercolationSystem::generateOccupationMatrix() {
     //    cout << "Generating occupation matrix..." << endl;
     double p = 1 - m_occupationTreshold;
-    m_movementCostMatrix = m_valueMatrix > p;
+    umat occupation = m_valueMatrix > p;
+    m_movementCostMatrix = conv_to<mat>::from(occupation);
 
 }
 
 void PercolationSystem::ensureInitialization()
 {
-    if(!m_valueMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
-            !m_areaMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
-            !m_movementCostMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
-            !m_flowMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
-            !m_pressureMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
-            !m_pressureSourceMatrix.in_range(m_nRows - 1, m_nCols - 1)  ||
-            !m_oldPressureMatrix.in_range(m_nRows - 1, m_nCols - 1)) {
+    if(!m_valueMatrix.in_range(m_rowCount - 1, m_columnCount - 1)  ||
+            !m_areaMatrix.in_range(m_rowCount - 1, m_columnCount - 1)  ||
+            !m_movementCostMatrix.in_range(m_rowCount - 1, m_columnCount - 1)  ||
+            !m_flowMatrix.in_range(m_rowCount - 1, m_columnCount - 1)  ||
+            !m_pressureMatrix.in_range(m_rowCount - 1, m_columnCount - 1)  ||
+            !m_pressureSourceMatrix.in_range(m_rowCount - 1, m_columnCount - 1)  ||
+            !m_oldPressureMatrix.in_range(m_rowCount - 1, m_columnCount - 1)) {
         initialize();
     }
 }
 
 double PercolationSystem::movementCost(int row, int col)
 {
-    if(row < 0 || col < 0 || row >= m_nRows || col >= m_nCols) {
+    if(row < 0 || col < 0 || row >= m_rowCount || col >= m_columnCount) {
         return false;
     }
     if(m_movementCostMatrix(row, col) == 1) {
@@ -311,7 +313,7 @@ void PercolationSystem::generateLabelMatrix() {
     m_visitDirections(2,0) = 1;
     m_visitDirections(3,1) = -1;
 
-    m_labelMatrix = zeros<umat>(m_nRows, m_nCols);
+    m_labelMatrix = zeros<umat>(m_rowCount, m_columnCount);
     int currentLabel = 1;
     imat directions = zeros<imat>(4,2);
     //    directions(0,0) = -1;
@@ -331,8 +333,8 @@ void PercolationSystem::generateLabelMatrix() {
     vector<int> tmpAreas;
     tmpAreas.push_back(0); // areas[0] = 0
 
-    for(int i = 0; i < m_nRows; i++) {
-        for(int j = 0; j < m_nCols; j++) {
+    for(int i = 0; i < m_rowCount; i++) {
+        for(int j = 0; j < m_columnCount; j++) {
             int area = 0;
             searchQueue.push_back(pair<uint, uint>(i,j));
             while(!searchQueue.empty()) {
@@ -369,7 +371,7 @@ void PercolationSystem::generateLabelMatrix() {
 }
 
 void PercolationSystem::generateImage() {
-    m_image = QImage(m_nCols, m_nRows, QImage::Format_ARGB32);
+    m_image = QImage(m_columnCount, m_rowCount, QImage::Format_ARGB32);
     QColor background("#0868ac");
     QColor foreground("#f0f9e8");
     double maxAreaLocal;
@@ -378,8 +380,8 @@ void PercolationSystem::generateImage() {
         maxAreaLocal = 1;
     }
     QColor color;
-    for(int i = 0; i < m_nRows; i++) {
-        for(int j = 0; j < m_nCols; j++) {
+    for(int i = 0; i < m_rowCount; i++) {
+        for(int j = 0; j < m_columnCount; j++) {
             switch(m_imageType) {
             case OccupationImage:
                 if(movementCost(i,j)) {
@@ -410,6 +412,23 @@ void PercolationSystem::generateImage() {
                     color = background;
                 }
                 break;
+            case FlowImage:
+                if(m_flowMatrix.max() < 0.1) {
+                    continue;
+                }
+                double ratio = m_flowMatrix(i, j) / m_flowMatrix.max();
+                //                double areaRatio = 1. / 3. + (m_flowMatrix(i,j) / m_flowMatrix.max()) * 2. / 3.;
+                color.setRed((1-ratio) * background.red() + ratio * foreground.red());
+                color.setGreen((1-ratio) * background.green() + ratio * foreground.green());
+                color.setBlue((1-ratio) * background.blue() + ratio * foreground.blue());
+                //                if(fabs(m_flowMatrix(i, j) < 0.1)) {
+                //                    color = QColor(0, 0, 0);
+                //                } else if(m_flowMatrix(i, j) < 0) {
+                //                    color = foreground;
+                //                } else {
+                //                    color = background;
+                //                }
+
             }
             m_image.setPixel(j,i,color.rgba());
         }
@@ -418,8 +437,8 @@ void PercolationSystem::generateImage() {
 
 void PercolationSystem::generateAreaMatrix() {
     //    cout << "Generating area matrix..." << endl;
-    for(int i = 0; i < m_nRows; i++) {
-        for(int j = 0; j < m_nCols; j++) {
+    for(int i = 0; i < m_rowCount; i++) {
+        for(int j = 0; j < m_columnCount; j++) {
             m_areaMatrix(i,j) = m_areas(labelAt(i,j));
         }
     }
@@ -447,3 +466,99 @@ void PercolationSystem::paint(QPainter *painter)
         m_prevImageMutex.unlock();
     }
 }
+
+void PercolationSystem::solveFlow() {
+    qDebug() << "Solving flow!";
+    //    m_movementCostMatrix = {1.0000,  0,1.0000,1.0000,1.0000,
+    //                            0,1.0000,1.0000, 0,1.0000,
+    //                            1.0000,  0,  0,1.0000,1.0000,
+    //                            0,1.0000,  0,1.0000,0,
+    //                            1.0000,1.0000,1.0000,1.0000,0};
+    //    m_movementCostMatrix.reshape(5,5);
+    //    m_movementCostMatrix = m_movementCostMatrix.t();
+//    m_movementCostMatrix.load("out.dat");
+    int equationCount = m_rowCount*(m_columnCount-2);
+    sp_mat A(equationCount, equationCount);
+    vec b = zeros(equationCount);
+    for(int i = 0; i < m_rowCount; i++) {
+        if(movementCost(i, 0) > 0 && movementCost(i, 1) > 0) {
+            b(i) = 1.0;
+        }
+    }
+    //    for(int i = 0; i < m_rowCount; i++) {
+    //        if(movementCost(i, m_columnCount - 1) > 0) {
+    //            b(i + (m_columnCount) * (m_rowCount - 1)) = -1.0;
+    //        }
+    //    }
+    for(int j = 1; j < m_columnCount-1; j++) {
+        for(int i = 0; i < m_rowCount; i++) {
+            int id = i + (j - 1) * m_rowCount;
+            if(movementCost(i, j) > 1e-6) {
+                A(id, id) = 0.0;
+                for(int ii = -1; ii < 2; ii++) {
+                    for(int jj = -1; jj < 2; jj++) {
+                        if((ii == 0 && jj == 0) || (ii != 0 && jj != 0)) {
+                            continue;
+                        }
+                        if(movementCost(i + ii, j + jj) > 0) {
+                            int id2 = id + ii + jj * m_rowCount;
+                            if(j + jj == 0 || j + jj == m_columnCount - 1) {
+                                A(id, id) += 1.0;
+                            }
+                            if(id2 < 0 || id2 > equationCount - 1) {
+                                continue;
+                            }
+                            //                            cout << "IDs: " << id << " " << id2 << endl;
+                            A(id, id2) = -1.0;
+                            //                            cout << "A(id, id2): " << A(id, id2) << endl;
+                            A(id, id) += 1.0;
+                        }
+                    }
+                }
+            }
+            if(A(id, id) < 1e-6) {
+                A(id, id) = 1.0;
+                b(id) = 0.0;
+            }
+        }
+    }
+
+    try {
+        vec x = spsolve(A, b);
+        //    cout << x << endl;
+        x.reshape(m_rowCount, m_columnCount);
+
+        m_flowMatrix = x;
+        m_flowMatrix -= m_flowMatrix.min();
+        //    m_flowMatrix -= m_movementCostMatrix;
+
+        qDebug() << m_flowMatrix.max();
+    } catch(std::runtime_error e) {
+        m_flowMatrix = m_movementCostMatrix;
+
+//        ofstream out("outA.dat");
+//        out << m_movementCostMatrix;
+//        out.close();
+        m_movementCostMatrix.save("out.dat", arma::raw_ascii);
+        A.save("outA.dat", arma::raw_ascii);
+        b.save("outb.dat", arma::raw_ascii);
+        exit(0);
+    }
+
+    //    m_flowMatrix = m_movementCostMatrix;
+
+//    exit(0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

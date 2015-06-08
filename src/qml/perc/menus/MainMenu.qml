@@ -28,6 +28,23 @@ Item {
     Row {
         anchors.centerIn: parent
         spacing: parent.width * 0.01
+
+        Rectangle {
+            color: "blue"
+            width: 100
+            height: 100
+            Text {
+                text: "Solve level"
+                color: "white"
+                anchors.centerIn: parent
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    selectedLevel("test/SolveLevel.qml")
+                }
+            }
+        }
         Rectangle {
             color: "blue"
             width: 100

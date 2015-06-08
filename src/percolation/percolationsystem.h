@@ -45,19 +45,20 @@ public:
     enum ImageType {
         OccupationImage,
         PressureImage,
-        AreaImage
+        AreaImage,
+        FlowImage
     };
 
-    const arma::umat &occupationMatrix();
+    const arma::mat &occupationMatrix();
     const arma::mat& probabilityMatrix();
     int nRows() const
     {
-        return m_nRows;
+        return m_rowCount;
     }
 
     int nCols() const
     {
-        return m_nCols;
+        return m_columnCount;
     }
 
     Q_INVOKABLE double movementCost(int row, int col);
@@ -92,6 +93,7 @@ public:
 
     Q_INVOKABLE void unlockUpdates();
     Q_INVOKABLE bool tryLockUpdates();
+    Q_INVOKABLE void solveFlow();
 
     ~PercolationSystem();
     Q_INVOKABLE void randomizeMatrix();
@@ -110,16 +112,16 @@ public slots:
 
     void setNCols(int arg)
     {
-        if (m_nCols != arg) {
-            m_nCols = arg;
+        if (m_columnCount != arg) {
+            m_columnCount = arg;
             emit nColsChanged(arg);
         }
     }
 
     void setNRows(int arg)
     {
-        if (m_nRows != arg) {
-            m_nRows = arg;
+        if (m_rowCount != arg) {
+            m_rowCount = arg;
             emit nRowsChanged(arg);
         }
     }
@@ -151,13 +153,13 @@ protected:
     QThread thread;
 
     // members
-    int m_nRows;
-    int m_nCols;
+    int m_rowCount;
+    int m_columnCount;
     int m_nClusters;
     double m_occupationTreshold;
 
     arma::mat m_valueMatrix;
-    arma::umat m_movementCostMatrix;
+    arma::mat m_movementCostMatrix;
     arma::umat m_labelMatrix;
     arma::umat m_areaMatrix;
     arma::mat m_pressureMatrix;
@@ -185,7 +187,7 @@ protected:
     Random m_random;
 };
 
-inline const arma::umat& PercolationSystem::occupationMatrix() {
+inline const arma::mat& PercolationSystem::occupationMatrix() {
     return m_movementCostMatrix;
 }
 
