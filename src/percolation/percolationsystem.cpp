@@ -8,19 +8,20 @@
 #include <QRgb>
 #include <vector>
 #include <QtConcurrent/QtConcurrent>
+#include <eigen3/Eigen/IterativeLinearSolvers>
 
-#ifdef Q_OS_ANDROID
-#include </home/svenni/apps/armadillo/armadillo>
-#else
-#include <armadillo>
-#endif
+//#ifdef Q_OS_ANDROID
+//#include </home/svenni/apps/armadillo/armadillo>
+//#else
+//#include <armadillo>
+//#endif
 #include <iostream>
 #include <random.h>
 #include <time.h>
 
 // Test comment
 
-using namespace arma;
+//using namespace arma;
 using namespace std;
 
 PercolationSystem::PercolationSystem(QQuickPaintedItem *parent) :
@@ -53,8 +54,8 @@ void PercolationSystem::setPressureSources(const QList<QObject *> &pressureSourc
 }
 
 void PercolationSystem::randomizeMatrix() {
-    for(uint i = 0; i < m_valueMatrix.n_rows; i++) {
-        for(uint j = 0; j < m_valueMatrix.n_cols; j++) {
+    for(uint i = 0; i < m_valueMatrix.rows(); i++) {
+        for(uint j = 0; j < m_valueMatrix.cols(); j++) {
             m_valueMatrix(j, i) = m_random.ran2();
         }
     }
@@ -65,27 +66,27 @@ void PercolationSystem::randomizeMatrix() {
 
 bool PercolationSystem::inBounds(int row, int column) const
 {
-    return !(row < 0 || row >= m_valueMatrix.n_rows || column < 0 || column >= m_valueMatrix.n_cols);
+    return !(row < 0 || row >= m_valueMatrix.rows() || column < 0 || column >= m_valueMatrix.cols());
 }
 
 void PercolationSystem::initialize() {
     m_isInitialized = false;
-    m_valueMatrix = zeros(m_rowCount, m_columnCount);
+    m_valueMatrix = MatrixXd(m_rowCount, m_columnCount);
     randomizeMatrix();
-    m_areaMatrix = zeros<umat>(m_rowCount, m_columnCount);
-    m_movementCostMatrix = zeros(m_rowCount, m_columnCount);
-    m_flowMatrix = zeros(m_rowCount, m_columnCount);
-    m_pressureMatrix = zeros(m_rowCount, m_columnCount);
-    m_pressureSourceMatrix = zeros(m_rowCount, m_columnCount);
-    m_oldPressureMatrix = zeros(m_rowCount, m_columnCount);
+    m_areaMatrix = MatrixXi::Zero(m_rowCount, m_columnCount);
+    m_movementCostMatrix = MatrixXd::Zero(m_rowCount, m_columnCount);
+    m_flowMatrix = MatrixXd::Zero(m_rowCount, m_columnCount);
+    m_pressureMatrix = MatrixXd::Zero(m_rowCount, m_columnCount);
+    m_pressureSourceMatrix = MatrixXd::Zero(m_rowCount, m_columnCount);
+    m_oldPressureMatrix = MatrixXd::Zero(m_rowCount, m_columnCount);
     recalculateMatricesAndUpdate();
     m_isInitialized = true;
 }
 
 void PercolationSystem::generatePressureMatrix() {
     //    qDebug() << "Generating pressure matrix";
-    m_pressureSourceMatrix.zeros();
-    m_pressures = zeros(m_nClusters);
+    //    m_pressureSourceMatrix.MatrixXd();
+    m_pressures = VectorXd(m_nClusters);
     for(QObject* pressureSource : m_pressureSources) {
         int row = pressureSource->property("row").toInt();
         int col = pressureSource->property("col").toInt();
@@ -242,20 +243,14 @@ double PercolationSystem::raiseValue(int row, int col) {
 void PercolationSystem::generateOccupationMatrix() {
     //    cout << "Generating occupation matrix..." << endl;
     double p = 1 - m_occupationTreshold;
-    umat occupation = m_valueMatrix > p;
-    m_movementCostMatrix = conv_to<mat>::from(occupation);
+    Matrix<bool, Dynamic, Dynamic> occupation = m_valueMatrix.array() > p;
+    m_movementCostMatrix = occupation.cast<double>();
 
 }
 
 void PercolationSystem::ensureInitialization()
 {
-    if(!m_valueMatrix.in_range(m_rowCount - 1, m_columnCount - 1)  ||
-            !m_areaMatrix.in_range(m_rowCount - 1, m_columnCount - 1)  ||
-            !m_movementCostMatrix.in_range(m_rowCount - 1, m_columnCount - 1)  ||
-            !m_flowMatrix.in_range(m_rowCount - 1, m_columnCount - 1)  ||
-            !m_pressureMatrix.in_range(m_rowCount - 1, m_columnCount - 1)  ||
-            !m_pressureSourceMatrix.in_range(m_rowCount - 1, m_columnCount - 1)  ||
-            !m_oldPressureMatrix.in_range(m_rowCount - 1, m_columnCount - 1)) {
+    if(m_valueMatrix.rows() < m_rowCount || m_valueMatrix.cols() < m_columnCount) {
         initialize();
     }
 }
@@ -292,14 +287,14 @@ uint PercolationSystem::maxLabel()
 
 uint PercolationSystem::maxArea()
 {
-    return m_areaMatrix.max();
+    return m_areaMatrix.maxCoeff();
 }
 
 double PercolationSystem::maxFlow()
 {
     cout << "m_flowMatrix.max()" << endl;
-    cout << m_flowMatrix.max() << endl;
-    return m_flowMatrix.max();
+    cout << m_flowMatrix.maxCoeff() << endl;
+    return m_flowMatrix.maxCoeff();
 }
 
 void PercolationSystem::generateLabelMatrix() {
@@ -307,15 +302,15 @@ void PercolationSystem::generateLabelMatrix() {
     QTime time;
     time.start();
 
-    m_visitDirections = zeros<imat>(4,2);
+    m_visitDirections = MatrixXi(4,2);
     m_visitDirections(0,0) = -1;
     m_visitDirections(1,1) = 1;
     m_visitDirections(2,0) = 1;
     m_visitDirections(3,1) = -1;
 
-    m_labelMatrix = zeros<umat>(m_rowCount, m_columnCount);
+    m_labelMatrix = MatrixXi::Zero(m_rowCount, m_columnCount);
     int currentLabel = 1;
-    imat directions = zeros<imat>(4,2);
+    MatrixXi directions(4,2);
     //    directions(0,0) = -1;
     //    directions(1,1) = 1;
     //    directions(2,0) = 1;
@@ -325,7 +320,7 @@ void PercolationSystem::generateLabelMatrix() {
     directions(1,0) = -1;
     //    directions(3,1) = -1;
 
-    uvec foundLabels = zeros<uvec>(2);
+    VectorXi foundLabels(2);
     vector<pair<uint,uint> > searchQueue;
     //    qDebug() << "Label time1" << time.elapsed();
 
@@ -342,7 +337,7 @@ void PercolationSystem::generateLabelMatrix() {
                 uint row = target.first;
                 uint col = target.second;
                 searchQueue.pop_back();
-                if(!m_labelMatrix.in_range(row, col)) {
+                if(!(row < m_rowCount && col < m_columnCount)) {
                     continue;
                 }
                 if(m_labelMatrix(row,col) > 0 || m_movementCostMatrix(row, col) < 1) {
@@ -351,7 +346,7 @@ void PercolationSystem::generateLabelMatrix() {
                 }
                 area += 1;
                 m_labelMatrix(row, col) = currentLabel;
-                for(uint d = 0; d < m_visitDirections.n_rows; d++) {
+                for(uint d = 0; d < m_visitDirections.rows(); d++) {
                     int nextRow = row + m_visitDirections(d,0);
                     int nextCol = col + m_visitDirections(d,1);
                     searchQueue.push_back(pair<uint, uint>(nextRow, nextCol));
@@ -362,7 +357,7 @@ void PercolationSystem::generateLabelMatrix() {
         }
     }
     m_nClusters = currentLabel;
-    m_areas = zeros<vec>(m_nClusters);
+    m_areas = VectorXd(m_nClusters);
     for(int i = 0; i < m_nClusters; i++) {
         m_areas(i) = tmpAreas.at(i);
     }
@@ -413,10 +408,10 @@ void PercolationSystem::generateImage() {
                 }
                 break;
             case FlowImage:
-                if(m_flowMatrix.max() < 0.1) {
+                if(m_flowMatrix.maxCoeff() < 0.1) {
                     continue;
                 }
-                double ratio = m_flowMatrix(i, j) / m_flowMatrix.max();
+                double ratio = m_flowMatrix(i, j) / m_flowMatrix.maxCoeff();
                 //                double areaRatio = 1. / 3. + (m_flowMatrix(i,j) / m_flowMatrix.max()) * 2. / 3.;
                 color.setRed((1-ratio) * background.red() + ratio * foreground.red());
                 color.setGreen((1-ratio) * background.green() + ratio * foreground.green());
@@ -476,13 +471,16 @@ void PercolationSystem::solveFlow() {
     //                            1.0000,1.0000,1.0000,1.0000,0};
     //    m_movementCostMatrix.reshape(5,5);
     //    m_movementCostMatrix = m_movementCostMatrix.t();
-//    m_movementCostMatrix.load("out.dat");
+    //    m_movementCostMatrix.load("out.dat");
     int equationCount = m_rowCount*(m_columnCount-2);
-    sp_mat A(equationCount, equationCount);
-    vec b = zeros(equationCount);
+    ConjugateGradient<SparseMatrix<double>, Eigen::Upper> solver;
+    SparseMatrix<double> A(equationCount, equationCount);// = MatrixXd::Zero(equationCount, equationCount);
+    VectorXd b(equationCount);
     for(int i = 0; i < m_rowCount; i++) {
         if(movementCost(i, 0) > 0 && movementCost(i, 1) > 0) {
             b(i) = 1.0;
+        } else {
+            b(i) = 0.0;
         }
     }
     //    for(int i = 0; i < m_rowCount; i++) {
@@ -493,8 +491,9 @@ void PercolationSystem::solveFlow() {
     for(int j = 1; j < m_columnCount-1; j++) {
         for(int i = 0; i < m_rowCount; i++) {
             int id = i + (j - 1) * m_rowCount;
+            double value = 0.0;
             if(movementCost(i, j) > 1e-6) {
-                A(id, id) = 0.0;
+                value = 0.0;
                 for(int ii = -1; ii < 2; ii++) {
                     for(int jj = -1; jj < 2; jj++) {
                         if((ii == 0 && jj == 0) || (ii != 0 && jj != 0)) {
@@ -503,51 +502,54 @@ void PercolationSystem::solveFlow() {
                         if(movementCost(i + ii, j + jj) > 0) {
                             int id2 = id + ii + jj * m_rowCount;
                             if(j + jj == 0 || j + jj == m_columnCount - 1) {
-                                A(id, id) += 1.0;
+                                value += 1.0;
                             }
                             if(id2 < 0 || id2 > equationCount - 1) {
                                 continue;
                             }
                             //                            cout << "IDs: " << id << " " << id2 << endl;
-                            A(id, id2) = -1.0;
+                            A.insert(id, id2) = -1.0;
                             //                            cout << "A(id, id2): " << A(id, id2) << endl;
-                            A(id, id) += 1.0;
+                            value += 1.0;
                         }
                     }
                 }
             }
-            if(A(id, id) < 1e-6) {
-                A(id, id) = 1.0;
+            if(value < 1e-6) {
+                value = 1.0;
                 b(id) = 0.0;
             }
+            A.insert(id, id) = value;
         }
     }
 
-    try {
-        vec x = spsolve(A, b);
-        //    cout << x << endl;
-        x.reshape(m_rowCount, m_columnCount);
+    A.makeCompressed();
+    MatrixXd x;
+//    x = A.fullPivLu().solve(b);
+    x = solver.compute(A).solve(b);
+    //        cout << x << endl;
 
-        m_flowMatrix = x;
-        m_flowMatrix -= m_flowMatrix.min();
-        //    m_flowMatrix -= m_movementCostMatrix;
-
-        qDebug() << m_flowMatrix.max();
-    } catch(std::runtime_error e) {
-        m_flowMatrix = m_movementCostMatrix;
-
-//        ofstream out("outA.dat");
-//        out << m_movementCostMatrix;
-//        out.close();
-        m_movementCostMatrix.save("out.dat", arma::raw_ascii);
-        A.save("outA.dat", arma::raw_ascii);
-        b.save("outb.dat", arma::raw_ascii);
-        exit(0);
+    for(int j = 1; j < m_columnCount - 1; j++) {
+        for(int i = 0; i < m_rowCount; i++) {
+            m_flowMatrix(i, j) = x(i + (j - 1) * m_rowCount) - x.minCoeff();
+        }
     }
+    for(int i = 0; i < m_rowCount; i++) {
+        m_flowMatrix(i, 0) = 0.0;
+        m_flowMatrix(i, m_columnCount - 1) = 0.0;
+    }
+    //    cout << x << endl;
+    //        x.reshape(m_rowCount, m_columnCount);
+
+    //        m_flowMatrix = x;
+    //        m_flowMatrix -= m_flowMatrix.minCoeff();
+    //            m_flowMatrix -= m_movementCostMatrix;
+
+    //        qDebug() << m_flowMatrix.max();
 
     //    m_flowMatrix = m_movementCostMatrix;
 
-//    exit(0);
+    //    exit(0);
 }
 
 

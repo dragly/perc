@@ -14,11 +14,16 @@
 #include <QMutex>
 #include <random.h>
 
-#ifdef Q_OS_ANDROID
-#include </home/svenni/apps/armadillo/armadillo>
-#else
-#include <armadillo>
-#endif
+//#ifdef Q_OS_ANDROID
+//#include </home/svenni/apps/armadillo/armadillo>
+//#else
+//#include <armadillo>
+//#endif
+
+#include <eigen3/Eigen/Eigen>
+
+using namespace Eigen;
+
 #include <iostream>
 
 class PressureSource {
@@ -49,8 +54,8 @@ public:
         FlowImage
     };
 
-    const arma::mat &occupationMatrix();
-    const arma::mat& probabilityMatrix();
+    const MatrixXd &occupationMatrix();
+    const MatrixXd& probabilityMatrix();
     int nRows() const
     {
         return m_rowCount;
@@ -158,19 +163,19 @@ protected:
     int m_nClusters;
     double m_occupationTreshold;
 
-    arma::mat m_valueMatrix;
-    arma::mat m_movementCostMatrix;
-    arma::umat m_labelMatrix;
-    arma::umat m_areaMatrix;
-    arma::mat m_pressureMatrix;
-    arma::mat m_oldPressureMatrix;
-    arma::mat m_pressureSourceMatrix;
-    arma::mat m_flowMatrix;
+    MatrixXd m_valueMatrix;
+    MatrixXd m_movementCostMatrix;
+    MatrixXi m_labelMatrix;
+    MatrixXi m_areaMatrix;
+    MatrixXd m_pressureMatrix;
+    MatrixXd m_oldPressureMatrix;
+    MatrixXd m_pressureSourceMatrix;
+    MatrixXd m_flowMatrix;
 
-    arma::imat m_visitDirections;
+    MatrixXi m_visitDirections;
 
-    arma::vec m_areas;
-    arma::vec m_pressures;
+    VectorXd m_areas;
+    VectorXd m_pressures;
     QList<QObject*> m_pressureSources;
 
     QImage m_image;
@@ -187,11 +192,11 @@ protected:
     Random m_random;
 };
 
-inline const arma::mat& PercolationSystem::occupationMatrix() {
+inline const MatrixXd& PercolationSystem::occupationMatrix() {
     return m_movementCostMatrix;
 }
 
-inline const arma::mat& PercolationSystem::probabilityMatrix() {
+inline const MatrixXd& PercolationSystem::probabilityMatrix() {
     return m_valueMatrix;
 }
 
