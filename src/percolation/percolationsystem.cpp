@@ -9,6 +9,7 @@
 #include <vector>
 #include <QtConcurrent/QtConcurrent>
 #include <eigen3/Eigen/IterativeLinearSolvers>
+#include <eigen3/Eigen/SparseCholesky>
 
 //#ifdef Q_OS_ANDROID
 //#include </home/svenni/apps/armadillo/armadillo>
@@ -489,7 +490,7 @@ void PercolationSystem::paint(QPainter *painter)
 void PercolationSystem::solveFlow() {
     qDebug() << "Solving flow!";
     int equationCount = m_rowCount*m_columnCount;
-    ConjugateGradient<SparseMatrix<double>, Eigen::Upper> solver;
+//    ConjugateGradient<SparseMatrix<double>, Eigen::Upper> solver;
     SparseMatrix<double> A(equationCount, equationCount);// = MatrixXd::Zero(equationCount, equationCount);
     VectorXd b = VectorXd::Zero(equationCount);
     //    qDebug() << "Move: " << m_movementCostMatrix.minCoeff() << " " << m_movementCostMatrix.maxCoeff();
@@ -541,7 +542,16 @@ void PercolationSystem::solveFlow() {
 
     MatrixXd x;
     //    x = A.fullPivLu().solve(b);
-    x = solver.compute(A).solve(b);
+    m_timer.restart();
+    if(!m_analyzed) {
+        qDebug() << "Analyzing pattern...";
+        m_solver.analyzePattern(A);
+        m_analyzed = true;
+    }
+    m_solver.factorize(A);
+    x = m_solver.solve(b);
+
+    qDebug() << "Timer: " << m_timer.restart();
     cout << "Min max: " << x.minCoeff() << " " << x.maxCoeff() << endl;
     //        cout << x << endl;
 

@@ -21,9 +21,11 @@
 //#endif
 
 #include <eigen3/Eigen/Eigen>
+#include <eigen3/Eigen/IterativeLinearSolvers>
 
 using namespace Eigen;
 
+#include <QElapsedTimer>
 #include <iostream>
 
 class PressureSource {
@@ -120,6 +122,7 @@ public slots:
     {
         if (m_columnCount != arg) {
             m_columnCount = arg;
+            m_analyzed = false;
             emit nColsChanged(arg);
         }
     }
@@ -128,6 +131,7 @@ public slots:
     {
         if (m_rowCount != arg) {
             m_rowCount = arg;
+            m_analyzed = false;
             emit nRowsChanged(arg);
         }
     }
@@ -191,6 +195,12 @@ protected:
     QMutex m_updateMatrixMutex;
     QMutex m_prevImageMutex;
     Random m_random;
+
+    ConjugateGradient<SparseMatrix<double>, Upper> m_solver;
+
+    bool m_analyzed = false;
+
+    QElapsedTimer m_timer;
 };
 
 inline const MatrixXd& PercolationSystem::occupationMatrix() {
