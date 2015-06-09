@@ -43,6 +43,7 @@ class PercolationSystem : public QQuickPaintedItem
     Q_PROPERTY(ImageType imageType READ imageType WRITE setImageType NOTIFY imageTypeChanged)
     Q_PROPERTY(QList<QObject*> pressureSources READ pressureSources WRITE setPressureSources NOTIFY pressureSourcesChanged)
 
+    void normalizedValue(double value, double minValue, double maxValue);
 public:
     PercolationSystem(QQuickPaintedItem *parent = 0);
     //    void setPercolationSystemGraphics(PercolationSystemGraphics* graphics);

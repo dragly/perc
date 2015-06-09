@@ -71,7 +71,7 @@ bool PercolationSystem::inBounds(int row, int column) const
 
 void PercolationSystem::initialize() {
     m_isInitialized = false;
-    m_valueMatrix = MatrixXd(m_rowCount, m_columnCount);
+    m_valueMatrix = MatrixXd::Zero(m_rowCount, m_columnCount);
     randomizeMatrix();
     m_areaMatrix = MatrixXi::Zero(m_rowCount, m_columnCount);
     m_movementCostMatrix = MatrixXd::Zero(m_rowCount, m_columnCount);
@@ -258,12 +258,12 @@ void PercolationSystem::ensureInitialization()
 double PercolationSystem::movementCost(int row, int col)
 {
     if(row < 0 || col < 0 || row >= m_rowCount || col >= m_columnCount) {
-        return false;
+        return 0.0;
     }
-    if(m_movementCostMatrix(row, col) == 1) {
-        return true;
+    if(m_movementCostMatrix(row, col) > 0.9 && m_movementCostMatrix(row, col) < 1.1) {
+        return 1.0;
     } else {
-        return false;
+        return 0.0;
     }
 }
 
@@ -367,66 +367,90 @@ void PercolationSystem::generateLabelMatrix() {
 
 void PercolationSystem::generateImage() {
     m_image = QImage(m_columnCount, m_rowCount, QImage::Format_ARGB32);
-    QColor background("#0868ac");
-    QColor foreground("#f0f9e8");
+    QColor background("#000000");
+    QColor foregroundLow("#0868ac");
+    QColor foregroundHigh("#f0f9e8");
     double maxAreaLocal;
     maxAreaLocal = maxArea();
     if(maxAreaLocal == 0) {
         maxAreaLocal = 1;
     }
-    QColor color;
-    for(int i = 0; i < m_rowCount; i++) {
-        for(int j = 0; j < m_columnCount; j++) {
-            switch(m_imageType) {
-            case OccupationImage:
+    QColor color(0, 255, 255);
+
+
+    switch(m_imageType) {
+    case OccupationImage: {
+        for(int i = 0; i < m_rowCount; i++) {
+            for(int j = 0; j < m_columnCount; j++) {
                 if(movementCost(i,j)) {
-                    color = foreground;
+                    color = foregroundHigh;
                 } else {
                     color = background;
                 }
-                break;
-            case PressureImage:
+                m_image.setPixel(j,i,color.rgba());
+            }
+        }
+        break;
+    }
+    case PressureImage: {
+        double minPressure = m_pressureMatrix.minCoeff();
+        double maxPressure = m_pressureMatrix.maxCoeff();
+        double diffPressurei = 1.0 / (maxPressure - minPressure);
+        for(int i = 0; i < m_rowCount; i++) {
+            for(int j = 0; j < m_columnCount; j++) {
                 if(movementCost(i,j)) {
-                    double maxPressureLocal;
-                    double pressureRatio;
-                    maxPressureLocal = 1. / 100.;
-                    pressureRatio = fmin(0.3 + (m_pressureMatrix(i,j) / maxPressureLocal) * 2. / 3., 1);
-                    color = QColor(240, pressureRatio*249, 232);
+                    double ratio = (m_pressureMatrix(i, j) - minPressure) * diffPressurei;
+                    color.setRed((1-ratio) * foregroundLow.red() + ratio * foregroundHigh.red());
+                    color.setGreen((1-ratio) * foregroundLow.green() + ratio * foregroundHigh.green());
+                    color.setBlue((1-ratio) * foregroundLow.blue() + ratio * foregroundHigh.blue());
                 } else {
                     color = background;
                 }
-                break;
-            case AreaImage:
+                m_image.setPixel(j,i,color.rgba());
+            }
+        }
+        break;
+    }
+    case AreaImage: {
+        for(int i = 0; i < m_rowCount; i++) {
+            for(int j = 0; j < m_columnCount; j++) {
                 if(movementCost(i,j)) {
                     double areaRatio;
                     areaRatio = 1. / 3. + (m_areaMatrix(i,j) / maxAreaLocal) * 2. / 3.;
-                    color.setRed((1-areaRatio) * background.red() + areaRatio * foreground.red());
-                    color.setGreen((1-areaRatio) * background.green() + areaRatio * foreground.green());
-                    color.setBlue((1-areaRatio) * background.blue() + areaRatio * foreground.blue());
+                    color.setRed((1-areaRatio) * foregroundLow.red() + areaRatio * foregroundHigh.red());
+                    color.setGreen((1-areaRatio) * foregroundLow.green() + areaRatio * foregroundHigh.green());
+                    color.setBlue((1-areaRatio) * foregroundLow.blue() + areaRatio * foregroundHigh.blue());
                 } else {
                     color = background;
                 }
-                break;
-            case FlowImage:
-                if(m_flowMatrix.maxCoeff() < 0.1) {
-                    continue;
-                }
-                double ratio = m_flowMatrix(i, j) / m_flowMatrix.maxCoeff();
-                //                double areaRatio = 1. / 3. + (m_flowMatrix(i,j) / m_flowMatrix.max()) * 2. / 3.;
-                color.setRed((1-ratio) * background.red() + ratio * foreground.red());
-                color.setGreen((1-ratio) * background.green() + ratio * foreground.green());
-                color.setBlue((1-ratio) * background.blue() + ratio * foreground.blue());
-                //                if(fabs(m_flowMatrix(i, j) < 0.1)) {
-                //                    color = QColor(0, 0, 0);
-                //                } else if(m_flowMatrix(i, j) < 0) {
-                //                    color = foreground;
-                //                } else {
-                //                    color = background;
-                //                }
-
+                m_image.setPixel(j,i,color.rgba());
             }
-            m_image.setPixel(j,i,color.rgba());
         }
+        break;
+    }
+    case FlowImage: {
+        double minFlow = m_flowMatrix.minCoeff();
+        double maxFlow = m_flowMatrix.maxCoeff();
+        double diffFlowi = 1.0 / (maxFlow - minFlow);
+        for(int i = 0; i < m_rowCount; i++) {
+            for(int j = 0; j < m_columnCount; j++) {
+                if(movementCost(i,j)) {
+                    double ratio = (m_flowMatrix(i, j) - minFlow) * diffFlowi;
+//                    if(ratio < 0.001) {
+//                        color = QColor(0,0,0);
+//                    } else {
+                        color.setRed((1-ratio) * foregroundLow.red() + ratio * foregroundHigh.red());
+                        color.setGreen((1-ratio) * foregroundLow.green() + ratio * foregroundHigh.green());
+                        color.setBlue((1-ratio) * foregroundLow.blue() + ratio * foregroundHigh.blue());
+//                    }
+                } else {
+                    color = background;
+                }
+                m_image.setPixel(j,i,color.rgba());
+            }
+        }
+        break;
+    }
     }
 }
 
@@ -464,33 +488,22 @@ void PercolationSystem::paint(QPainter *painter)
 
 void PercolationSystem::solveFlow() {
     qDebug() << "Solving flow!";
-    //    m_movementCostMatrix = {1.0000,  0,1.0000,1.0000,1.0000,
-    //                            0,1.0000,1.0000, 0,1.0000,
-    //                            1.0000,  0,  0,1.0000,1.0000,
-    //                            0,1.0000,  0,1.0000,0,
-    //                            1.0000,1.0000,1.0000,1.0000,0};
-    //    m_movementCostMatrix.reshape(5,5);
-    //    m_movementCostMatrix = m_movementCostMatrix.t();
-    //    m_movementCostMatrix.load("out.dat");
-    int equationCount = m_rowCount*(m_columnCount-2);
+    int equationCount = m_rowCount*m_columnCount;
     ConjugateGradient<SparseMatrix<double>, Eigen::Upper> solver;
     SparseMatrix<double> A(equationCount, equationCount);// = MatrixXd::Zero(equationCount, equationCount);
-    VectorXd b(equationCount);
+    VectorXd b = VectorXd::Zero(equationCount);
+    //    qDebug() << "Move: " << m_movementCostMatrix.minCoeff() << " " << m_movementCostMatrix.maxCoeff();
+    //    cout << m_movementCostMatrix << endl;
     for(int i = 0; i < m_rowCount; i++) {
-        if(movementCost(i, 0) > 0 && movementCost(i, 1) > 0) {
+        if(movementCost(i, 0) > 0) {
             b(i) = 1.0;
         } else {
             b(i) = 0.0;
         }
     }
-    //    for(int i = 0; i < m_rowCount; i++) {
-    //        if(movementCost(i, m_columnCount - 1) > 0) {
-    //            b(i + (m_columnCount) * (m_rowCount - 1)) = -1.0;
-    //        }
-    //    }
-    for(int j = 1; j < m_columnCount-1; j++) {
+    for(int j = 0; j < m_columnCount; j++) {
         for(int i = 0; i < m_rowCount; i++) {
-            int id = i + (j - 1) * m_rowCount;
+            int id = i + j * m_rowCount;
             double value = 0.0;
             if(movementCost(i, j) > 1e-6) {
                 value = 0.0;
@@ -499,17 +512,15 @@ void PercolationSystem::solveFlow() {
                         if((ii == 0 && jj == 0) || (ii != 0 && jj != 0)) {
                             continue;
                         }
+                        if(j + jj == -1 || j + jj == m_columnCount) {
+                            value += 1.0;
+                        }
                         if(movementCost(i + ii, j + jj) > 0) {
                             int id2 = id + ii + jj * m_rowCount;
-                            if(j + jj == 0 || j + jj == m_columnCount - 1) {
-                                value += 1.0;
-                            }
                             if(id2 < 0 || id2 > equationCount - 1) {
                                 continue;
                             }
-                            //                            cout << "IDs: " << id << " " << id2 << endl;
                             A.insert(id, id2) = -1.0;
-                            //                            cout << "A(id, id2): " << A(id, id2) << endl;
                             value += 1.0;
                         }
                     }
@@ -524,32 +535,65 @@ void PercolationSystem::solveFlow() {
     }
 
     A.makeCompressed();
+
+//    cout << A << endl;
+//    cout << b << endl;
+
     MatrixXd x;
-//    x = A.fullPivLu().solve(b);
+    //    x = A.fullPivLu().solve(b);
     x = solver.compute(A).solve(b);
+    cout << "Min max: " << x.minCoeff() << " " << x.maxCoeff() << endl;
     //        cout << x << endl;
 
-    for(int j = 1; j < m_columnCount - 1; j++) {
+    double minPressure = x.minCoeff();
+    double maxPressure = x.maxCoeff();
+    double diffPressure = maxPressure - minPressure;
+    double diffPressurei = 1.0 / diffPressure;
+    MatrixXd pressure = MatrixXd::Zero(m_rowCount, m_columnCount);
+    for(int j = 0; j < m_columnCount; j++) {
         for(int i = 0; i < m_rowCount; i++) {
-            m_flowMatrix(i, j) = x(i + (j - 1) * m_rowCount) - x.minCoeff();
+            //            pressure(i, j) = (x(i + j * m_rowCount) - minPressure) * diffPressurei;
+            pressure(i, j) = x(i + j * m_rowCount);
         }
     }
-    for(int i = 0; i < m_rowCount; i++) {
-        m_flowMatrix(i, 0) = 0.0;
-        m_flowMatrix(i, m_columnCount - 1) = 0.0;
+
+    m_flowMatrix = MatrixXd::Zero(m_rowCount, m_columnCount);
+    for(int j = 0; j < m_columnCount; j++) {
+        for(int i = 0; i < m_rowCount; i++) {
+            if(movementCost(i, j) > 0) {
+                if(movementCost(i - 1, j) > 0) {
+                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i - 1, j) - pressure(i, j));
+                }
+                if(movementCost(i + 1, j) > 0) {
+                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i + 1, j) - pressure(i, j));
+                }
+                if(movementCost(i, j - 1) > 0) {
+                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i, j - 1) - pressure(i, j));
+                }
+                if(movementCost(i, j + 1) > 0) {
+                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i, j + 1) - pressure(i, j));
+                }
+                if(j == 0) {
+                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i,j) - 1.0);
+                }
+                if(j == m_columnCount - 1) {
+                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i,j) - 0.0);
+                }
+            }
+        }
     }
-    //    cout << x << endl;
-    //        x.reshape(m_rowCount, m_columnCount);
 
-    //        m_flowMatrix = x;
-    //        m_flowMatrix -= m_flowMatrix.minCoeff();
-    //            m_flowMatrix -= m_movementCostMatrix;
+    // Normalize pressure
+    m_pressureMatrix = pressure;
 
-    //        qDebug() << m_flowMatrix.max();
+    //    cout << "Flow:" << endl;
+    //    cout << m_flowMatrix << endl;
 
-    //    m_flowMatrix = m_movementCostMatrix;
+    //    m_flowMatrix = pressure;
 
-    //    exit(0);
+
+    //    cout << "Pressure:" << endl;
+    //    cout << m_pressureMatrix << endl;
 }
 
 

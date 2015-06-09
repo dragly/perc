@@ -5,7 +5,15 @@ import org.dragly.perc 1.0
 Item {
     id: gameMenuRoot
 
-    property int imageType: PercolationSystem.FlowImage
+    property int imageType: imageTypes[currentImageTypeIndex]
+
+    property int currentImageTypeIndex: 0
+    property var imageTypes: [
+        PercolationSystem.FlowImage,
+        PercolationSystem.PressureImage,
+        PercolationSystem.OccupationImage
+    ]
+
     property double energy
     signal pauseClicked
 
@@ -98,12 +106,10 @@ Item {
             anchors.fill: parent
 
             onClicked: {
-                if(imageType === PercolationSystem.PressureImage) {
-                    imageType = PercolationSystem.OccupationImage
-                } else if(imageType === PercolationSystem.OccupationImage) {
-                    imageType = PercolationSystem.AreaImage
-                } else if(imageType === PercolationSystem.AreaImage) {
-                    imageType = PercolationSystem.PressureImage
+                if(currentImageTypeIndex + 1 >= imageTypes.length) {
+                    currentImageTypeIndex = 0
+                } else {
+                    currentImageTypeIndex += 1
                 }
             }
         }
