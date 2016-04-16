@@ -79,75 +79,10 @@ Item {
         hoverEnabled: true
 
         anchors.fill: parent
-        //        onClicked: {
-        //            if(!isDragging) {
-        //                console.log("clicked")
-        //                selectedObjects = []
-        //            }
-        //        }
 
         onExited: {
             console.log("Exited")
         }
-
-//        onReleased: {
-//            console.log("Released")
-//            if(isDragging) {
-//                var newSelection;
-//                if(mouse.modifiers & Qt.ShiftModifier) {
-//                    newSelection = sceneRoot.selectedObjects
-//                } else {
-//                    newSelection = []
-//                }
-//                for(var i in entityManager.entities) {
-//                    var entity = entityManager.entities[i]
-//                    var rect = selectionRectangle
-//                    if(entity.x > rect.x && entity.x < rect.x + rect.width && entity.y > rect.y && entity.y < rect.y + rect.height) {
-//                        newSelection.push(entity)
-//                    } else {
-//                        entity.selected = false
-//                    }
-//                }
-//                for(var i in newSelection) {
-//                    var entity = newSelection[i]
-//                    entity.selected = true
-//                }
-
-//                sceneRoot.selectedObjects = newSelection
-//            } else {
-//                selectedObjects = []
-//            }
-//            selectionRectangle.width = 1
-//            selectionRectangle.height = 1
-//            isDragging = false
-//        }
-
-//        onPressed: {
-//            console.log("Pressed")
-//            isDragging = true
-//            dragStart.x = mouse.x
-//            dragStart.y = mouse.y
-
-//        }
-
-//        onPositionChanged: {
-//            if(isDragging) {
-//                if(mouse.x > dragStart.x) {
-//                    selectionRectangle.x = dragStart.x
-//                    selectionRectangle.width = mouse.x - dragStart.x
-//                } else {
-//                    selectionRectangle.x = mouse.x
-//                    selectionRectangle.width = dragStart.x - mouse.x
-//                }
-//                if(mouse.y > dragStart.y) {
-//                    selectionRectangle.y = dragStart.y
-//                    selectionRectangle.height = mouse.y - dragStart.y
-//                } else {
-//                    selectionRectangle.y = mouse.y
-//                    selectionRectangle.height = dragStart.y - mouse.y
-//                }
-//            }
-//        }
 
         drag.target: parent
         z: 9999999
