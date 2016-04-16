@@ -1,4 +1,6 @@
 import QtQuick 2.0
+import Qt.WebSockets 1.0
+
 import org.dragly.perc 1.0
 
 import "hud"
@@ -21,10 +23,10 @@ Item {
     property alias nCols: percolationSystem.nCols
     property alias occupationTreshold: percolationSystem.occupationTreshold
     readonly property alias percolationSystem: percolationSystem
-    readonly property alias entityManager: entityManager
-//    property alias pressureSources: percolationSystem.pressureSources
+    readonly property alias entityManager: serverEntityManager
+
     property Team playerTeam: playerTeamInternal
-    property list<Team> otherTeams
+    property int playerTeamId: 0
 
     property list<Objective> failObjectives
     property list<Objective> winObjectives
@@ -66,8 +68,7 @@ Item {
         percolationSystemShader.updateSourceRect()
     }
 
-    Component.onCompleted: {
-    }
+    Component.onCompleted: {}
 
     Team {
         id: playerTeamInternal
@@ -91,7 +92,6 @@ Item {
         nCols: 10
         occupationTreshold: 0.55
         imageType: constructionMenu.imageType
-//        pressureSources: pressureSources
 
         smooth: false
     }
@@ -110,9 +110,9 @@ Item {
         function updateSourceRect() {
             var newRect = gameViewRoot.mapToItem(gameScene,0,0,gameViewRoot.width,gameViewRoot.height)
             sourceRect = Qt.rect(newRect.x / (Defaults.GRID_SIZE),
-                                newRect.y / (Defaults.GRID_SIZE),
-                                newRect.width / (Defaults.GRID_SIZE),
-                                newRect.height / (Defaults.GRID_SIZE))
+                                 newRect.y / (Defaults.GRID_SIZE),
+                                 newRect.width / (Defaults.GRID_SIZE),
+                                 newRect.height / (Defaults.GRID_SIZE))
         }
     }
 
@@ -125,7 +125,6 @@ Item {
         objectName: "gameScene"
         targetScale: 0.2
         percolationSystem: percolationSystem
-//        imageType: gameMenu.imageType
 
         onCurrentScaleChanged: {
             percolationSystemShader.updateSourceRect()
@@ -162,11 +161,7 @@ Item {
         drag.target: gameScene
 
         onWheel: {
-            //            var realGameSceneX = gameScene.scaleOriginX
-//            var currentScaleOrigin = mapFromItem(gameScene, gameScene.scaleOriginX, gameScene.scaleOriginY)
             var relativeMouse = mapToItem(gameScene, wheel.x, wheel.y)
-            //            gameScene.x += wheel.x - currentScaleOrigin.x
-            //            gameScene.y += wheel.y - currentScaleOrigin.y
             gameScene.scaleOriginX = relativeMouse.x
             gameScene.scaleOriginY = relativeMouse.y
             if(wheel.angleDelta.y > 0) {
@@ -177,7 +172,6 @@ Item {
             var newPosition = mapFromItem(gameScene, relativeMouse.x, relativeMouse.y)
             gameScene.x += wheel.x - newPosition.x
             gameScene.y += wheel.y - newPosition.y
-//            percolationSystemShader.updateSourceRect()
         }
 
         onPositionChanged: {
@@ -185,30 +179,7 @@ Item {
             percolationSystemShader.lightPosY = mouse.y / (gameViewRoot.height)
             var relativeMouse = mapToItem(gameScene, mouse.x, mouse.y)
             gameScene.lightSource.setLightPos(relativeMouse.x, relativeMouse.y)
-//            if(isDragging) {
-//                gameScene.x += mouse.x - prevX
-//                gameScene.y += mouse.y - prevY
-//                percolationSystemShader.updateSourceRect()
-//            }
-//            prevX = mouse.x
-//            prevY = mouse.y
         }
-
-//        onReleased: {
-//            console.log("mainViewMouseArea released")
-//            isDragging = false
-//        }
-
-//        onExited: {
-//            isDragging = false
-//        }
-
-//        onPressed: {
-//            console.log("mainViewMouseArea pressed")
-//            isDragging = true
-//            prevX = mouse.x
-//            prevY = mouse.y
-//        }
     }
 
     PinchArea {
@@ -308,17 +279,201 @@ Item {
         }
     }
 
+    WebSocketServer {
+        id: server
+
+        property var clients: []
+        property int nextTeamId: 1
+
+        host: "192.168.2.2"
+        port: 44789
+        accept: true
+        listen: true
+
+        function notifyClients() {
+            var entities = [];
+            for(var j in serverEntityManager.entities) {
+                var entity = serverEntityManager.entities[j];
+                entities.push(entity.properties);
+            }
+            var teams = [];
+            for(var j in serverEntityManager.teams) {
+                var team = serverEntityManager.teams[j];
+                teams.push(team.properties);
+            }
+
+            var state = {
+                type: "state",
+                entities: entities,
+                teams: teams
+            };
+
+            for(var i in clients) {
+                var client = clients[i];
+                client.webSocket.sendTextMessage(JSON.stringify(state));
+            }
+        }
+
+        function spawnWalker(spawn, properties) {
+            console.log("Spawn walker!");
+            properties.row = spawn.row
+            properties.col = spawn.col
+            properties.team = spawn.team
+            var walker = serverEntityManager.createEntityFromUrl("walkers/RandomWalker.qml", properties);
+        }
+
+        onClientConnected: {
+            console.log("Client connected");
+
+            var client = {webSocket: webSocket};
+            clients.push(client);
+            var teamComponent = Qt.createComponent("Team.qml");
+            var team = teamComponent.createObject(server, {teamId: nextTeamId});
+            serverEntityManager.teams.push(team);
+            nextTeamId += 1;
+
+            var playerSpawnSite = Logic.randomSiteOnLargestCluster(percolationSystem)
+            var properties = {
+                team: team,
+                row: playerSpawnSite.row,
+                col: playerSpawnSite.col,
+                interval: 10000
+            }
+            var playerSpawn = serverEntityManager.createEntityFromUrl("spawns/Spawn.qml", properties)
+            playerSpawn.spawnedWalker.connect(spawnWalker)
+
+            webSocket.sendTextMessage(JSON.stringify({type: "welcome", team: team}));
+
+            webSocket.onTextMessageReceived.connect(function(message) {
+                var parsed = JSON.parse(message);
+                for(var i in parsed.entities) {
+                    var entityStrategy = parsed.entities[i];
+                    for(var j in serverEntityManager.entities) {
+                        var entity = serverEntityManager.entities[j];
+                        if(entity.entityId === entityStrategy.entityId) {
+                            if(entity.strategy !== undefined) {
+                                entity.strategy = entityStrategy.strategy;
+                            }
+                        }
+                    }
+                }
+            });
+            webSocket.onStatusChanged.connect(function(status) {
+                if(status === WebSocket.Closed) {
+                    clients.splice(clients.indexOf(client), 1);
+                }
+            });
+        }
+        onErrorStringChanged: {
+            console.log(qsTr("Server error: %1").arg(errorString));
+        }
+    }
+
+    WebSocket {
+        id: socket
+        url: "ws://192.168.2.2:44789"
+        active: true
+        onTextMessageReceived: {
+            var parsed = JSON.parse(message);
+            console.log("Client received message", message);
+            if(parsed.type === "welcome") {
+                playerTeamId = parsed.team.teamId;
+            }
+            if(parsed.type === "state") {
+                for(var i in entityManager.entities) {
+                    var entity = entityManager.entities[i];
+                    entity.toBeDeleted = true;
+                }
+
+                for(var i in parsed.entities) {
+                    var parsedEntity = parsed.entities[i];
+                    var entity;
+                    var found = false;
+                    for(var j in entityManager.entities) {
+                        var existingEntity = entityManager.entities[j];
+                        if(existingEntity.entityId === parsedEntity.entityId) {
+                            entity = existingEntity;
+                            found = true;
+                        }
+                    }
+                    if(!found) {
+                        entity = entityManager.createEntityFromUrl(parsedEntity.filename, {team: playerTeam});
+                    }
+                    for(var j in parsedEntity) {
+                        entity.properties[j] = parsedEntity[j];
+                    }
+                    entity.toBeDeleted = false;
+                }
+
+                for(var i in entityManager.entities) {
+                    var entity = entityManager.entities[i];
+                    if(entity.toBeDeleted) {
+                        entityManager.killLater(entity);
+                    }
+                }
+
+                var strategyEntities = [];
+                for(var i in entityManager.entities) {
+                    var entity = entityManager.entities[i];
+                    var entityStrategy = {
+                        entityId: entity.entityId,
+                        strategy: 1
+                    }
+                    strategyEntities.push(entityStrategy);
+                }
+                var strategy = {
+                    entities: strategyEntities
+                };
+                socket.sendTextMessage(JSON.stringify(strategy));
+            }
+        }
+        onStatusChanged: {
+            if (socket.status == WebSocket.Error) {
+                console.log(qsTr("Client error: %1").arg(socket.errorString));
+            } else if (socket.status == WebSocket.Closed) {
+                console.log(qsTr("Client socket closed."));
+            }
+        }
+    }
+
+    EntityManager {
+        id: serverEntityManager
+        gameScene: serverScene
+        gameView: gameViewRoot
+        percolationSystem: percolationSystem
+    }
+
+    Rectangle {
+
+        anchors {
+            left: parent.left
+            top: parent.top
+        }
+
+        width: 300
+        height: 300
+
+
+        GameScene {
+            id: serverScene
+            anchors.fill: parent
+            targetScale: 0.2
+            scale: 0.2
+            percolationSystem: percolationSystem
+        }
+    }
+
     Timer {
         id: advanceTimer
         property int triggers: 0
         running: (state === "running")
-        interval: 1000 / 60 // hoping for 60 FPS
+        interval: 1000 // hoping for 60 FPS
         repeat: true
         onTriggered: {
             var currentTime = Date.now()
             advance(currentTime)
             if(percolationSystem.tryLockUpdates()) {
-                entityManager.advance(currentTime)
+                serverEntityManager.advance(currentTime)
                 var fail = false
                 for(var i in failObjectives) {
                     var failObjective = failObjectives[i]
@@ -339,8 +494,9 @@ Item {
                 }
 
                 percolationSystem.unlockUpdates()
-                percolationSystem.requestRecalculation()
             }
+
+            server.notifyClients();
         }
     }
 }

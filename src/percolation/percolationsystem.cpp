@@ -40,12 +40,29 @@ PercolationSystem::PercolationSystem(QQuickPaintedItem *parent) :
     connect(this, SIGNAL(imageTypeChanged(ImageType)), this, SLOT(requestRecalculation()));
 }
 
+int PercolationSystem::rowCount() const
+{
+    return m_rowCount;
+}
+
+int PercolationSystem::columnCount() const
+{
+    return m_columnCount;
+}
+
+QByteArray PercolationSystem::serialize() {
+    QByteArray data = QByteArray::fromRawData(reinterpret_cast<char*>(m_valueMatrix.data()),
+                                              m_rowCount * m_columnCount * sizeof(double)).toBase64();
+    return data;
+}
+
+void PercolationSystem::deserialize(QByteArray data)
+{
+
+}
+
 PercolationSystem::~PercolationSystem() {
     m_isInitialized = false;
-    //    m_updateMatrixMutex.lock();
-    //    m_updateMatrixMutex.unlock();
-    //    m_prevImageMutex.lock();
-    //    m_prevImageMutex.unlock();
 }
 
 void PercolationSystem::setPressureSources(const QList<QObject *> &pressureSources) {
@@ -74,6 +91,7 @@ void PercolationSystem::initialize() {
     m_isInitialized = false;
     m_valueMatrix = MatrixXd::Zero(m_rowCount, m_columnCount);
     randomizeMatrix();
+    m_teamMatrix = MatrixXi::Zero(m_rowCount, m_columnCount);
     m_areaMatrix = MatrixXi::Zero(m_rowCount, m_columnCount);
     m_movementCostMatrix = MatrixXd::Zero(m_rowCount, m_columnCount);
     m_flowMatrix = MatrixXd::Zero(m_rowCount, m_columnCount);
@@ -85,8 +103,6 @@ void PercolationSystem::initialize() {
 }
 
 void PercolationSystem::generatePressureMatrix() {
-    //    qDebug() << "Generating pressure matrix";
-    //    m_pressureSourceMatrix.MatrixXd();
     m_pressures = VectorXd(m_nClusters);
     for(QObject* pressureSource : m_pressureSources) {
         int row = pressureSource->property("row").toInt();
@@ -154,7 +170,6 @@ void PercolationSystem::recalculateMatricesAndUpdate() {
     generateAreaMatrix();
     generatePressureMatrix();
     generateImage();
-    solveFlow();
     QMutexLocker prevImageLocker(&m_prevImageMutex);
     m_prevImage = m_image;
     emit readyToUpdate();
@@ -195,12 +210,10 @@ void PercolationSystem::setOccupationTreshold(double arg)
 }
 
 bool PercolationSystem::tryLockUpdates() {
-    //    qDebug() << "Locked updates";
     return m_updateMatrixMutex.tryLock();
 }
 
 void PercolationSystem::unlockUpdates() {
-    //    qDebug() << "Unlocked updates";
     m_updateMatrixMutex.unlock();
 }
 
@@ -214,23 +227,10 @@ void PercolationSystem::setImageType(ImageType arg)
 
 double PercolationSystem::lowerValue(int row, int col) {
     if(movementCost(row,col)) {
-        //        m_valueMatrix(row, col) = fmax(m_valueMatrix(row,col) - 0.05, 0);
         m_valueMatrix(row, col) = fmax(m_occupationTreshold - 0.05, 0);
         return 0.05;
     }
     return 0;
-    //    if(isSite(row+1,col)) {
-    //        m_valueMatrix(row + 1, col) = fmin(m_valueMatrix(row + 1,col) - 0.05, 1);
-    //    }
-    //    if(isSite(row-1,col)) {
-    //        m_valueMatrix(row - 1, col) = fmin(m_valueMatrix(row - 1,col) - 0.05, 1);
-    //    }
-    //    if(isSite(row,col+1)) {
-    //        m_valueMatrix(row, col + 1) = fmin(m_valueMatrix(row, col + 1) - 0.05, 1);
-    //    }
-    //    if(isSite(row,col-1)) {
-    //        m_valueMatrix(row, col - 1) = fmin(m_valueMatrix(row, col - 1) - 0.05, 1);
-    //    }
 }
 
 double PercolationSystem::raiseValue(int row, int col) {
@@ -401,9 +401,14 @@ void PercolationSystem::generateImage() {
             for(int j = 0; j < m_columnCount; j++) {
                 if(movementCost(i,j)) {
                     double ratio = (m_pressureMatrix(i, j) - minPressure) * diffPressurei;
-                    color.setRed((1-ratio) * foregroundLow.red() + ratio * foregroundHigh.red());
-                    color.setGreen((1-ratio) * foregroundLow.green() + ratio * foregroundHigh.green());
-                    color.setBlue((1-ratio) * foregroundLow.blue() + ratio * foregroundHigh.blue());
+                    double red = (1-ratio) * foregroundLow.red() + ratio * foregroundHigh.red();
+                    double green = (1-ratio) * foregroundLow.green() + ratio * foregroundHigh.green();
+                    double blue = (1-ratio) * foregroundLow.blue() + ratio * foregroundHigh.blue();
+                    if(red >= 0 && red <= 255 && green >= 0 && green <= 255 && blue >= 0 && blue <= 255) {
+                        color.setRed(red);
+                        color.setGreen(green);
+                        color.setBlue(blue);
+                    }
                 } else {
                     color = background;
                 }
@@ -437,13 +442,9 @@ void PercolationSystem::generateImage() {
             for(int j = 0; j < m_columnCount; j++) {
                 if(movementCost(i,j)) {
                     double ratio = (m_flowMatrix(i, j) - minFlow) * diffFlowi;
-//                    if(ratio < 0.001) {
-//                        color = QColor(0,0,0);
-//                    } else {
-                        color.setRed((1-ratio) * foregroundLow.red() + ratio * foregroundHigh.red());
-                        color.setGreen((1-ratio) * foregroundLow.green() + ratio * foregroundHigh.green());
-                        color.setBlue((1-ratio) * foregroundLow.blue() + ratio * foregroundHigh.blue());
-//                    }
+                    color.setRed((1-ratio) * foregroundLow.red() + ratio * foregroundHigh.red());
+                    color.setGreen((1-ratio) * foregroundLow.green() + ratio * foregroundHigh.green());
+                    color.setBlue((1-ratio) * foregroundLow.blue() + ratio * foregroundHigh.blue());
                 } else {
                     color = background;
                 }
@@ -451,6 +452,32 @@ void PercolationSystem::generateImage() {
             }
         }
         break;
+    }
+    case TeamImage: {
+        for(int i = 0; i < m_rowCount; i++) {
+            for(int j = 0; j < m_columnCount; j++) {
+                if(movementCost(i,j)) {
+                    int team = m_teamMatrix(i, j);
+                    switch(team) {
+                    case 1:
+                        color = QColor("red");
+                        break;
+                    case 2:
+                        color = QColor("green");
+                        break;
+                    case 3:
+                        color = QColor("blue");
+                        break;
+                    default:
+                        color = QColor("grey");
+                        break;
+                    }
+                } else {
+                    color = background;
+                }
+                m_image.setPixel(j,i,color.rgba());
+            }
+        }
     }
     }
 }
@@ -488,18 +515,12 @@ void PercolationSystem::paint(QPainter *painter)
 }
 
 void PercolationSystem::solveFlow() {
-    qDebug() << "Solving flow!";
     int equationCount = m_rowCount*m_columnCount;
-//    ConjugateGradient<SparseMatrix<double>, Eigen::Upper> solver;
     SparseMatrix<double> A(equationCount, equationCount);// = MatrixXd::Zero(equationCount, equationCount);
     VectorXd b = VectorXd::Zero(equationCount);
-    //    qDebug() << "Move: " << m_movementCostMatrix.minCoeff() << " " << m_movementCostMatrix.maxCoeff();
-    //    cout << m_movementCostMatrix << endl;
     for(int i = 0; i < m_rowCount; i++) {
-        if(movementCost(i, 0) > 0) {
-            b(i) = 1.0;
-        } else {
-            b(i) = 0.0;
+        for(int j = 0; j < m_columnCount; j++) {
+            b(i + j*m_rowCount) = m_pressureSourceMatrix(i, j);
         }
     }
     for(int j = 0; j < m_columnCount; j++) {
@@ -537,11 +558,7 @@ void PercolationSystem::solveFlow() {
 
     A.makeCompressed();
 
-//    cout << A << endl;
-//    cout << b << endl;
-
     MatrixXd x;
-    //    x = A.fullPivLu().solve(b);
     m_timer.restart();
     if(!m_analyzed) {
         qDebug() << "Analyzing pattern...";
@@ -553,7 +570,6 @@ void PercolationSystem::solveFlow() {
 
     qDebug() << "Timer: " << m_timer.restart();
     cout << "Min max: " << x.minCoeff() << " " << x.maxCoeff() << endl;
-    //        cout << x << endl;
 
     double minPressure = x.minCoeff();
     double maxPressure = x.maxCoeff();
@@ -562,7 +578,6 @@ void PercolationSystem::solveFlow() {
     MatrixXd pressure = MatrixXd::Zero(m_rowCount, m_columnCount);
     for(int j = 0; j < m_columnCount; j++) {
         for(int i = 0; i < m_rowCount; i++) {
-            //            pressure(i, j) = (x(i + j * m_rowCount) - minPressure) * diffPressurei;
             pressure(i, j) = x(i + j * m_rowCount);
         }
     }

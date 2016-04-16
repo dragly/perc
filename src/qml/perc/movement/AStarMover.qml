@@ -29,16 +29,16 @@ Mover {
     }
 
     function createGrid() {
-        var tmp = new Array(percolationSystem.nRows)
-        for(var i = 0; i < percolationSystem.nRows; i++) {
-            tmp[i] = new Array(percolationSystem.nCols)
+        var tmp = new Array(percolationSystem.rowCount)
+        for(var i = 0; i < percolationSystem.rowCount; i++) {
+            tmp[i] = new Array(percolationSystem.columnCount)
         }
         grid = tmp
     }
 
     function resetGrid() {
-        for(var i = 0; i < percolationSystem.nRows; i++) {
-            for(var j = 0; j < percolationSystem.nCols; j++) {
+        for(var i = 0; i < percolationSystem.rowCount; i++) {
+            for(var j = 0; j < percolationSystem.columnCount; j++) {
                 grid[i][j] = {
                     i: i,
                     j: j,

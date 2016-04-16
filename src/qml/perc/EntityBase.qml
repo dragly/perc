@@ -11,17 +11,20 @@ Item {
     signal move(real currentTime)
     signal killed(var object)
 
+    property int entityId: -1
     property string objectName: "EntityBase"
+    property string filename: "EntityBase.qml"
     property int row: 0
     property int col: 0
     property string informationText: "Not set"
     property bool selected: false
     property double lastTime: Date.now()
-    property double animationDuration: 1
+    property double animationDuration: 400
     property var entityManager: null
     property var percolationSystem: null
     property Team team: null
     property bool _isKilled: false
+    property bool toBeDeleted: false
 
     x: col * Defaults.GRID_SIZE
     y: row * Defaults.GRID_SIZE
@@ -29,6 +32,13 @@ Item {
     function kill() {
         _isKilled = true
         killed(entityRoot)
+    }
+
+    property QtObject properties: QtObject {
+        property alias row: entityRoot.row
+        property alias column: entityRoot.col
+        property alias filename: entityRoot.filename
+        property alias entityId: entityRoot.entityId
     }
 
     Behavior on x {

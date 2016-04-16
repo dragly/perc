@@ -8,8 +8,8 @@ function randomSiteOnLargestCluster(percolationSystem) {
             console.log("Could not find random site!")
             return {row: 0, col: 0}
         }
-        var i = parseInt(Math.random() * percolationSystem.nRows)
-        var j = parseInt(Math.random() * percolationSystem.nCols)
+        var i = parseInt(Math.random() * percolationSystem.rowCount)
+        var j = parseInt(Math.random() * percolationSystem.columnCount)
         if(percolationSystem.area(i,j) === largestArea) {
             return { row: i, col: j }
         }
@@ -25,8 +25,8 @@ function randomSite(percolationSystem) {
             console.log("Could not find random site!")
             return {row: 0, col: 0}
         }
-        var i = parseInt(Math.random() * percolationSystem.nRows)
-        var j = parseInt(Math.random() * percolationSystem.nCols)
+        var i = parseInt(Math.random() * percolationSystem.rowCount)
+        var j = parseInt(Math.random() * percolationSystem.columnCount)
         if(percolationSystem.movementCost(i,j) > 0) {
             return { row: i, col: j }
         }
@@ -85,8 +85,8 @@ function createDirectionWalker(type, team) {
             break;
         }
 
-        var i = parseInt(Math.random() * percolationSystem.nRows)
-        var j = parseInt(Math.random() * percolationSystem.nCols)
+        var i = parseInt(Math.random() * percolationSystem.rowCount)
+        var j = parseInt(Math.random() * percolationSystem.columnCount)
         if(percolationSystem.movementCost(i,j) > 0) {
             var occupiedNeighbors = 0;
             if(percolationSystem.movementCost(i + 1,j) > 0) {

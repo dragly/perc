@@ -7,7 +7,6 @@ Mover {
         if(!owner) {
             return
         }
-
         var randomIndex = parseInt(Math.random() * 4)
         var found = false
         var directions = []

@@ -5,8 +5,8 @@ import "../../logic.js" as Logic
 GameView {
     id: levelRoot
 
-    nRows: 50
-    nCols: 50
+    rowCount: 50
+    columnCount: 50
     occupationTreshold: 0.6
 
 //    playerTeam.energy: 10

@@ -6,6 +6,7 @@ import "../defaults.js" as Defaults
 
 EntityBase {
     objectName: "RandomWalker"
+    filename: "walkers/RandomWalker.qml"
     property string type: "raise"
     signal collectedEnergy(var amount)
 

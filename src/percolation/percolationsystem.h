@@ -14,11 +14,11 @@
 #include <QMutex>
 #include <random.h>
 
-//#ifdef Q_OS_ANDROID
-//#include </home/svenni/apps/armadillo/armadillo>
-//#else
-//#include <armadillo>
-//#endif
+#ifdef Q_OS_ANDROID
+#include </home/svenni/apps/armadillo/armadillo>
+#else
+#include <armadillo>
+#endif
 
 #include <eigen3/Eigen/Eigen>
 #include <eigen3/Eigen/IterativeLinearSolvers>
@@ -41,8 +41,8 @@ class PercolationSystem : public QQuickPaintedItem
 {
     Q_OBJECT
     Q_ENUMS(ImageType)
-    Q_PROPERTY(int nRows READ nRows WRITE setNRows NOTIFY nRowsChanged)
-    Q_PROPERTY(int nCols READ nCols WRITE setNCols NOTIFY nColsChanged)
+    Q_PROPERTY(int rowCount READ rowCount WRITE setrowCount NOTIFY rowCountChanged)
+    Q_PROPERTY(int columnCount READ columnCount WRITE setcolumnCount NOTIFY columnCountChanged)
     Q_PROPERTY(double occupationTreshold READ occupationTreshold WRITE setOccupationTreshold NOTIFY occupationTresholdChanged)
     Q_PROPERTY(ImageType imageType READ imageType WRITE setImageType NOTIFY imageTypeChanged)
     Q_PROPERTY(QList<QObject*> pressureSources READ pressureSources WRITE setPressureSources NOTIFY pressureSourcesChanged)
@@ -56,20 +56,16 @@ public:
         OccupationImage,
         PressureImage,
         AreaImage,
-        FlowImage
+        FlowImage,
+        TeamImage
     };
 
     const MatrixXd &occupationMatrix();
     const MatrixXd& probabilityMatrix();
-    int nRows() const
-    {
-        return m_rowCount;
-    }
-
-    int nCols() const
-    {
-        return m_columnCount;
-    }
+    int rowCount() const;
+    int columnCount() const;
+    QByteArray serialize();
+    void deserialize(QByteArray data);
 
     Q_INVOKABLE double movementCost(int row, int col);
 
@@ -120,21 +116,21 @@ public slots:
     void setOccupationTreshold(double arg);
     void requestRecalculation();
 
-    void setNCols(int arg)
+    void setcolumnCount(int arg)
     {
         if (m_columnCount != arg) {
             m_columnCount = arg;
             m_analyzed = false;
-            emit nColsChanged(arg);
+            emit columnCountChanged(arg);
         }
     }
 
-    void setNRows(int arg)
+    void setrowCount(int arg)
     {
         if (m_rowCount != arg) {
             m_rowCount = arg;
             m_analyzed = false;
-            emit nRowsChanged(arg);
+            emit rowCountChanged(arg);
         }
     }
     void setPressureSources(const QList<QObject *> &pressureSources);
@@ -143,8 +139,8 @@ public slots:
     bool inBounds(int row, int column) const;
 
 signals:
-    void nRowsChanged(int arg);
-    void nColsChanged(int arg);
+    void rowCountChanged(int arg);
+    void columnCountChanged(int arg);
 
     void occupationTresholdChanged(double arg);
 
@@ -159,7 +155,6 @@ protected:
     void generateLabelMatrix();
     void generateAreaMatrix();
     void generatePressureMatrix();
-//    void generatePressureAndFlowMatrices();
     void generateOccupationMatrix();
 
     QThread thread;
@@ -178,6 +173,7 @@ protected:
     MatrixXd m_oldPressureMatrix;
     MatrixXd m_pressureSourceMatrix;
     MatrixXd m_flowMatrix;
+    MatrixXi m_teamMatrix;
 
     MatrixXi m_visitDirections;
 

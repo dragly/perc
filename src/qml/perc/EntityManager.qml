@@ -12,6 +12,8 @@ Item {
     property var deadEntities: []
     property double moveInterval: 100
     property double lastTime: Date.now()
+    property int nextEntityId: 0
+    property var teams: []
 
     function addInteraction(interaction) {
         interactions.push(interaction)
@@ -20,6 +22,11 @@ Item {
     function createEntityFromUrl(url, properties) {
         if(properties === undefined) {
             properties = {}
+        }
+
+        if(!properties.entityId) {
+            properties.entityId = nextEntityId;
+            nextEntityId += 1;
         }
 
         properties.gameView = gameView

@@ -38,11 +38,11 @@ Rectangle {
     PercolationSystem {
         id: percolationSystem
         anchors.centerIn: parent
-        width: nCols
-        height: nRows
+        width: columnCount
+        height: rowCount
         scale: 1
-        nRows: 1000
-        nCols: 1000
+        rowCount: 1000
+        columnCount: 1000
         occupationTreshold: pSlider.value
         imageType: constructionMenu.imageType
         smooth: false
