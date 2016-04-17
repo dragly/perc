@@ -12,33 +12,13 @@ BaseEntity {
     property bool spawn: true
     property bool spawned: false
     property real previousSpawnTime
-    property real spawnInterval: 250
-    property url spawnType: spawnModes[spawnMode][1]
-    property int spawnMode: 0
+    property real spawnInterval: 100
+    property url spawnType: "../walkers/TargetWalker.qml"
+
     property int ticksSinceSpawn: spawnInterval
     readonly property int ticksUntilSpawn: spawnInterval - ticksSinceSpawn
 
-    property var spawnModes: [
-        ["Target walker", "../walkers/TargetWalker.qml"],
-        ["Random walker", "../walkers/RandomWalker.qml"],
-    ]
-
     informationText: "Spawn. " + ticksUntilSpawn + " ticks until spawn."
-
-    controls: Component {
-        Item {
-            Button {
-                text: "Spawn type: " + spawnModes[spawnMode][0]
-                onClicked: {
-                    var nextMode = spawnMode + 1;
-                    if(nextMode > spawnModes.length) {
-                        nextMode = 0;
-                    }
-                    spawnMode = nextMode;
-                }
-            }
-        }
-    }
 
     width: Defaults.GRID_SIZE
     height: Defaults.GRID_SIZE

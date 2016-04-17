@@ -46,14 +46,13 @@ Item {
         return team;
     }
 
-    function removeTeamAndEntities(team) {
+    function removeTeamsEntities(team) {
         for(var i in entities) {
             var entity = entities[i];
             if(entity.teamId === team.teamId) {
                 deadEntities.push(entity)
             }
         }
-        deadTeams.push(team);
     }
 
     function createEntityFromUrl(url, properties) {

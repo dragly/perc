@@ -408,16 +408,13 @@ Item {
                                 entity.strategy = parsedEntity.strategy;
                                 entity.moveStrategy = parsedEntity.moveStrategy;
                             }
-                            if(entity.spawn) {
-                                entity.spawnMode = parsedEntity.spawnMode;
-                            }
                         }
                     }
                 }
             });
             webSocket.onStatusChanged.connect(function(status) {
                 if(status === WebSocket.Closed) {
-                    serverEntityManager.removeTeamAndEntities(clientTeam);
+                    serverEntityManager.removeTeamsEntities(clientTeam);
                     if(clients) {
                         clients.splice(clients.indexOf(client), 1);
                     }
@@ -530,7 +527,7 @@ Item {
                     var team = entityManager.teams[i];
                     if(team.toBeDeleted) {
                         console.log("Removing team", team);
-                        entityManager.removeTeamAndEntities(team);
+                        entityManager.removeTeamsEntities(team);
                     }
                 }
 
@@ -545,13 +542,6 @@ Item {
                             moveStrategy: entity.moveStrategy
                         }
                         strategyEntities.push(walkerStrategy);
-                    }
-                    if(entity.team === playerTeam && entity.spawn) {
-                        var spawnStrategy = {
-                            entityId: entity.entityId,
-                            spawnMode: entity.spawnMode
-                        }
-                        strategyEntities.push(spawnStrategy);
                     }
                 }
 
