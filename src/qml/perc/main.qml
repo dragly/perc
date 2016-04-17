@@ -18,6 +18,10 @@ Rectangle {
         state = "main"
     }
 
+    Component.onCompleted: {
+        levelLoader.source = "levels/test/TestLevel.qml"
+    }
+
     Loader {
         id: levelLoader
         anchors.fill: parent

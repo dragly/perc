@@ -9,6 +9,7 @@ Item {
     signal requestSelection(var object)
     signal advance(real currentTime)
     signal move(real currentTime)
+    signal performAction(var row, var column)
     signal killed(var object)
 
     property int entityId: -1
@@ -39,6 +40,12 @@ Item {
         property alias column: entityRoot.col
         property alias filename: entityRoot.filename
         property alias entityId: entityRoot.entityId
+    }
+
+    Component.onCompleted: {
+        if(filename === "EntityBase.qml" || objectName === "EntityBase") {
+            throw("You need to set the objectName and filename if you inherit from EntityBase.")
+        }
     }
 
     Behavior on x {

@@ -4,7 +4,7 @@ import ".."
 import "../movement"
 import "../defaults.js" as Defaults
 
-EntityBase {
+BaseWalker {
     objectName: "RandomWalker"
     filename: "walkers/RandomWalker.qml"
     property string type: "raise"
@@ -26,8 +26,21 @@ EntityBase {
         }
     }
 
-    RandomMover {
-        id: mover
+    onChooseStrategy: {
+        var randomIndex = parseInt(Math.random() * 4)
+        var found = false
+        var directions = Defaults.directions;
+        for(var attempt = 0; attempt < 4 && !found; attempt++) {
+            var nextSiteRow = parent.row + directions[randomIndex][0]
+            var nextSiteCol = parent.col + directions[randomIndex][1]
+            if(percolationSystem.movementCost(nextSiteRow, nextSiteCol) > 0) {
+                strategy = randomIndex;
+                found = true
+            } else {
+                randomIndex += 1
+                randomIndex = (randomIndex + 4) % 4
+            }
+        }
     }
 
     Rectangle {

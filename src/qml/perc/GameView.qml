@@ -19,8 +19,8 @@ Item {
     signal advance(real currentTime)
     property alias gameScene: gameScene
     property double lastUpdateTime: Date.now()
-    property alias nRows: percolationSystem.nRows
-    property alias nCols: percolationSystem.nCols
+    property alias rowCount: percolationSystem.rowCount
+    property alias columnCount: percolationSystem.columnCount
     property alias occupationTreshold: percolationSystem.occupationTreshold
     readonly property alias percolationSystem: percolationSystem
     readonly property alias entityManager: serverEntityManager
@@ -53,9 +53,9 @@ Item {
     }
 
     onRestart: {
-        percolationSystem.pressureSources = []
-        entityManager.clear()
-        percolationSystem.initialize()
+        serverPercolationSystem.pressureSources = []
+        serverEntityManager.clear()
+        serverPercolationSystem.initialize()
         percolationSystemShader.updateSourceRect()
         resume()
     }
@@ -86,13 +86,9 @@ Item {
 
     PercolationSystem {
         id: percolationSystem
-        width: nCols
-        height: nRows
-        nRows: 10
-        nCols: 10
-        occupationTreshold: 0.55
+        width: columnCount
+        height: rowCount
         imageType: constructionMenu.imageType
-
         smooth: false
     }
 
@@ -305,7 +301,13 @@ Item {
             var state = {
                 type: "state",
                 entities: entities,
-                teams: teams
+                teams: teams,
+                percolationSystem: {
+                    rowCount: serverPercolationSystem.rowCount,
+                    columnCount: serverPercolationSystem.columnCount,
+                    valueMatrix: serverPercolationSystem.serialize(),
+                    occupationThreshold: serverPercolationSystem.occupationTreshold
+                }
             };
 
             for(var i in clients) {
@@ -319,7 +321,7 @@ Item {
             properties.row = spawn.row
             properties.col = spawn.col
             properties.team = spawn.team
-            var walker = serverEntityManager.createEntityFromUrl("walkers/RandomWalker.qml", properties);
+            var walker = serverEntityManager.createEntityFromUrl("walkers/TargetWalker.qml", properties);
         }
 
         onClientConnected: {
@@ -337,7 +339,7 @@ Item {
                 team: team,
                 row: playerSpawnSite.row,
                 col: playerSpawnSite.col,
-                interval: 10000
+                interval: 1000000
             }
             var playerSpawn = serverEntityManager.createEntityFromUrl("spawns/Spawn.qml", properties)
             playerSpawn.spawnedWalker.connect(spawnWalker)
@@ -353,6 +355,7 @@ Item {
                         if(entity.entityId === entityStrategy.entityId) {
                             if(entity.strategy !== undefined) {
                                 entity.strategy = entityStrategy.strategy;
+                                entity.moveStrategy = entityStrategy.moveStrategy;
                             }
                         }
                     }
@@ -360,7 +363,9 @@ Item {
             });
             webSocket.onStatusChanged.connect(function(status) {
                 if(status === WebSocket.Closed) {
-                    clients.splice(clients.indexOf(client), 1);
+                    if(clients) {
+                        clients.splice(clients.indexOf(client), 1);
+                    }
                 }
             });
         }
@@ -375,11 +380,15 @@ Item {
         active: true
         onTextMessageReceived: {
             var parsed = JSON.parse(message);
-            console.log("Client received message", message);
             if(parsed.type === "welcome") {
                 playerTeamId = parsed.team.teamId;
             }
             if(parsed.type === "state") {
+                percolationSystem.occupationTreshold = parsed.percolationSystem.occupationThreshold;
+                percolationSystem.rowCount = parsed.percolationSystem.rowCount;
+                percolationSystem.columnCount = parsed.percolationSystem.columnCount;
+                percolationSystem.deserialize(parsed.percolationSystem.valueMatrix);
+
                 for(var i in entityManager.entities) {
                     var entity = entityManager.entities[i];
                     entity.toBeDeleted = true;
@@ -415,11 +424,16 @@ Item {
                 var strategyEntities = [];
                 for(var i in entityManager.entities) {
                     var entity = entityManager.entities[i];
-                    var entityStrategy = {
-                        entityId: entity.entityId,
-                        strategy: 1
+                    if(entity.walker) {
+                        entity.chooseStrategy();
+                        var entityStrategy = {
+                            entityId: entity.entityId,
+                            strategy: entity.strategy,
+                            moveStrategy: entity.moveStrategy
+                        }
+                        console.log("Sending strategy", entity.strategy, entity.moveStrategy)
+                        strategyEntities.push(entityStrategy);
                     }
-                    strategyEntities.push(entityStrategy);
                 }
                 var strategy = {
                     entities: strategyEntities
@@ -440,26 +454,63 @@ Item {
         id: serverEntityManager
         gameScene: serverScene
         gameView: gameViewRoot
-        percolationSystem: percolationSystem
+        percolationSystem: serverPercolationSystem
     }
 
     Rectangle {
 
         anchors {
             left: parent.left
-            top: parent.top
+            bottom: parent.bottom
         }
 
         width: 300
         height: 300
 
+        PercolationSystem {
+            id: serverPercolationSystem
+            width: columnCount
+            height: rowCount
+            rowCount: 10
+            columnCount: 10
+
+            occupationTreshold: 0.6
+            imageType: constructionMenu.imageType
+            smooth: false
+        }
+
+        PercolationSystemShader {
+            id: serverPercolationSystemShader
+            source: serverPercolationSystem
+
+            anchors.fill: parent
+
+            lightIntensity: 10 * serverScene.targetScale
+
+            smooth: false
+            samples: 32 * Math.sqrt(serverScene.targetScale)
+
+            function updateSourceRect() {
+                var newRect = gameViewRoot.mapToItem(serverScene,0,0,300,300)
+                sourceRect = Qt.rect(newRect.x / (Defaults.GRID_SIZE),
+                                     newRect.y / (Defaults.GRID_SIZE),
+                                     newRect.width / (Defaults.GRID_SIZE),
+                                     newRect.height / (Defaults.GRID_SIZE))
+            }
+        }
 
         GameScene {
             id: serverScene
+
+            property real scala: serverPercolationSystem.width / (serverPercolationSystem.rowCount * Defaults.GRID_SIZE)
+
             anchors.fill: parent
-            targetScale: 0.2
             scale: 0.2
-            percolationSystem: percolationSystem
+            targetScale: 0.2
+            onScalaChanged: console.log("scala", scala)
+            percolationSystem: serverPercolationSystem
+
+            smooth: false
         }
     }
 
@@ -467,12 +518,12 @@ Item {
         id: advanceTimer
         property int triggers: 0
         running: (state === "running")
-        interval: 1000 // hoping for 60 FPS
+        interval: 400
         repeat: true
         onTriggered: {
             var currentTime = Date.now()
             advance(currentTime)
-            if(percolationSystem.tryLockUpdates()) {
+            if(serverPercolationSystem.tryLockUpdates()) {
                 serverEntityManager.advance(currentTime)
                 var fail = false
                 for(var i in failObjectives) {
@@ -493,7 +544,9 @@ Item {
                     failGame()
                 }
 
-                percolationSystem.unlockUpdates()
+                serverPercolationSystem.requestRecalculation();
+
+                serverPercolationSystem.unlockUpdates()
             }
 
             server.notifyClients();

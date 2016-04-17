@@ -48,11 +48,13 @@ class PercolationSystem : public QQuickPaintedItem
     Q_PROPERTY(QList<QObject*> pressureSources READ pressureSources WRITE setPressureSources NOTIFY pressureSourcesChanged)
 
     void normalizedValue(double value, double minValue, double maxValue);
+    QRgb colorize(int i, int j, double value, double minValue = 1, double maxValue = 0);
 public:
     PercolationSystem(QQuickPaintedItem *parent = 0);
     //    void setPercolationSystemGraphics(PercolationSystemGraphics* graphics);
 
     enum ImageType {
+        ValueImage,
         OccupationImage,
         PressureImage,
         AreaImage,
@@ -60,13 +62,13 @@ public:
         TeamImage
     };
 
-    const MatrixXd &occupationMatrix();
-    const MatrixXd& probabilityMatrix();
+    const arma::mat &occupationMatrix();
+    const arma::mat& probabilityMatrix();
     int rowCount() const;
     int columnCount() const;
-    QByteArray serialize();
-    void deserialize(QByteArray data);
 
+    Q_INVOKABLE QString serialize();
+    Q_INVOKABLE void deserialize(QString data);
     Q_INVOKABLE double movementCost(int row, int col);
 
     Q_INVOKABLE double value(int row, int col);
@@ -165,20 +167,20 @@ protected:
     int m_nClusters;
     double m_occupationTreshold;
 
-    MatrixXd m_valueMatrix;
-    MatrixXd m_movementCostMatrix;
-    MatrixXi m_labelMatrix;
-    MatrixXi m_areaMatrix;
-    MatrixXd m_pressureMatrix;
-    MatrixXd m_oldPressureMatrix;
-    MatrixXd m_pressureSourceMatrix;
-    MatrixXd m_flowMatrix;
-    MatrixXi m_teamMatrix;
+    arma::mat m_valueMatrix;
+    arma::mat m_movementCostMatrix;
+    arma::imat m_labelMatrix;
+    arma::imat m_areaMatrix;
+    arma::mat m_pressureMatrix;
+    arma::mat m_oldPressureMatrix;
+    arma::mat m_pressureSourceMatrix;
+    arma::mat m_flowMatrix;
+    arma::imat m_teamMatrix;
 
-    MatrixXi m_visitDirections;
+    arma::imat m_visitDirections;
 
-    VectorXd m_areas;
-    VectorXd m_pressures;
+    arma::vec m_areas;
+    arma::vec m_pressures;
     QList<QObject*> m_pressureSources;
 
     QImage m_image;
@@ -202,11 +204,11 @@ protected:
     QElapsedTimer m_timer;
 };
 
-inline const MatrixXd& PercolationSystem::occupationMatrix() {
+inline const arma::mat& PercolationSystem::occupationMatrix() {
     return m_movementCostMatrix;
 }
 
-inline const MatrixXd& PercolationSystem::probabilityMatrix() {
+inline const arma::mat& PercolationSystem::probabilityMatrix() {
     return m_valueMatrix;
 }
 

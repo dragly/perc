@@ -9,6 +9,7 @@ Item {
 
     property int currentImageTypeIndex: 0
     property var imageTypes: [
+        PercolationSystem.ValueImage,
         PercolationSystem.OccupationImage
     ]
 

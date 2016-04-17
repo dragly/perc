@@ -10,7 +10,8 @@ Item {
     width: 100
     height: 62
 
-//    property alias imageType: percolationSystem.imageType
+    default property alias containerChildren: entityContainer.children
+
     property PercolationSystem percolationSystem: null
     property list<EntityBase> selectedObjects
     property real targetScale: scale
@@ -78,14 +79,31 @@ Item {
         propagateComposedEvents: true
         hoverEnabled: true
 
+        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+
         anchors.fill: parent
 
         onExited: {
             console.log("Exited")
         }
 
+        onClicked: {
+            console.log("Clicked")
+            switch(mouse.button) {
+            case Qt.LeftButton:
+                selectedObjects = [];
+                break;
+            case Qt.RightButton:
+                for(var i in selectedObjects) {
+                    var selectedObject = selectedObjects[i];
+                    var row = parseInt(Math.floor(mouse.y / Defaults.GRID_SIZE));
+                    var column = parseInt(Math.floor(mouse.x / Defaults.GRID_SIZE));
+                    selectedObject.performAction(row, column);
+                }
+            }
+        }
+
         drag.target: parent
-        z: 9999999
     }
 
     Rectangle {
@@ -107,5 +125,9 @@ Item {
         z: 10
         lightIntensity: 0.5
         anchors.centerIn: parent
+    }
+
+    Item {
+        id: entityContainer
     }
 }

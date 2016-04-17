@@ -88,7 +88,6 @@ Item {
         if(interval > moveInterval) {
             for(var i in entities) {
                 var entity = entities[i]
-                entity.animationDuration = interval
                 entity.move(currentUpdateTime)
             }
             lastTime = currentUpdateTime
@@ -97,6 +96,7 @@ Item {
         for(var i in entities) {
             var entity = entities[i]
             entity.advance(currentUpdateTime)
+            percolationSystem.raiseValue(entity.row, entity.col);
         }
     }
 

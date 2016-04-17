@@ -6,7 +6,7 @@ import "../../spawns"
 GameView {
     id: gameViewRoot
 
-    nRows: 50
-    nCols: 50
-    occupationTreshold: 0.6
+    rowCount: 5
+    columnCount: 5
+    occupationTreshold: 1.0
 }
