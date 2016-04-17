@@ -16,6 +16,7 @@ BaseWalker {
 
     objectName: "TargetWalker"
     filename: "walkers/TargetWalker.qml"
+    informationText: "Target walker. Right-click to move."
 
     function createGrid() {
         var tmp = new Array(percolationSystem.rowCount)

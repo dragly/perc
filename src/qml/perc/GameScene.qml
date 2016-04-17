@@ -27,16 +27,20 @@ Item {
         }
     }
 
-    function requestSelection(object) {
+    function deselectAll() {
         for(var i in entityManager.entities) {
             var other = entityManager.entities[i]
             other.selected = false
         }
-        var objects = []
-        objects.push(object)
-        object.selected = true
+        selectedObjects = [];
+    }
 
-        selectedObjects = objects
+    function requestSelection(object) {
+        deselectAll();
+        var objects = [];
+        objects.push(object);
+        object.selected = true;
+        selectedObjects = objects;
     }
 
     onTargetScaleChanged: {
@@ -90,7 +94,7 @@ Item {
             console.log("Clicked")
             switch(mouse.button) {
             case Qt.LeftButton:
-                selectedObjects = [];
+                deselectAll();
                 break;
             case Qt.RightButton:
                 for(var i in selectedObjects) {
