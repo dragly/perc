@@ -96,7 +96,6 @@ Item {
             console.log("Turn!");
             for(var i in entities) {
                 var entity = entities[i];
-                console.log("Team comparison:", percolationSystem.team(entity.row, entity.col), entity.team.teamId);
                 if(percolationSystem.team(entity.row, entity.col) === entity.team.teamId) {
                     for(var di = -1; di < 2; di++) {
                         for(var dj = -1; dj < 2; dj++) {

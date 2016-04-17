@@ -68,11 +68,9 @@ EntityBase {
     }
 
     onMove: {
-        console.log("----- Server testing strategy -----");
         var rowChange = 0;
         var columnChange = 0;
         if(strategy === "move") {
-            console.log("Received strategy", moveStrategy);
             if(moveAcceptable(moveStrategy)) {
                 row = moveResult(moveStrategy).row;
                 col = moveResult(moveStrategy).column;

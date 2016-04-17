@@ -49,6 +49,7 @@ class PercolationSystem : public QQuickPaintedItem
 
     void normalizedValue(double value, double minValue, double maxValue);
     QRgb colorize(int i, int j, double value, double minValue = 1, double maxValue = 0);
+    QColor mixColors(QColor color1, QColor color2, double factor = 0.5);
 public:
     PercolationSystem(QQuickPaintedItem *parent = 0);
     //    void setPercolationSystemGraphics(PercolationSystemGraphics* graphics);

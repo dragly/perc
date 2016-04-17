@@ -348,7 +348,6 @@ Item {
             webSocket.sendTextMessage(JSON.stringify({type: "welcome", team: clientTeam.properties}));
 
             webSocket.onTextMessageReceived.connect(function(message) {
-                console.log("Received message from", client.webSocket);
                 var parsed = JSON.parse(message);
                 for(var i in parsed.entities) {
                     var entityStrategy = parsed.entities[i];
@@ -482,7 +481,6 @@ Item {
                             strategy: entity.strategy,
                             moveStrategy: entity.moveStrategy
                         }
-                        console.log("Sending strategy", entity.strategy, entity.moveStrategy)
                         strategyEntities.push(entityStrategy);
                     }
                 }

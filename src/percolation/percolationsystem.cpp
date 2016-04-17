@@ -110,7 +110,6 @@ void PercolationSystem::randomizeValueMatrix() {
 
 int PercolationSystem::team(int row, int column)
 {
-    qDebug() << "Team matrix:" << row << column << m_teamMatrix.max() << m_teamMatrix(row, column);
     if(m_teamMatrix.in_range(row, column)) {
         return m_teamMatrix(row, column);
     }
@@ -125,7 +124,6 @@ bool PercolationSystem::inBounds(int row, int column) const
 void PercolationSystem::teamTag(int team, int row, int column)
 {
     if(m_teamMatrix.in_range(row, column)) {
-        qDebug() << "Setting" << row << column << team;
         m_teamMatrix(row, column) = team;
     }
 }
@@ -338,7 +336,7 @@ double PercolationSystem::maxFlow()
 }
 
 void PercolationSystem::generateLabelMatrix() {
-//    qDebug() << "Generating label matrix on" << objectName();
+    //    qDebug() << "Generating label matrix on" << objectName();
 
     m_labelMatrix = arma::zeros<arma::imat>(m_rowCount, m_columnCount);
     int currentLabel = 1;
@@ -421,6 +419,17 @@ QRgb PercolationSystem::colorize(int i, int j, double value, double minValue, do
     return QColor(red, green, blue).rgba();
 }
 
+QColor PercolationSystem::mixColors(QColor color1, QColor color2, double factor)
+{
+    double f = factor;
+    return QColor(
+                color1.red()* (1-f) + color2.red()*f,
+                color1.green() * (1-f) + color2.green()*f,
+                color1.blue() * (1-f) + color2.blue()*f,
+                255
+                );
+}
+
 void PercolationSystem::generateImage() {
     m_image = QImage(m_columnCount, m_rowCount, QImage::Format_ARGB32);
     double maxAreaLocal;
@@ -451,30 +460,30 @@ void PercolationSystem::generateImage() {
         }
         break;
     }
-//    case PressureImage: {
-//        double minPressure = m_pressureMatrix.min();
-//        double maxPressure = m_pressureMatrix.max();
-//        double diffPressurei = 1.0 / (maxPressure - minPressure);
-//        for(int i = 0; i < m_rowCount; i++) {
-//            for(int j = 0; j < m_columnCount; j++) {
-//                if(movementCost(i,j)) {
-//                    double ratio = (m_pressureMatrix(i, j) - minPressure) * diffPressurei;
-//                    double red = (1-ratio) * foregroundLow.red() + ratio * foregroundHigh.red();
-//                    double green = (1-ratio) * foregroundLow.green() + ratio * foregroundHigh.green();
-//                    double blue = (1-ratio) * foregroundLow.blue() + ratio * foregroundHigh.blue();
-//                    if(red >= 0 && red <= 255 && green >= 0 && green <= 255 && blue >= 0 && blue <= 255) {
-//                        color.setRed(red);
-//                        color.setGreen(green);
-//                        color.setBlue(blue);
-//                    }
-//                } else {
-//                    color = background;
-//                }
-//                m_image.setPixel(j,i,color.rgba());
-//            }
-//        }
-//        break;
-//    }
+        //    case PressureImage: {
+        //        double minPressure = m_pressureMatrix.min();
+        //        double maxPressure = m_pressureMatrix.max();
+        //        double diffPressurei = 1.0 / (maxPressure - minPressure);
+        //        for(int i = 0; i < m_rowCount; i++) {
+        //            for(int j = 0; j < m_columnCount; j++) {
+        //                if(movementCost(i,j)) {
+        //                    double ratio = (m_pressureMatrix(i, j) - minPressure) * diffPressurei;
+        //                    double red = (1-ratio) * foregroundLow.red() + ratio * foregroundHigh.red();
+        //                    double green = (1-ratio) * foregroundLow.green() + ratio * foregroundHigh.green();
+        //                    double blue = (1-ratio) * foregroundLow.blue() + ratio * foregroundHigh.blue();
+        //                    if(red >= 0 && red <= 255 && green >= 0 && green <= 255 && blue >= 0 && blue <= 255) {
+        //                        color.setRed(red);
+        //                        color.setGreen(green);
+        //                        color.setBlue(blue);
+        //                    }
+        //                } else {
+        //                    color = background;
+        //                }
+        //                m_image.setPixel(j,i,color.rgba());
+        //            }
+        //        }
+        //        break;
+        //    }
     case AreaImage: {
         double minValue = m_areaMatrix.min();
         double maxValue = m_areaMatrix.max();
@@ -495,54 +504,59 @@ void PercolationSystem::generateImage() {
         }
         break;
     }
-//    case FlowImage: {
-//        double minFlow = m_flowMatrix.min();
-//        double maxFlow = m_flowMatrix.max();
-//        double diffFlowi = 1.0 / (maxFlow - minFlow);
-//        for(int i = 0; i < m_rowCount; i++) {
-//            for(int j = 0; j < m_columnCount; j++) {
-//                if(movementCost(i,j)) {
-//                    double ratio = (m_flowMatrix(i, j) - minFlow) * diffFlowi;
-//                    color.setRed((1-ratio) * foregroundLow.red() + ratio * foregroundHigh.red());
-//                    color.setGreen((1-ratio) * foregroundLow.green() + ratio * foregroundHigh.green());
-//                    color.setBlue((1-ratio) * foregroundLow.blue() + ratio * foregroundHigh.blue());
-//                } else {
-//                    color = background;
-//                }
-//                m_image.setPixel(j,i,color.rgba());
-//            }
-//        }
-//        break;
-//    }
-    case TeamImage: {
+        //    case FlowImage: {
+        //        double minFlow = m_flowMatrix.min();
+        //        double maxFlow = m_flowMatrix.max();
+        //        double diffFlowi = 1.0 / (maxFlow - minFlow);
+        //        for(int i = 0; i < m_rowCount; i++) {
+        //            for(int j = 0; j < m_columnCount; j++) {
+        //                if(movementCost(i,j)) {
+        //                    double ratio = (m_flowMatrix(i, j) - minFlow) * diffFlowi;
+        //                    color.setRed((1-ratio) * foregroundLow.red() + ratio * foregroundHigh.red());
+        //                    color.setGreen((1-ratio) * foregroundLow.green() + ratio * foregroundHigh.green());
+        //                    color.setBlue((1-ratio) * foregroundLow.blue() + ratio * foregroundHigh.blue());
+        //                } else {
+        //                    color = background;
+        //                }
+        //                m_image.setPixel(j,i,color.rgba());
+        //            }
+        //        }
+        //        break;
+        //    }
+    default: {
+        color = QColor("purple");
         for(int i = 0; i < m_rowCount; i++) {
             for(int j = 0; j < m_columnCount; j++) {
-                if(movementCost(i,j)) {
-                    int team = m_teamMatrix(i, j);
-                    switch(team) {
-                    case 1:
-                        color = QColor("pink");
-                        break;
-                    case 2:
-                        color = QColor("lightgreen");
-                        break;
-                    case 3:
-                        color = QColor("lightblue");
-                        break;
-                    default:
-                        color = QColor("lightgrey");
-                        break;
-                    }
-                } else {
-                    color = QColor("black");
-                }
-                m_image.setPixel(j,i,color.rgba());
+                m_image.setPixelColor(j, i, color);
             }
         }
-    }
-    default: {
         break;
     }
+    }
+    for(int i = 0; i < m_rowCount; i++) {
+        for(int j = 0; j < m_columnCount; j++) {
+            if(movementCost(i,j)) {
+                int team = m_teamMatrix(i, j);
+                bool foundTeam = true;
+                switch(team) {
+                case 1:
+                    color = QColor("pink");
+                    break;
+                case 2:
+                    color = QColor("lightgreen");
+                    break;
+                case 3:
+                    color = QColor("lightblue");
+                    break;
+                default:
+                    foundTeam = false;
+                    break;
+                }
+                if(foundTeam) {
+                    m_image.setPixel(j, i, mixColors(QColor(m_image.pixel(j, i)), color).rgba());
+                }
+            }
+        }
     }
 }
 
@@ -570,110 +584,110 @@ void PercolationSystem::paint(QPainter *painter)
 }
 
 void PercolationSystem::solveFlow() {
-//    int equationCount = m_rowCount*m_columnCount;
-//    SparseMatrix<double> A(equationCount, equationCount);// = arma::zeros(equationCount, equationCount);
-//    arma::vec b = arma::vec::Zero(equationCount);
-//    for(int i = 0; i < m_rowCount; i++) {
-//        for(int j = 0; j < m_columnCount; j++) {
-//            b(i + j*m_rowCount) = m_pressureSourceMatrix(i, j);
-//        }
-//    }
-//    for(int j = 0; j < m_columnCount; j++) {
-//        for(int i = 0; i < m_rowCount; i++) {
-//            int id = i + j * m_rowCount;
-//            double value = 0.0;
-//            if(movementCost(i, j) > 1e-6) {
-//                value = 0.0;
-//                for(int ii = -1; ii < 2; ii++) {
-//                    for(int jj = -1; jj < 2; jj++) {
-//                        if((ii == 0 && jj == 0) || (ii != 0 && jj != 0)) {
-//                            continue;
-//                        }
-//                        if(j + jj == -1 || j + jj == m_columnCount) {
-//                            value += 1.0;
-//                        }
-//                        if(movementCost(i + ii, j + jj) > 0) {
-//                            int id2 = id + ii + jj * m_rowCount;
-//                            if(id2 < 0 || id2 > equationCount - 1) {
-//                                continue;
-//                            }
-//                            A.insert(id, id2) = -1.0;
-//                            value += 1.0;
-//                        }
-//                    }
-//                }
-//            }
-//            if(value < 1e-6) {
-//                value = 1.0;
-//                b(id) = 0.0;
-//            }
-//            A.insert(id, id) = value;
-//        }
-//    }
+    //    int equationCount = m_rowCount*m_columnCount;
+    //    SparseMatrix<double> A(equationCount, equationCount);// = arma::zeros(equationCount, equationCount);
+    //    arma::vec b = arma::vec::Zero(equationCount);
+    //    for(int i = 0; i < m_rowCount; i++) {
+    //        for(int j = 0; j < m_columnCount; j++) {
+    //            b(i + j*m_rowCount) = m_pressureSourceMatrix(i, j);
+    //        }
+    //    }
+    //    for(int j = 0; j < m_columnCount; j++) {
+    //        for(int i = 0; i < m_rowCount; i++) {
+    //            int id = i + j * m_rowCount;
+    //            double value = 0.0;
+    //            if(movementCost(i, j) > 1e-6) {
+    //                value = 0.0;
+    //                for(int ii = -1; ii < 2; ii++) {
+    //                    for(int jj = -1; jj < 2; jj++) {
+    //                        if((ii == 0 && jj == 0) || (ii != 0 && jj != 0)) {
+    //                            continue;
+    //                        }
+    //                        if(j + jj == -1 || j + jj == m_columnCount) {
+    //                            value += 1.0;
+    //                        }
+    //                        if(movementCost(i + ii, j + jj) > 0) {
+    //                            int id2 = id + ii + jj * m_rowCount;
+    //                            if(id2 < 0 || id2 > equationCount - 1) {
+    //                                continue;
+    //                            }
+    //                            A.insert(id, id2) = -1.0;
+    //                            value += 1.0;
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //            if(value < 1e-6) {
+    //                value = 1.0;
+    //                b(id) = 0.0;
+    //            }
+    //            A.insert(id, id) = value;
+    //        }
+    //    }
 
-//    A.makeCompressed();
+    //    A.makeCompressed();
 
-//    arma::mat x;
-//    m_timer.restart();
-//    if(!m_analyzed) {
-//        qDebug() << "Analyzing pattern...";
-//        m_solver.analyzePattern(A);
-//        m_analyzed = true;
-//    }
-//    m_solver.factorize(A);
-//    x = m_solver.solve(b);
+    //    arma::mat x;
+    //    m_timer.restart();
+    //    if(!m_analyzed) {
+    //        qDebug() << "Analyzing pattern...";
+    //        m_solver.analyzePattern(A);
+    //        m_analyzed = true;
+    //    }
+    //    m_solver.factorize(A);
+    //    x = m_solver.solve(b);
 
-//    qDebug() << "Timer: " << m_timer.restart();
-//    cout << "Min max: " << x.min() << " " << x.max() << endl;
+    //    qDebug() << "Timer: " << m_timer.restart();
+    //    cout << "Min max: " << x.min() << " " << x.max() << endl;
 
-//    double minPressure = x.min();
-//    double maxPressure = x.max();
-//    double diffPressure = maxPressure - minPressure;
-//    double diffPressurei = 1.0 / diffPressure;
-//    arma::mat pressure = arma::zeros(m_rowCount, m_columnCount);
-//    for(int j = 0; j < m_columnCount; j++) {
-//        for(int i = 0; i < m_rowCount; i++) {
-//            pressure(i, j) = x(i + j * m_rowCount);
-//        }
-//    }
+    //    double minPressure = x.min();
+    //    double maxPressure = x.max();
+    //    double diffPressure = maxPressure - minPressure;
+    //    double diffPressurei = 1.0 / diffPressure;
+    //    arma::mat pressure = arma::zeros(m_rowCount, m_columnCount);
+    //    for(int j = 0; j < m_columnCount; j++) {
+    //        for(int i = 0; i < m_rowCount; i++) {
+    //            pressure(i, j) = x(i + j * m_rowCount);
+    //        }
+    //    }
 
-//    m_flowMatrix = arma::zeros(m_rowCount, m_columnCount);
-//    for(int j = 0; j < m_columnCount; j++) {
-//        for(int i = 0; i < m_rowCount; i++) {
-//            if(movementCost(i, j) > 0) {
-//                if(movementCost(i - 1, j) > 0) {
-//                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i - 1, j) - pressure(i, j));
-//                }
-//                if(movementCost(i + 1, j) > 0) {
-//                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i + 1, j) - pressure(i, j));
-//                }
-//                if(movementCost(i, j - 1) > 0) {
-//                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i, j - 1) - pressure(i, j));
-//                }
-//                if(movementCost(i, j + 1) > 0) {
-//                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i, j + 1) - pressure(i, j));
-//                }
-//                if(j == 0) {
-//                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i,j) - 1.0);
-//                }
-//                if(j == m_columnCount - 1) {
-//                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i,j) - 0.0);
-//                }
-//            }
-//        }
-//    }
+    //    m_flowMatrix = arma::zeros(m_rowCount, m_columnCount);
+    //    for(int j = 0; j < m_columnCount; j++) {
+    //        for(int i = 0; i < m_rowCount; i++) {
+    //            if(movementCost(i, j) > 0) {
+    //                if(movementCost(i - 1, j) > 0) {
+    //                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i - 1, j) - pressure(i, j));
+    //                }
+    //                if(movementCost(i + 1, j) > 0) {
+    //                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i + 1, j) - pressure(i, j));
+    //                }
+    //                if(movementCost(i, j - 1) > 0) {
+    //                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i, j - 1) - pressure(i, j));
+    //                }
+    //                if(movementCost(i, j + 1) > 0) {
+    //                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i, j + 1) - pressure(i, j));
+    //                }
+    //                if(j == 0) {
+    //                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i,j) - 1.0);
+    //                }
+    //                if(j == m_columnCount - 1) {
+    //                    m_flowMatrix(i, j) += 0.25 * fabs(pressure(i,j) - 0.0);
+    //                }
+    //            }
+    //        }
+    //    }
 
-//    // Normalize pressure
-//    m_pressureMatrix = pressure;
+    //    // Normalize pressure
+    //    m_pressureMatrix = pressure;
 
-//    //    cout << "Flow:" << endl;
-//    //    cout << m_flowMatrix << endl;
+    //    //    cout << "Flow:" << endl;
+    //    //    cout << m_flowMatrix << endl;
 
-//    //    m_flowMatrix = pressure;
+    //    //    m_flowMatrix = pressure;
 
 
-//    //    cout << "Pressure:" << endl;
-//    //    cout << m_pressureMatrix << endl;
+    //    //    cout << "Pressure:" << endl;
+    //    //    cout << m_pressureMatrix << endl;
 }
 
 
