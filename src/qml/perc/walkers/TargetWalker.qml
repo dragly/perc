@@ -173,7 +173,7 @@ BaseWalker {
                 var randomIndex = parseInt(Math.random() * directions.length);
                 var found = false;
                 var result = moveResult(randomIndex);
-                if(moveAcceptable(randomIndex) && percolationSystem.team(result.row, result.column) === team.teamId) {
+                if(Math.random() < 0.5 && moveAcceptable(randomIndex) && percolationSystem.team(result.row, result.column) === team.teamId) {
                     moveStrategy = randomIndex;
                     strategy = "move";
                 } else {
@@ -184,7 +184,7 @@ BaseWalker {
                 var randomIndex = parseInt(Math.random() * directions.length);
                 var found = false;
                 var result = moveResult(randomIndex);
-                if(moveAcceptable(randomIndex)) {
+                if(Math.random() < 0.5 && moveAcceptable(randomIndex)) {
                     moveStrategy = randomIndex;
                     strategy = "move";
                 } else if (percolationSystem.team(row, col) !== team.teamId) {

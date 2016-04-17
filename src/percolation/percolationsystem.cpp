@@ -251,7 +251,7 @@ void PercolationSystem::calculateTeamAreas()
     QVariantMap areas;
     for(int i = 0; i < m_rowCount; i++) {
         for(int j = 0; j < m_columnCount; j++) {
-            if(m_teamMatrix.in_range(j, i)) {
+            if(m_teamMatrix.in_range(j, i) && movementCost(i, j) > 0.0) {
                 int team = m_teamMatrix(j, i);
                 if(team > 0) {
                     QString key = QString::number(team);

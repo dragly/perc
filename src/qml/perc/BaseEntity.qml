@@ -95,6 +95,40 @@ PercObject {
         }
     }
 
+    Rectangle {
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+            topMargin: -24
+        }
+        height: 24
+        color: "black"
+
+        Rectangle {
+            id: lifeLeft
+            anchors {
+                left: parent.left
+                top: parent.top
+                bottom: parent.bottom
+                margins: 4
+            }
+            width: entityRoot.healthPoints / 100.0 * parent.width - anchors.margins * 2
+            color: "green"
+        }
+
+        Rectangle {
+            anchors {
+                left: lifeLeft.right
+                right: parent.right
+                top: parent.top
+                bottom: parent.bottom
+                margins: 4
+            }
+            color: "red"
+        }
+    }
+
     MouseArea {
         anchors.centerIn: parent
         width: parent.width + Defaults.GRID_SIZE * 0.25

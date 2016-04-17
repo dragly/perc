@@ -40,7 +40,9 @@ Rectangle {
                 if(selectedObjects.length > 1) {
                     return selectedObjects.length + " items selected"
                 } else if (selectedObjects.length === 1) {
-                    return selectedObjects[0].team.name + "\n" + selectedObjects[0].informationText
+                    return selectedObjects[0].team.name + "\n" +
+                            "HP: " + selectedObjects[0].healthPoints + "\n" +
+                            selectedObjects[0].informationText
                 } else {
                     return "None selected"
                 }

@@ -12,7 +12,7 @@ BaseEntity {
     property bool spawn: true
     property bool spawned: false
     property real previousSpawnTime
-    property real spawnInterval: 100
+    property real spawnInterval: 50
     property url spawnType: "../walkers/TargetWalker.qml"
 
     property int ticksSinceSpawn: spawnInterval

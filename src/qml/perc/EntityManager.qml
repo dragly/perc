@@ -158,6 +158,7 @@ Item {
                             for(var dj = -1; dj < 2; dj++) {
                                 var row = entity.row + di;
                                 var column = entity.col + dj;
+                                percolationSystem.teamTag(0, row, column);
                                 percolationSystem.lowerValue(0.01, row, column);
                                 console.log("Lower value");
 
@@ -167,7 +168,7 @@ Item {
                         var entity1 = entity;
                         for(var j in entities) {
                             var entity2 = entities[j];
-                            if(entity1 === entity2 && entity2.walker) {
+                            if(!entity2.walker || entity1 === entity2 || entity1.team === entity2.team) {
                                 continue;
                             }
                             var xDiff = entity1.col - entity2.col
@@ -176,14 +177,13 @@ Item {
 
                             if(distance <= 1) {
                                 console.log(entity1, "attacking", entity2)
-                                entity2.healthPoints -= 0.1;
+                                entity2.healthPoints -= 10.0;
                                 if(entity2.healthPoints < 0) {
                                     console.log(entity2, "died");
                                     deadEntities.push(entity2);
                                 }
                             }
                         }
-
                         break;
                     default:
                         break;
@@ -197,6 +197,14 @@ Item {
                         properties.team = spawn.team
                         entityManagerRoot.createEntityFromUrl(spawn.spawnType, properties);
                         spawn.spawned = false;
+                    }
+                    for(var di = -1; di < 2; di++) {
+                        for(var dj = -1; dj < 2; dj++) {
+                            var row = spawn.row + di;
+                            var column = spawn.col + dj;
+                            percolationSystem.teamTag(spawn.team.teamId, row, column);
+                            percolationSystem.raiseValue(0.01, row, column);
+                        }
                     }
                 }
 
