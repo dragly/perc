@@ -52,6 +52,7 @@ Item {
     }
 
     onRestart: {
+        console.log("Restart!");
         serverPercolationSystem.pressureSources = []
         serverEntityManager.clear()
         serverPercolationSystem.initialize()
@@ -132,6 +133,7 @@ Item {
 
     EntityManager {
         id: entityManager
+        objectName: "clientEntityManager"
         gameScene: gameScene
         gameView: gameViewRoot
         percolationSystem: percolationSystem
@@ -231,6 +233,7 @@ Item {
     SelectionMenu {
         id: gameObjectInfo
         selectedObjects: gameScene.selectedObjects
+        playerTeam: gameViewRoot.playerTeam
     }
 
     states: [
@@ -311,14 +314,6 @@ Item {
             }
         }
 
-        function spawnWalker(spawn, properties) {
-            console.log("Spawn walker!");
-            properties.row = spawn.row
-            properties.col = spawn.col
-            properties.team = spawn.team
-            var walker = serverEntityManager.createEntityFromUrl("walkers/RandomWalker.qml", properties);
-        }
-
         onClientConnected: {
             console.log("Client connected");
 
@@ -331,11 +326,9 @@ Item {
             var properties = {
                 team: clientTeam,
                 row: playerSpawnSite.row,
-                col: playerSpawnSite.col,
-                interval: 20000
+                col: playerSpawnSite.col
             }
-            var playerSpawn = serverEntityManager.createEntityFromUrl("spawns/Spawn.qml", properties)
-            playerSpawn.spawnedWalker.connect(spawnWalker)
+            var playerSpawn = serverEntityManager.createEntityFromUrl("spawns/Spawn.qml", properties);
 
             for(var di = -1; di < 2; di++) {
                 for(var dj = -1; dj < 2; dj++) {
@@ -350,19 +343,21 @@ Item {
             webSocket.onTextMessageReceived.connect(function(message) {
                 var parsed = JSON.parse(message);
                 for(var i in parsed.entities) {
-                    var entityStrategy = parsed.entities[i];
+                    var parsedEntity = parsed.entities[i];
                     for(var j in serverEntityManager.entities) {
                         var entity = serverEntityManager.entities[j];
-                        if(entity.entityId === entityStrategy.entityId) {
+                        if(entity.entityId === parsedEntity.entityId) {
                             if(entity.team !== clientTeam) {
                                 console.warn("WARNING: Received command for entity from client with different team:")
                                 console.log("Entity", entity.entityId, "on team", entity.team.teamId, "requested by team", clientTeam.teamId)
                                 continue;
                             }
-
-                            if(entity.strategy !== undefined) {
-                                entity.strategy = entityStrategy.strategy;
-                                entity.moveStrategy = entityStrategy.moveStrategy;
+                            if(entity.walker) {
+                                entity.strategy = parsedEntity.strategy;
+                                entity.moveStrategy = parsedEntity.moveStrategy;
+                            }
+                            if(entity.spawn) {
+                                entity.spawnMode = parsedEntity.spawnMode;
                             }
                         }
                     }
@@ -400,8 +395,6 @@ Item {
                 percolationSystem.columnCount = parsed.percolationSystem.columnCount;
                 percolationSystem.deserialize(PercolationSystem.ValueImage, parsed.percolationSystem.valueMatrix);
                 percolationSystem.deserialize(PercolationSystem.TeamImage, parsed.percolationSystem.teamMatrix);
-
-                entityManager.ticksSinceTurn = parsed.ticksSinceTurn;
 
                 for(var i in entityManager.entities) {
                     var entity = entityManager.entities[i];
@@ -476,14 +469,22 @@ Item {
                     var entity = entityManager.entities[i];
                     if(entity.team === playerTeam && entity.walker) {
                         entity.chooseStrategy();
-                        var entityStrategy = {
+                        var walkerStrategy = {
                             entityId: entity.entityId,
                             strategy: entity.strategy,
                             moveStrategy: entity.moveStrategy
                         }
-                        strategyEntities.push(entityStrategy);
+                        strategyEntities.push(walkerStrategy);
+                    }
+                    if(entity.team === playerTeam && entity.spawn) {
+                        var spawnStrategy = {
+                            entityId: entity.entityId,
+                            spawnMode: entity.spawnMode
+                        }
+                        strategyEntities.push(spawnStrategy);
                     }
                 }
+
                 var strategy = {
                     entities: strategyEntities
                 };
@@ -501,6 +502,7 @@ Item {
 
     EntityManager {
         id: serverEntityManager
+        objectName: "serverEntityManager"
         gameScene: serverScene
         gameView: gameViewRoot
         percolationSystem: serverPercolationSystem

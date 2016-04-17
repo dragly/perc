@@ -15,7 +15,6 @@ Item {
     property int nextEntityId: 1
     property int nextTeamId: 1
     property var teams: []
-    property int ticksSinceTurn: 0
 
     function addInteraction(interaction) {
         interactions.push(interaction)
@@ -77,7 +76,7 @@ Item {
 
         var entity = component.createObject(gameScene, properties)
         if(entity === null) {
-            console.log("Could not create entity!")
+            console.log("Could not create entity from url:", url)
             console.log(component.errorString())
         }
 
@@ -92,25 +91,6 @@ Item {
     }
 
     function advance(currentUpdateTime) {
-        if(ticksSinceTurn > 10) {
-            console.log("Turn!");
-            for(var i in entities) {
-                var entity = entities[i];
-                if(percolationSystem.team(entity.row, entity.col) === entity.team.teamId) {
-                    for(var di = -1; di < 2; di++) {
-                        for(var dj = -1; dj < 2; dj++) {
-                            var row = entity.row + di;
-                            var column = entity.col + dj;
-                            percolationSystem.teamTag(entity.team.teamId, row, column);
-                            percolationSystem.raiseValue(0.01, row, column);
-                        }
-                    }
-                }
-            }
-
-            ticksSinceTurn = 0;
-        }
-
         // remove dead entities
         for(var i in deadEntities) {
             var deadEntity = deadEntities[i]
@@ -123,29 +103,82 @@ Item {
 
         deadEntities = []
 
-        for(var i = 0; i < entities.length; i++) {
-            var entity1 = entities[i]
-            for(var j = i + 1; j < entities.length; j++) {
-                var entity2 = entities[j]
-                interactionManager.interact(entity1, entity2)
-            }
-        }
-
         var interval = currentUpdateTime - lastTime
         if(interval > moveInterval) {
             for(var i in entities) {
                 var entity = entities[i]
-                entity.move(currentUpdateTime)
+                if(entity.walker) {
+                    switch(entity.strategy) {
+                    case "move":
+                        entity.move(currentUpdateTime)
+                        break;
+                    case "construct":
+                        if(percolationSystem.team(entity.row, entity.col) === entity.team.teamId) {
+                            for(var di = -1; di < 2; di++) {
+                                for(var dj = -1; dj < 2; dj++) {
+                                    var row = entity.row + di;
+                                    var column = entity.col + dj;
+                                    percolationSystem.teamTag(entity.team.teamId, row, column);
+                                    percolationSystem.raiseValue(0.01, row, column);
+                                }
+                            }
+                        }
+                        break;
+                    case "destruct":
+                        for(var di = -1; di < 2; di++) {
+                            for(var dj = -1; dj < 2; dj++) {
+                                var row = entity.row + di;
+                                var column = entity.col + dj;
+                                percolationSystem.lowerValue(0.01, row, column);
+                                console.log("Lower value");
+
+                                // TODO attack other entities
+                            }
+                        }
+                        var entity1 = entity;
+                        for(var j in entities) {
+                            var entity2 = entities[j];
+                            if(entity1 === entity2 && entity2.walker) {
+                                continue;
+                            }
+                            var xDiff = entity1.col - entity2.col
+                            var yDiff = entity1.row - entity2.row
+                            var distance = Math.abs(xDiff) + Math.abs(yDiff)
+
+                            if(distance <= 1) {
+                                console.log(entity1, "attacking", entity2)
+                                entity2.healthPoints -= 0.1;
+                                if(entity2.healthPoints < 0) {
+                                    console.log(entity2, "died");
+                                    deadEntities.push(entity2);
+                                }
+                            }
+                        }
+
+                        break;
+                    default:
+                        break;
+                    }
+                } else if(entity.spawn) {
+                    var spawn = entity;
+                    if(spawn.spawned) {
+                        var properties = {};
+                        properties.row = spawn.row
+                        properties.col = spawn.col
+                        properties.team = spawn.team
+                        entityManagerRoot.createEntityFromUrl(spawn.spawnType, properties);
+                        spawn.spawned = false;
+                    }
+                }
+
+                lastTime = currentUpdateTime
             }
-            lastTime = currentUpdateTime
-        }
 
-        for(var i in entities) {
-            var entity = entities[i]
-            entity.advance(currentUpdateTime)
+            for(var i in entities) {
+                var entity = entities[i]
+                entity.advance(currentUpdateTime)
+            }
         }
-
-        ticksSinceTurn += 1;
     }
 
     function clear() {
@@ -154,9 +187,5 @@ Item {
             entity.destroy()
         }
         entities = []
-    }
-
-    InteractionManager {
-        id: interactionManager
     }
 }

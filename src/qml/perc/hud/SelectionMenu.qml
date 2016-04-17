@@ -4,12 +4,13 @@ import ".."
 
 Rectangle {
     id: selectionMenuRoot
+    property Team playerTeam: null
     property list<EntityBase> selectedObjects
     anchors.right: parent.right
     anchors.bottom: parent.bottom
 
     width: parent.width * 0.2
-    height: parent.height * 0.1
+    height: parent.height * 0.2
 
     state: selectedObjects.length > 0 ? "active" : "hidden"
 
@@ -20,21 +21,51 @@ Rectangle {
         }
     }
 
-    Text {
-        id: gameObjectInfoText
-        anchors.centerIn: parent
-
-        text: {
-            if(selectedObjects.length > 1) {
-                return selectedObjects.length + " items selected"
-            } else if (selectedObjects.length === 1) {
-                return selectedObjects[0].informationText
-            } else {
-                return "None selected"
-            }
+    Item {
+        anchors {
+            fill: parent
+            margins: 16
         }
 
-        font.pixelSize: parent.height * 0.2
+        Text {
+            id: gameObjectInfoText
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+            }
+            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+
+            text: {
+                if(selectedObjects.length > 1) {
+                    return selectedObjects.length + " items selected"
+                } else if (selectedObjects.length === 1) {
+                    return selectedObjects[0].informationText
+                } else {
+                    return "None selected"
+                }
+            }
+        }
+        Loader {
+            anchors {
+                top: gameObjectInfoText.bottom
+                bottom: parent.bottom
+                left: parent.left
+                right: parent.right
+                topMargin: 16
+            }
+            sourceComponent: {
+                if(selectedObjects.length < 1) {
+                    return undefined;
+                }
+                var targetObject = selectedObjects[0];
+                if(targetObject.controls && targetObject.team === playerTeam) {
+                    return targetObject.controls;
+                } else {
+                    return undefined;
+                }
+            }
+        }
     }
 
     states: [

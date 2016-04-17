@@ -129,7 +129,7 @@ void PercolationSystem::teamTag(int team, int row, int column)
 }
 
 void PercolationSystem::initialize() {
-    qDebug() << "Initializing percolation system";
+    qDebug() << "Initializing percolation system" << objectName();
     m_isInitialized = false;
     m_valueMatrix = arma::zeros(m_rowCount, m_columnCount);
     randomizeValueMatrix();
@@ -268,13 +268,19 @@ void PercolationSystem::setImageType(ImageType arg)
 
 void PercolationSystem::lowerValue(double value, int row, int column) {
     if(m_valueMatrix.in_range(row, column)) {
-        m_valueMatrix(row, column) = fmax(m_occupationTreshold - value, 0);
+        m_valueMatrix(row, column) -= value;
+        if(m_valueMatrix(row, column) < 0.0) {
+            m_valueMatrix(row, column) = 0.0;
+        }
     }
 }
 
 void PercolationSystem::raiseValue(double value, int row, int column) {
     if(m_valueMatrix.in_range(row, column)) {
-        m_valueMatrix(row, column) = fmin(m_valueMatrix(row,column) + value, 1.0);
+        m_valueMatrix(row, column) += value;
+        if(m_valueMatrix(row, column) > 1.0) {
+            m_valueMatrix(row, column) = 1.0;
+        }
     }
 }
 

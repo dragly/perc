@@ -27,6 +27,7 @@ Item {
     property int teamId: -1
     property bool _isKilled: false
     property bool toBeDeleted: false
+    property double healthPoints: 100.0
 
     x: col * Defaults.GRID_SIZE
     y: row * Defaults.GRID_SIZE
@@ -42,7 +43,10 @@ Item {
         property alias filename: entityRoot.filename
         property alias entityId: entityRoot.entityId
         property alias teamId: entityRoot.teamId
+        property alias healthPoints: entityRoot.healthPoints
     }
+
+    property Component controls
 
     Component.onCompleted: {
         if(filename === "EntityBase.qml" || objectName === "EntityBase") {

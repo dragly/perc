@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import QtQuick.Controls 1.4
 
 import ".."
 import "../movement"
@@ -13,10 +14,26 @@ BaseWalker {
     property var target: {
         return {row: -1, col: -1}
     }
+    property var defaultStrategy: "construct"
 
     objectName: "TargetWalker"
     filename: "walkers/TargetWalker.qml"
-    informationText: "Target walker. Right-click to move."
+    informationText: "Target walker. Right-click to move.\nCurrent strategy: " + strategy
+
+    controls: Item {
+        Button {
+            text: "Mode: " + defaultStrategy
+            onClicked: {
+                if(defaultStrategy === "none") {
+                    defaultStrategy = "construct";
+                } else if(defaultStrategy === "construct") {
+                    defaultStrategy = "destruct";
+                } else if(defaultStrategy === "destruct") {
+                    defaultStrategy = "none";
+                }
+            }
+        }
+    }
 
     function createGrid() {
         var tmp = new Array(percolationSystem.rowCount)
@@ -131,17 +148,17 @@ BaseWalker {
 
     onChooseStrategy: {
         if(!target) {
-            strategy = "none";
+            strategy = defaultStrategy;
             return;
         }
         if(!targetEnabled) {
-            strategy = "none";
+            strategy = defaultStrategy;
             return;
         }
 
         console.log("Rows:", target.row, root.row, target.col, root.col);
         if(target.row === root.row && target.col === root.col) {
-            strategy = "none";
+            strategy = defaultStrategy;
             targetEnabled = false;
             return;
         }

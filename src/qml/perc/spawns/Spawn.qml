@@ -1,4 +1,6 @@
 import QtQuick 2.0
+import QtQuick.Controls 1.4
+
 import ".."
 import "../defaults.js" as Defaults
 
@@ -7,13 +9,38 @@ EntityBase {
     objectName: "Spawn"
     filename: "spawns/Spawn.qml"
 
-    signal spawnedWalker(var spawn, var properties)
-
+    property bool spawn: true
+    property bool spawned: false
     property real previousSpawnTime
-    property real interval: 5000
-    property double healthPoints: 100.0
+    property real spawnInterval: 250
+    property url spawnType: spawnModes[spawnMode][1]
+    property int spawnMode: 0
+    property int ticksSinceSpawn: spawnInterval
+    readonly property int ticksUntilSpawn: spawnInterval - ticksSinceSpawn
+
+    property var spawnModes: [
+        ["Target walker", "../walkers/TargetWalker.qml"],
+        ["Random walker", "../walkers/RandomWalker.qml"],
+    ]
 
     property double _colorValue: Math.max(0, Math.min(100, healthPoints)) / 100
+
+    informationText: "Spawn. " + ticksUntilSpawn + " ticks until spawn."
+
+    controls: Component {
+        Item {
+            Button {
+                text: "Spawn type: " + spawnModes[spawnMode][0]
+                onClicked: {
+                    var nextMode = spawnMode + 1;
+                    if(nextMode > spawnModes.length) {
+                        nextMode = 0;
+                    }
+                    spawnMode = nextMode;
+                }
+            }
+        }
+    }
 
     width: Defaults.GRID_SIZE
     height: Defaults.GRID_SIZE
@@ -21,7 +48,6 @@ EntityBase {
     onHealthPointsChanged: {
         if(healthPoints < 0) {
             healthPoints = 0
-            spawnTimer.stop()
         }
     }
 
@@ -50,9 +76,10 @@ EntityBase {
     }
 
     onAdvance: {
-        if(currentTime - previousSpawnTime > interval) {
-            spawnedWalker(spawnRoot, {})
-            previousSpawnTime = currentTime;
+        if(ticksSinceSpawn > spawnInterval) {
+            spawned = true;
+            ticksSinceSpawn = 0;
         }
+        ticksSinceSpawn += 1;
     }
 }
