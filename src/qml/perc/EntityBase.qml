@@ -24,6 +24,7 @@ Item {
     property var entityManager: null
     property var percolationSystem: null
     property Team team: null
+    property int teamId: -1
     property bool _isKilled: false
     property bool toBeDeleted: false
 
@@ -40,6 +41,7 @@ Item {
         property alias column: entityRoot.col
         property alias filename: entityRoot.filename
         property alias entityId: entityRoot.entityId
+        property alias teamId: entityRoot.teamId
     }
 
     Component.onCompleted: {

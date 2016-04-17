@@ -51,18 +51,38 @@ int PercolationSystem::columnCount() const
     return m_columnCount;
 }
 
-QString PercolationSystem::serialize() {
+QString PercolationSystem::serialize(ImageType matrixType) {
     stringstream stream;
-    m_valueMatrix.save(stream, arma::arma_binary);
+    switch(matrixType) {
+    case ValueImage:
+        m_valueMatrix.save(stream, arma::arma_binary);
+        break;
+    case TeamImage:
+        m_teamMatrix.save(stream, arma::arma_binary);
+        break;
+    default:
+        qWarning() << "ERROR: Cannot serialize image of type" << matrixType;
+        break;
+    }
     return QString::fromLatin1(QByteArray::fromStdString(stream.str()).toBase64());
 }
 
-void PercolationSystem::deserialize(QString data)
+void PercolationSystem::deserialize(ImageType matrixType, QString data)
 {
     stringstream stream;
     stream << QByteArray::fromBase64(data.toLatin1()).toStdString();
     ensureInitialization();
-    m_valueMatrix.load(stream, arma::arma_binary);
+    switch(matrixType) {
+    case ValueImage:
+        m_valueMatrix.load(stream, arma::arma_binary);
+        break;
+    case TeamImage:
+        m_teamMatrix.load(stream, arma::arma_binary);
+        break;
+    default:
+        qWarning() << "ERROR: Cannot deserialize image of type" << matrixType;
+        break;
+    }
     recalculateMatricesAndUpdate();
 }
 
@@ -88,9 +108,26 @@ void PercolationSystem::randomizeValueMatrix() {
     }
 }
 
+int PercolationSystem::team(int row, int column)
+{
+    qDebug() << "Team matrix:" << row << column << m_teamMatrix.max() << m_teamMatrix(row, column);
+    if(m_teamMatrix.in_range(row, column)) {
+        return m_teamMatrix(row, column);
+    }
+    return -1;
+}
+
 bool PercolationSystem::inBounds(int row, int column) const
 {
-    return !(row < 0 || row >= m_valueMatrix.n_rows || column < 0 || column >= m_valueMatrix.n_cols);
+    return m_valueMatrix.in_range(row, column);
+}
+
+void PercolationSystem::teamTag(int team, int row, int column)
+{
+    if(m_teamMatrix.in_range(row, column)) {
+        qDebug() << "Setting" << row << column << team;
+        m_teamMatrix(row, column) = team;
+    }
 }
 
 void PercolationSystem::initialize() {
@@ -174,7 +211,6 @@ void PercolationSystem::recalculateMatricesAndUpdate() {
     ensureInitialization();
     generateOccupationMatrix();
     generateLabelMatrix();
-    generateAreaMatrix();
     generatePressureMatrix();
     generateImage();
     QMutexLocker prevImageLocker(&m_prevImageMutex);
@@ -232,21 +268,16 @@ void PercolationSystem::setImageType(ImageType arg)
     }
 }
 
-double PercolationSystem::lowerValue(int row, int col) {
-    if(movementCost(row,col)) {
-        m_valueMatrix(row, col) = fmax(m_occupationTreshold - 0.05, 0);
-        return 0.05;
+void PercolationSystem::lowerValue(double value, int row, int column) {
+    if(m_valueMatrix.in_range(row, column)) {
+        m_valueMatrix(row, column) = fmax(m_occupationTreshold - value, 0);
     }
-    return 0;
 }
 
-double PercolationSystem::raiseValue(int row, int col) {
-    ensureInitialization();
-    if(movementCost(row,col)) {
-        m_valueMatrix(row, col) = fmin(m_valueMatrix(row,col) + 0.05, 1.0);
-        return 0.05;
+void PercolationSystem::raiseValue(double value, int row, int column) {
+    if(m_valueMatrix.in_range(row, column)) {
+        m_valueMatrix(row, column) = fmin(m_valueMatrix(row,column) + value, 1.0);
     }
-    return 0;
 }
 
 void PercolationSystem::generateOccupationMatrix() {
@@ -298,19 +329,16 @@ uint PercolationSystem::maxLabel()
 
 uint PercolationSystem::maxArea()
 {
-    qDebug() << "Requested max area on" << objectName() << m_areaMatrix.max();
     return m_areaMatrix.max();
 }
 
 double PercolationSystem::maxFlow()
 {
-    cout << "m_flowMatrix.max()" << endl;
-    cout << m_flowMatrix.max() << endl;
     return m_flowMatrix.max();
 }
 
 void PercolationSystem::generateLabelMatrix() {
-    qDebug() << "Generating label matrix on" << objectName();
+//    qDebug() << "Generating label matrix on" << objectName();
 
     m_labelMatrix = arma::zeros<arma::imat>(m_rowCount, m_columnCount);
     int currentLabel = 1;
@@ -486,46 +514,36 @@ void PercolationSystem::generateImage() {
 //        }
 //        break;
 //    }
-//    case TeamImage: {
-//        for(int i = 0; i < m_rowCount; i++) {
-//            for(int j = 0; j < m_columnCount; j++) {
-//                if(movementCost(i,j)) {
-//                    int team = m_teamMatrix(i, j);
-//                    switch(team) {
-//                    case 1:
-//                        color = QColor("red");
-//                        break;
-//                    case 2:
-//                        color = QColor("green");
-//                        break;
-//                    case 3:
-//                        color = QColor("blue");
-//                        break;
-//                    default:
-//                        color = QColor("grey");
-//                        break;
-//                    }
-//                } else {
-//                    color = background;
-//                }
-//                m_image.setPixel(j,i,color.rgba());
-//            }
-//        }
-//    }
+    case TeamImage: {
+        for(int i = 0; i < m_rowCount; i++) {
+            for(int j = 0; j < m_columnCount; j++) {
+                if(movementCost(i,j)) {
+                    int team = m_teamMatrix(i, j);
+                    switch(team) {
+                    case 1:
+                        color = QColor("pink");
+                        break;
+                    case 2:
+                        color = QColor("lightgreen");
+                        break;
+                    case 3:
+                        color = QColor("lightblue");
+                        break;
+                    default:
+                        color = QColor("lightgrey");
+                        break;
+                    }
+                } else {
+                    color = QColor("black");
+                }
+                m_image.setPixel(j,i,color.rgba());
+            }
+        }
+    }
     default: {
         break;
     }
     }
-}
-
-void PercolationSystem::generateAreaMatrix() {
-    qDebug() << "Generating area matrix" << objectName();
-//    for(int i = 0; i < m_rowCount; i++) {
-//        for(int j = 0; j < m_columnCount; j++) {
-//            m_areaMatrix(i,j) = m_areas(label(i,j));
-//        }
-//    }
-    qDebug() << "Largest area:" << m_areaMatrix.max();
 }
 
 double PercolationSystem::pressure(int row, int col) {

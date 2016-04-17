@@ -27,28 +27,22 @@ BaseWalker {
     }
 
     onChooseStrategy: {
-        var randomIndex = parseInt(Math.random() * 4)
-        var found = false
-        var directions = Defaults.directions;
+        var randomIndex = parseInt(Math.random() * directions.length);
+        var found = false;
         for(var attempt = 0; attempt < 4 && !found; attempt++) {
-            var nextSiteRow = parent.row + directions[randomIndex][0]
-            var nextSiteCol = parent.col + directions[randomIndex][1]
-            if(percolationSystem.movementCost(nextSiteRow, nextSiteCol) > 0) {
-                strategy = randomIndex;
-                found = true
+            var result = moveResult(randomIndex);
+            console.log("Testing", randomIndex, result.row, result.column);
+            console.log("Team:", percolationSystem.team(result.row, result.column), team.teamId);
+            if(moveAcceptable(randomIndex) && percolationSystem.team(result.row, result.column) === team.teamId) {
+                console.log("Accepted");
+                moveStrategy = randomIndex;
+                found = true;
             } else {
-                randomIndex += 1
-                randomIndex = (randomIndex + 4) % 4
+                console.log("Denied, trying next...");
+                randomIndex += 1;
+                randomIndex = (randomIndex + 4) % 4;
             }
         }
-    }
-
-    Rectangle {
-        id: rect
-        color: team.color
-        anchors.centerIn: parent
-
-        width: Defaults.GRID_SIZE * 0.7
-        height: Defaults.GRID_SIZE * 0.7
+        strategy = "move";
     }
 }

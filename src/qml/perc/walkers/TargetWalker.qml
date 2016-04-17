@@ -170,13 +170,4 @@ BaseWalker {
     onPercolationSystemChanged: {
         createGrid();
     }
-
-    Rectangle {
-        id: rect
-        color: team.color
-        anchors.centerIn: root
-
-        width: Defaults.GRID_SIZE * 0.7
-        height: Defaults.GRID_SIZE * 0.7
-    }
 }

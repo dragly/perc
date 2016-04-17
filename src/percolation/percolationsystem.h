@@ -68,8 +68,8 @@ public:
     int rowCount() const;
     int columnCount() const;
 
-    Q_INVOKABLE QString serialize();
-    Q_INVOKABLE void deserialize(QString data);
+    Q_INVOKABLE QString serialize(ImageType matrixType);
+    Q_INVOKABLE void deserialize(ImageType matrixType, QString data);
     Q_INVOKABLE double movementCost(int row, int col);
 
     Q_INVOKABLE double value(int row, int col);
@@ -79,8 +79,6 @@ public:
     Q_INVOKABLE double maxFlow();
     Q_INVOKABLE double pressure(int row, int col);
     Q_INVOKABLE double flow(int row, int col);
-    Q_INVOKABLE double lowerValue(int row, int col);
-    Q_INVOKABLE double raiseValue(int row, int col);
     void paint(QPainter *painter);
     bool isSite(int row, int col);
     Q_INVOKABLE int label(int row, int col);
@@ -110,6 +108,9 @@ public:
     }
 
 public slots:
+    int team(int row, int column);
+    void lowerValue(double value, int row, int col);
+    void raiseValue(double value, int row, int col);
     void setFinishedUpdating();
     void initialize();
     void recalculateMatricesAndUpdate();
@@ -137,6 +138,7 @@ public slots:
 
     void setImageType(ImageType arg);    
     bool inBounds(int row, int column) const;
+    void teamTag(int team, int row, int column);
 
 signals:
     void rowCountChanged(int arg);
@@ -153,7 +155,6 @@ signals:
 protected:
     void generateImage();
     void generateLabelMatrix();
-    void generateAreaMatrix();
     void generatePressureMatrix();
     void generateOccupationMatrix();
 

@@ -11,7 +11,7 @@ Item {
 
     property QtObject properties: QtObject {
         property alias name: root.name
-        property alias color: root.color
+        property string color: root.color
         property alias teamId: root.teamId
     }
 

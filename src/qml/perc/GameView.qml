@@ -25,8 +25,7 @@ Item {
     readonly property alias percolationSystem: percolationSystem
     readonly property alias entityManager: serverEntityManager
 
-    property Team playerTeam: playerTeamInternal
-    property int playerTeamId: 0
+    property Team playerTeam: null
 
     property list<Objective> failObjectives
     property list<Objective> winObjectives
@@ -69,14 +68,6 @@ Item {
     }
 
     Component.onCompleted: {}
-
-    Team {
-        id: playerTeamInternal
-        isPlayer: true
-        name: "player"
-        color: "#6a3d9a"
-        lightColor: "#cab2d6"
-    }
 
     Rectangle {
         id: backgroundRect
@@ -231,7 +222,7 @@ Item {
 
     ConstructionMenu {
         id: constructionMenu
-        energy: playerTeam.energy
+        energy: playerTeam ? playerTeam.energy : 0
         onPauseClicked: {
             pause()
         }
@@ -304,10 +295,12 @@ Item {
                 type: "state",
                 entities: entities,
                 teams: teams,
+                ticksSinceTurn: serverEntityManager.ticksSinceTurn,
                 percolationSystem: {
                     rowCount: serverPercolationSystem.rowCount,
                     columnCount: serverPercolationSystem.columnCount,
-                    valueMatrix: serverPercolationSystem.serialize(),
+                    valueMatrix: serverPercolationSystem.serialize(PercolationSystem.ValueImage),
+                    teamMatrix: serverPercolationSystem.serialize(PercolationSystem.TeamImage),
                     occupationThreshold: serverPercolationSystem.occupationTreshold
                 }
             };
@@ -323,7 +316,7 @@ Item {
             properties.row = spawn.row
             properties.col = spawn.col
             properties.team = spawn.team
-            var walker = serverEntityManager.createEntityFromUrl("walkers/TargetWalker.qml", properties);
+            var walker = serverEntityManager.createEntityFromUrl("walkers/RandomWalker.qml", properties);
         }
 
         onClientConnected: {
@@ -331,30 +324,43 @@ Item {
 
             var client = {webSocket: webSocket};
             clients.push(client);
-            var teamComponent = Qt.createComponent("Team.qml");
-            var team = teamComponent.createObject(server, {teamId: nextTeamId});
-            serverEntityManager.teams.push(team);
+            var clientTeam = serverEntityManager.createTeam();
             nextTeamId += 1;
 
             var playerSpawnSite = Logic.randomSiteOnLargestCluster(serverPercolationSystem)
             var properties = {
-                team: team,
+                team: clientTeam,
                 row: playerSpawnSite.row,
                 col: playerSpawnSite.col,
-                interval: 1000000
+                interval: 20000
             }
             var playerSpawn = serverEntityManager.createEntityFromUrl("spawns/Spawn.qml", properties)
             playerSpawn.spawnedWalker.connect(spawnWalker)
 
-            webSocket.sendTextMessage(JSON.stringify({type: "welcome", team: team}));
+            for(var di = -1; di < 2; di++) {
+                for(var dj = -1; dj < 2; dj++) {
+                    var row = playerSpawn.row + di;
+                    var column = playerSpawn.col + dj;
+                    serverPercolationSystem.teamTag(playerSpawn.team.teamId, row, column);
+                }
+            }
+
+            webSocket.sendTextMessage(JSON.stringify({type: "welcome", team: clientTeam.properties}));
 
             webSocket.onTextMessageReceived.connect(function(message) {
+                console.log("Received message from", client.webSocket);
                 var parsed = JSON.parse(message);
                 for(var i in parsed.entities) {
                     var entityStrategy = parsed.entities[i];
                     for(var j in serverEntityManager.entities) {
                         var entity = serverEntityManager.entities[j];
                         if(entity.entityId === entityStrategy.entityId) {
+                            if(entity.team !== clientTeam) {
+                                console.warn("WARNING: Received command for entity from client with different team:")
+                                console.log("Entity", entity.entityId, "on team", entity.team.teamId, "requested by team", clientTeam.teamId)
+                                continue;
+                            }
+
                             if(entity.strategy !== undefined) {
                                 entity.strategy = entityStrategy.strategy;
                                 entity.moveStrategy = entityStrategy.moveStrategy;
@@ -366,6 +372,7 @@ Item {
             webSocket.onStatusChanged.connect(function(status) {
                 if(status === WebSocket.Closed) {
                     if(clients) {
+
                         clients.splice(clients.indexOf(client), 1);
                     }
                 }
@@ -383,36 +390,78 @@ Item {
         onTextMessageReceived: {
             var parsed = JSON.parse(message);
             if(parsed.type === "welcome") {
-                playerTeamId = parsed.team.teamId;
+                playerTeam = entityManager.createTeam({teamId: parsed.team.teamId});
+                for(var j in parsedTeam) {
+                    playerTeam.properties[j] = parsedTeam[j];
+                }
             }
             if(parsed.type === "state") {
                 percolationSystem.occupationTreshold = parsed.percolationSystem.occupationThreshold;
                 percolationSystem.rowCount = parsed.percolationSystem.rowCount;
                 percolationSystem.columnCount = parsed.percolationSystem.columnCount;
-                percolationSystem.deserialize(parsed.percolationSystem.valueMatrix);
+                percolationSystem.deserialize(PercolationSystem.ValueImage, parsed.percolationSystem.valueMatrix);
+                percolationSystem.deserialize(PercolationSystem.TeamImage, parsed.percolationSystem.teamMatrix);
+
+                entityManager.ticksSinceTurn = parsed.ticksSinceTurn;
 
                 for(var i in entityManager.entities) {
                     var entity = entityManager.entities[i];
                     entity.toBeDeleted = true;
                 }
 
+                // TODO delete teams no longer found on server
+                for(var i in parsed.teams) {
+                    var parsedTeam = parsed.teams[i];
+                    var foundTeam = false;
+                    var team;
+                    for(var j in entityManager.teams) {
+                        var existingTeam = entityManager.teams[j];
+                        if(parsedTeam.teamId === existingTeam.teamId) {
+                            team = existingTeam;
+                            foundTeam = true;
+                        }
+                    }
+                    if(!foundTeam) {
+                        team = entityManager.createTeam({teamId: parsedTeam.teamId});
+                    }
+                    for(var j in parsedTeam) {
+                        team.properties[j] = parsedTeam[j];
+                    }
+                }
+
                 for(var i in parsed.entities) {
                     var parsedEntity = parsed.entities[i];
                     var entity;
-                    var found = false;
+                    var parsedEntityTeam;
+
+                    var foundTeam = false;
+                    for(var k in entityManager.teams) {
+                        var existingTeam = entityManager.teams[k];
+                        if(existingTeam.teamId === parsedEntity.teamId) {
+                            parsedEntityTeam = existingTeam;
+                            foundTeam = true;
+                        }
+                    }
+
+                    if(!foundTeam) {
+                        console.log("WARNING: Got entity with unknown team!");
+                    }
+
+                    var foundEntity = false;
                     for(var j in entityManager.entities) {
                         var existingEntity = entityManager.entities[j];
                         if(existingEntity.entityId === parsedEntity.entityId) {
                             entity = existingEntity;
-                            found = true;
+                            foundEntity = true;
                         }
                     }
-                    if(!found) {
-                        entity = entityManager.createEntityFromUrl(parsedEntity.filename, {team: playerTeam});
+                    if(!foundEntity) {
+                        entity = entityManager.createEntityFromUrl(parsedEntity.filename, {entityId: parsedEntity.entityId, team: parsedEntityTeam});
                     }
                     for(var j in parsedEntity) {
                         entity.properties[j] = parsedEntity[j];
                     }
+                    entity.team = parsedEntityTeam;
                     entity.toBeDeleted = false;
                 }
 
@@ -426,7 +475,7 @@ Item {
                 var strategyEntities = [];
                 for(var i in entityManager.entities) {
                     var entity = entityManager.entities[i];
-                    if(entity.walker) {
+                    if(entity.team === playerTeam && entity.walker) {
                         entity.chooseStrategy();
                         var entityStrategy = {
                             entityId: entity.entityId,
@@ -460,7 +509,22 @@ Item {
     }
 
     Rectangle {
+        anchors {
+            left: parent.left
+            top: parent.top
+        }
+        height: entityManager.ticksSinceTurn / 10 * parent.height
+        width: 20
+        Behavior on height {
+            NumberAnimation {
+                duration: 400
+                easing.type: Easing.InOutQuad
+            }
+        }
+    }
 
+    Rectangle {
+        visible: false
         anchors {
             left: parent.left
             bottom: parent.bottom

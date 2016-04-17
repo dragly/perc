@@ -12,11 +12,33 @@ Item {
     property var deadEntities: []
     property double moveInterval: 100
     property double lastTime: Date.now()
-    property int nextEntityId: 0
+    property int nextEntityId: 1
+    property int nextTeamId: 1
     property var teams: []
+    property int ticksSinceTurn: 0
 
     function addInteraction(interaction) {
         interactions.push(interaction)
+    }
+
+    function createTeam(properties) {
+        if(properties === undefined) {
+            properties = {};
+        }
+
+        if(properties.name === undefined) {
+            properties.name = "Team " + nextTeamId;
+        }
+
+        if(properties.teamId === undefined) {
+            properties.teamId = nextTeamId;
+            nextTeamId += 1;
+        }
+
+        var teamComponent = Qt.createComponent("Team.qml");
+        var team = teamComponent.createObject(entityManagerRoot, properties);
+        entityManagerRoot.teams.push(team);
+        return team;
     }
 
     function createEntityFromUrl(url, properties) {
@@ -24,9 +46,15 @@ Item {
             properties = {}
         }
 
-        if(!properties.entityId) {
+        if(properties.entityId === undefined) {
             properties.entityId = nextEntityId;
             nextEntityId += 1;
+        }
+
+        if(properties.team === undefined) {
+            console.log("WARNING: Making entity without team!");
+        } else {
+            properties.teamId = properties.team.teamId;
         }
 
         properties.gameView = gameView
@@ -64,6 +92,26 @@ Item {
     }
 
     function advance(currentUpdateTime) {
+        if(ticksSinceTurn > 10) {
+            console.log("Turn!");
+            for(var i in entities) {
+                var entity = entities[i];
+                console.log("Team comparison:", percolationSystem.team(entity.row, entity.col), entity.team.teamId);
+                if(percolationSystem.team(entity.row, entity.col) === entity.team.teamId) {
+                    for(var di = -1; di < 2; di++) {
+                        for(var dj = -1; dj < 2; dj++) {
+                            var row = entity.row + di;
+                            var column = entity.col + dj;
+                            percolationSystem.teamTag(entity.team.teamId, row, column);
+                            percolationSystem.raiseValue(0.01, row, column);
+                        }
+                    }
+                }
+            }
+
+            ticksSinceTurn = 0;
+        }
+
         // remove dead entities
         for(var i in deadEntities) {
             var deadEntity = deadEntities[i]
@@ -96,8 +144,9 @@ Item {
         for(var i in entities) {
             var entity = entities[i]
             entity.advance(currentUpdateTime)
-            percolationSystem.raiseValue(entity.row, entity.col);
         }
+
+        ticksSinceTurn += 1;
     }
 
     function clear() {

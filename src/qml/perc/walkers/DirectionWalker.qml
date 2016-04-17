@@ -40,13 +40,4 @@ BaseWalker {
         }
         console.log("Chose strategy:", strategy, moveStrategy)
     }
-
-    Rectangle {
-        id: rect
-        color: team.color
-        anchors.centerIn: parent
-
-        width: Defaults.GRID_SIZE * 0.7
-        height: Defaults.GRID_SIZE * 0.7
-    }
 }

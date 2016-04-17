@@ -42,13 +42,9 @@ EntityBase {
 
     function moveAcceptable(moveStrategy) {
         var result = moveResult(moveStrategy);
-        console.log("Testing", moveStrategy, "resulting in", result.row, result.column);
-        console.log("Cost:", percolationSystem.movementCost(result.row, result.column))
         if(percolationSystem.movementCost(result.row, result.column) > 0) {
-            console.log("Accepted");
             return true;
         }
-        console.log("Denied");
         return false;
     }
 
@@ -88,6 +84,8 @@ EntityBase {
         id: rect
         color: team.color
         anchors.centerIn: parent
+        border.width: width * 0.1
+        border.color: "white"
 
         width: Defaults.GRID_SIZE * 0.7
         height: Defaults.GRID_SIZE * 0.7

@@ -9,13 +9,4 @@ EntityBase {
 
     width: Defaults.GRID_SIZE
     height: Defaults.GRID_SIZE
-
-    Rectangle {
-        id: rect
-        color: team.color
-        anchors.centerIn: parent
-
-        width: Defaults.GRID_SIZE * 0.7
-        height: Defaults.GRID_SIZE * 0.7
-    }
 }
