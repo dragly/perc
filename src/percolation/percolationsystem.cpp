@@ -76,7 +76,8 @@ void PercolationSystem::setPressureSources(const QList<QObject *> &pressureSourc
     emit pressureSourcesChanged(m_pressureSources);
 }
 
-void PercolationSystem::randomizeMatrix() {
+void PercolationSystem::randomizeValueMatrix() {
+    qDebug() << "Randomizing value matrix";
     for(uint i = 0; i < m_valueMatrix.n_rows; i++) {
         for(uint j = 0; j < m_valueMatrix.n_cols; j++) {
             m_valueMatrix(j, i) = m_random.ran2();
@@ -93,10 +94,10 @@ bool PercolationSystem::inBounds(int row, int column) const
 }
 
 void PercolationSystem::initialize() {
-    qDebug() << "Initializing percolation systemf";
+    qDebug() << "Initializing percolation system";
     m_isInitialized = false;
     m_valueMatrix = arma::zeros(m_rowCount, m_columnCount);
-    randomizeMatrix();
+    randomizeValueMatrix();
     m_teamMatrix = arma::zeros<arma::imat>(m_rowCount, m_columnCount);
     m_areaMatrix = arma::zeros<arma::imat>(m_rowCount, m_columnCount);
     m_movementCostMatrix = arma::zeros(m_rowCount, m_columnCount);
@@ -114,8 +115,8 @@ void PercolationSystem::generatePressureMatrix() {
         int row = pressureSource->property("row").toInt();
         int col = pressureSource->property("col").toInt();
         double pressure = pressureSource->property("pressure").toDouble();
-        int label = labelAt(row, col);
-        m_pressures(label) += pressure;
+        int theLabel = label(row, col);
+        m_pressures(theLabel) += pressure;
         m_pressureSourceMatrix(row, col) = pressure;
     }
     double kappa = 0.01;
@@ -126,9 +127,9 @@ void PercolationSystem::generatePressureMatrix() {
         for(int i = 0; i < m_rowCount; i++) {
             for(int j = 0; j < m_columnCount; j++) {
                 if(movementCost(i,j)) {
-                    int label = labelAt(i, j);
+                    int theLabel = label(i, j);
                     if(m_pressureSourceMatrix(i,j) > 0) {
-                        m_pressureMatrix(i,j) = m_pressures(label); // set the source to the pressure based on the area
+                        m_pressureMatrix(i,j) = m_pressures(theLabel); // set the source to the pressure based on the area
                     } else {
                         m_pressureMatrix(i,j) = m_oldPressureMatrix(i,j);
                         double fromOthers = 0;
@@ -188,10 +189,10 @@ bool PercolationSystem::isSite(int row, int col) {
     return true;
 }
 
-int PercolationSystem::labelAt(int row, int col)
+int PercolationSystem::label(int row, int column)
 {
-    if(isSite(row, col)) {
-        return m_labelMatrix(row, col);
+    if(m_labelMatrix.in_range(row, column)) {
+        return m_labelMatrix(row, column);
     } else {
         return -1;
     }
@@ -282,13 +283,6 @@ double PercolationSystem::value(int row, int col) {
     return m_valueMatrix(row,col);
 }
 
-uint PercolationSystem::label(int row, int col) {
-    if(!m_labelMatrix.in_range(row, col)) {
-        return 0;
-    }
-    return m_labelMatrix(row,col);
-}
-
 uint PercolationSystem::area(int row, int col)
 {
     if(!m_areaMatrix.in_range(row, col)) {
@@ -315,11 +309,8 @@ double PercolationSystem::maxFlow()
 }
 
 void PercolationSystem::generateLabelMatrix() {
-    //    cout << "Generating label matrix..." << endl;
-    QTime time;
-    time.start();
-
-    m_visitDirections = arma::imat(4,2);
+    qDebug() << "Generating label matrix on" << objectName();
+    m_visitDirections = arma::zeros<arma::imat>(4,2);
     m_visitDirections(0,0) = -1;
     m_visitDirections(1,1) = 1;
     m_visitDirections(2,0) = 1;
@@ -328,45 +319,38 @@ void PercolationSystem::generateLabelMatrix() {
     m_labelMatrix = arma::zeros<arma::imat>(m_rowCount, m_columnCount);
     int currentLabel = 1;
     arma::imat directions(4,2);
-    //    directions(0,0) = -1;
-    //    directions(1,1) = 1;
-    //    directions(2,0) = 1;
-    //    directions(3,1) = -1;
-    //    directions(0,0) = -1;
     directions(0,1) = -1;
     directions(1,0) = -1;
-    //    directions(3,1) = -1;
 
-    VectorXi foundLabels(2);
-    vector<pair<uint,uint> > searchQueue;
-    //    qDebug() << "Label time1" << time.elapsed();
+    QVector<QPoint> searchQueue;
 
-
-    vector<int> tmpAreas;
+    QVector<int> tmpAreas;
     tmpAreas.push_back(0); // areas[0] = 0
+
+    cerr << "m_visitDirections" << m_visitDirections;
 
     for(int i = 0; i < m_rowCount; i++) {
         for(int j = 0; j < m_columnCount; j++) {
             int area = 0;
-            searchQueue.push_back(pair<uint, uint>(i,j));
+            searchQueue.push_back(QPoint(i, j));
             while(!searchQueue.empty()) {
-                pair<uint, uint> &target = searchQueue.back();
-                uint row = target.first;
-                uint col = target.second;
+                QPoint &target = searchQueue.back();
+                int row = target.x();
+                int column = target.y();
                 searchQueue.pop_back();
-                if(!(row < m_rowCount && col < m_columnCount)) {
+                if(!(row < m_rowCount && column < m_columnCount)) {
                     continue;
                 }
-                if(m_labelMatrix(row,col) > 0 || m_movementCostMatrix(row, col) < 1) {
+                if(m_labelMatrix(row,column) > 0 || m_movementCostMatrix(row, column) < 1) {
                     // Site already visited or not occupied, nothing to do here
                     continue;
                 }
                 area += 1;
-                m_labelMatrix(row, col) = currentLabel;
+                m_labelMatrix(row, column) = currentLabel;
                 for(uint d = 0; d < m_visitDirections.n_rows; d++) {
                     int nextRow = row + m_visitDirections(d,0);
-                    int nextCol = col + m_visitDirections(d,1);
-                    searchQueue.push_back(pair<uint, uint>(nextRow, nextCol));
+                    int nextColumn = column + m_visitDirections(d,1);
+                    searchQueue.push_back(QPoint(nextRow, nextColumn));
                 }
             }
             currentLabel += 1;
@@ -378,8 +362,6 @@ void PercolationSystem::generateLabelMatrix() {
     for(int i = 0; i < m_nClusters; i++) {
         m_areas(i) = tmpAreas.at(i);
     }
-    //    cout << "Current label " << currentLabel << endl;
-    //    qDebug() << "Label time2" << time.elapsed();
 }
 
 QRgb PercolationSystem::colorize(int i, int j, double value, double minValue, double maxValue) {
@@ -393,7 +375,7 @@ QRgb PercolationSystem::colorize(int i, int j, double value, double minValue, do
     if(movementCost(i, j) == 0.0) {
         return background.rgba();
     }
-    double ratio = (value - minValue) * (maxValue - minValue);
+    double ratio = (value - minValue) / (maxValue - minValue);
     ratio = fmax(0.0, fmin(1.0, ratio));
     double red = (1-ratio) * foregroundLow.red() + ratio * foregroundHigh.red();
     double green = (1-ratio) * foregroundLow.green() + ratio * foregroundHigh.green();
@@ -455,23 +437,26 @@ void PercolationSystem::generateImage() {
 //        }
 //        break;
 //    }
-//    case AreaImage: {
-//        for(int i = 0; i < m_rowCount; i++) {
-//            for(int j = 0; j < m_columnCount; j++) {
-//                if(movementCost(i,j)) {
-//                    double areaRatio;
-//                    areaRatio = 1. / 3. + (m_areaMatrix(i,j) / maxAreaLocal) * 2. / 3.;
-//                    color.setRed((1-areaRatio) * foregroundLow.red() + areaRatio * foregroundHigh.red());
-//                    color.setGreen((1-areaRatio) * foregroundLow.green() + areaRatio * foregroundHigh.green());
-//                    color.setBlue((1-areaRatio) * foregroundLow.blue() + areaRatio * foregroundHigh.blue());
-//                } else {
-//                    color = background;
-//                }
-//                m_image.setPixel(j,i,color.rgba());
-//            }
-//        }
-//        break;
-//    }
+    case AreaImage: {
+        double minValue = m_areaMatrix.min();
+        double maxValue = m_areaMatrix.max();
+        for(int i = 0; i < m_rowCount; i++) {
+            for(int j = 0; j < m_columnCount; j++) {
+                m_image.setPixel(j, i, colorize(i, j, m_areaMatrix(i, j), minValue, maxValue));
+            }
+        }
+        break;
+    }
+    case LabelImage: {
+        double minValue = m_labelMatrix.min();
+        double maxValue = m_labelMatrix.max();
+        for(int i = 0; i < m_rowCount; i++) {
+            for(int j = 0; j < m_columnCount; j++) {
+                m_image.setPixel(j, i, colorize(i, j, m_labelMatrix(i, j), minValue, maxValue));
+            }
+        }
+        break;
+    }
 //    case FlowImage: {
 //        double minFlow = m_flowMatrix.min();
 //        double maxFlow = m_flowMatrix.max();
@@ -517,16 +502,20 @@ void PercolationSystem::generateImage() {
 //            }
 //        }
 //    }
+    default: {
+        break;
+    }
     }
 }
 
 void PercolationSystem::generateAreaMatrix() {
-    //    cout << "Generating area matrix..." << endl;
+    qDebug() << "Generating area matrix" << objectName();
     for(int i = 0; i < m_rowCount; i++) {
         for(int j = 0; j < m_columnCount; j++) {
-            m_areaMatrix(i,j) = m_areas(labelAt(i,j));
+            m_areaMatrix(i,j) = m_areas(label(i,j));
         }
     }
+    qDebug() << "Largest area:" << m_areaMatrix.max();
 }
 
 double PercolationSystem::pressure(int row, int col) {

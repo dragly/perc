@@ -57,6 +57,7 @@ public:
         ValueImage,
         OccupationImage,
         PressureImage,
+        LabelImage,
         AreaImage,
         FlowImage,
         TeamImage
@@ -72,7 +73,6 @@ public:
     Q_INVOKABLE double movementCost(int row, int col);
 
     Q_INVOKABLE double value(int row, int col);
-    Q_INVOKABLE uint label(int row, int col);
     Q_INVOKABLE uint area(int row, int col);
     Q_INVOKABLE uint maxLabel();
     Q_INVOKABLE uint maxArea();
@@ -82,9 +82,8 @@ public:
     Q_INVOKABLE double lowerValue(int row, int col);
     Q_INVOKABLE double raiseValue(int row, int col);
     void paint(QPainter *painter);
-    int labelCell(int row, int col, int label);
     bool isSite(int row, int col);
-    Q_INVOKABLE int labelAt(int row, int col);
+    Q_INVOKABLE int label(int row, int col);
     double occupationTreshold() const
     {
         return m_occupationTreshold;
@@ -104,14 +103,13 @@ public:
     Q_INVOKABLE void solveFlow();
 
     ~PercolationSystem();
-    Q_INVOKABLE void randomizeMatrix();
+    Q_INVOKABLE void randomizeValueMatrix();
     QList<QObject*> pressureSources() const
     {
         return m_pressureSources;
     }
 
 public slots:
-//    void update();
     void setFinishedUpdating();
     void initialize();
     void recalculateMatricesAndUpdate();
