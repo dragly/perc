@@ -17,20 +17,20 @@ BaseWalker {
     property var modes: [
         "construct",
         "destruct",
-        "target"
+        "none"
     ]
     property int modeIndex: 0
     readonly property string currentMode: modes[modeIndex]
 
     objectName: "TargetWalker"
     filename: "walkers/TargetWalker.qml"
-    informationText: "Target walker. Right-click to move.\n" +
-                     "Mode:" + modeIndex + "\n" +
+    informationText: "Walker.\nRight-click to move.\n" +
+                     "Mode: " + currentMode + "\n" +
                      "Strategy: " + strategy
 
     controls: Item {
         Button {
-            text: "Mode: " + modes[modeIndex]
+            text: "Mode: " + currentMode
             onClicked: {
                 var nextMode = modeIndex + 1;
                 if(nextMode > modes.length - 1) {
@@ -153,63 +153,50 @@ BaseWalker {
     }
 
     onChooseStrategy: {
-        switch(currentMode) {
-        case "construct":
-            var randomIndex = parseInt(Math.random() * directions.length);
-            var found = false;
-            var result = moveResult(randomIndex);
-            if(moveAcceptable(randomIndex) && percolationSystem.team(result.row, result.column) === team.teamId) {
-                moveStrategy = randomIndex;
-                strategy = "move";
-            } else {
-                strategy = "construct";
-            }
-            break;
-        case "destruct":
-            var randomIndex = parseInt(Math.random() * directions.length);
-            var found = false;
-            var result = moveResult(randomIndex);
-            if(moveAcceptable(randomIndex)) {
-                moveStrategy = randomIndex;
-                strategy = "move";
-            } else if (percolationSystem.team(row, col) !== team.teamId) {
-                strategy = "destruct";
-            } else {
-                strategy = "none";
-            }
-            break;
-        case "target":
-            if(!target) {
-                strategy = currentMode;
-                return;
-            }
-            if(!targetEnabled) {
-                strategy = currentMode;
-                return;
-            }
-
-            console.log("Rows:", target.row, root.row, target.col, root.col);
+        strategy = "none";
+        if(targetEnabled && target) {
             if(target.row === root.row && target.col === root.col) {
-                strategy = currentMode;
                 targetEnabled = false;
                 return;
             }
-            console.log("Path length:", path.length);
             if(path.length === 0) {
                 path = findPath(Qt.point(root.row, root.col), Qt.point(target.row, target.col));
             }
             var next = path.pop();
-            console.log("Next:", next);
             moveStrategy = changeToDirection(next.x - root.row, next.y - root.col);
             if(moveStrategy > -1) {
                 strategy = "move";
-            } else {
-                strategy = "none";
             }
-            break;
-        default:
-            strategy = "none";
-            break
+        } else {
+            switch(currentMode) {
+            case "construct":
+                var randomIndex = parseInt(Math.random() * directions.length);
+                var found = false;
+                var result = moveResult(randomIndex);
+                if(moveAcceptable(randomIndex) && percolationSystem.team(result.row, result.column) === team.teamId) {
+                    moveStrategy = randomIndex;
+                    strategy = "move";
+                } else {
+                    strategy = "construct";
+                }
+                break;
+            case "destruct":
+                var randomIndex = parseInt(Math.random() * directions.length);
+                var found = false;
+                var result = moveResult(randomIndex);
+                if(moveAcceptable(randomIndex)) {
+                    moveStrategy = randomIndex;
+                    strategy = "move";
+                } else if (percolationSystem.team(row, col) !== team.teamId) {
+                    strategy = "destruct";
+                } else {
+                    strategy = "none";
+                }
+                break;
+            default:
+                strategy = "none";
+                break
+            }
         }
     }
 

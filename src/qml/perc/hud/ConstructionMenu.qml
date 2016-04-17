@@ -2,10 +2,15 @@ import QtQuick 2.0
 import QtGraphicalEffects 1.0
 import Perc 1.0
 
+import ".."
+
 Item {
     id: gameMenuRoot
 
     property int imageType: imageTypes[currentImageTypeIndex]
+    property string playerTeamName
+    property color playerTeamColor
+    property var teamAreas
 
     property int currentImageTypeIndex: 0
     property var imageTypes: [
@@ -69,7 +74,7 @@ Item {
 
         Rectangle {
             id: gameMenuBackground
-            color: "white"
+            color: Qt.lighter(playerTeamColor, 1.9)
             anchors.centerIn: parent
             width: gameMenuRoot.width
             height: gameMenuRoot.height
@@ -132,11 +137,20 @@ Item {
         }
     }
 
+
     Text {
-        text: "Energy: " + (Math.round(gameMenuRoot.energy * 100) / 100).toFixed(2)
-        font.pixelSize: parent.width * 0.1
-        anchors.top: returnToMainMenuButton.bottom
-        anchors.left: parent.left
-        anchors.leftMargin: parent.width*0.2
+        anchors{
+            top: returnToMainMenuButton.bottom
+            left: parent.left
+            right: parent.right
+            margins: 16
+        }
+        text: {
+            var result = "We are team " + playerTeamName + "\n";
+            for(var i in teamAreas) {
+                result += "Team " + i + ": " + teamAreas[i] + "\n";
+            }
+            return result;
+        }
     }
 }

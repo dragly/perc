@@ -47,6 +47,7 @@ class PercolationSystem : public QQuickPaintedItem
     Q_PROPERTY(ImageType imageType READ imageType WRITE setImageType NOTIFY imageTypeChanged)
     Q_PROPERTY(QList<QObject*> pressureSources READ pressureSources WRITE setPressureSources NOTIFY pressureSourcesChanged)
     Q_PROPERTY(QVariantMap teamColors READ teamColors WRITE setTeamColors NOTIFY teamColorsChanged)
+    Q_PROPERTY(QVariantMap teamAreas READ teamAreas NOTIFY teamAreasChanged)
 
 public:
     PercolationSystem(QQuickPaintedItem *parent = 0);
@@ -118,6 +119,7 @@ public slots:
     void teamTag(int team, int row, int column);
 
     void setTeamColors(QVariantMap teamColors);
+    QVariantMap teamAreas();
 
 signals:
     void rowCountChanged(int arg);
@@ -132,6 +134,8 @@ signals:
     void pressureSourcesChanged(QList<QObject*> arg);
 
     void teamColorsChanged(QVariantMap teamColors);
+
+    void teamAreasChanged(QVariantMap teamAreas);
 
 protected:
     void generateImage();
@@ -189,6 +193,8 @@ private:
     QRgb colorize(int i, int j, double value, double minValue = 1, double maxValue = 0);
     QColor mixColors(QColor color1, QColor color2, double factor = 0.5);
     QVariantMap m_teamColors;
+    QVariantMap m_teamAreas;
+    void calculateTeamAreas();
 };
 
 inline const arma::mat& PercolationSystem::occupationMatrix() {

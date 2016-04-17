@@ -147,6 +147,11 @@ void PercolationSystem::setTeamColors(QVariantMap teamColors)
         emit teamColorsChanged(teamColors);
 }
 
+QVariantMap PercolationSystem::teamAreas()
+{
+    return m_teamAreas;
+}
+
 void PercolationSystem::initialize() {
     qDebug() << "Initializing percolation system" << objectName();
     m_isInitialized = false;
@@ -241,6 +246,28 @@ void PercolationSystem::setrowCount(int arg)
     }
 }
 
+void PercolationSystem::calculateTeamAreas()
+{
+    QVariantMap areas;
+    for(int i = 0; i < m_rowCount; i++) {
+        for(int j = 0; j < m_columnCount; j++) {
+            if(m_teamMatrix.in_range(j, i)) {
+                int team = m_teamMatrix(j, i);
+                if(team > 0) {
+                    QString key = QString::number(team);
+                    if(!areas.contains(key)) {
+                        areas[key] = 0;
+                    } else {
+                        areas[key] = areas[key].toInt() + 1;
+                    }
+                }
+            }
+        }
+    }
+    m_teamAreas = areas;
+    emit teamAreasChanged(m_teamAreas);
+}
+
 void PercolationSystem::recalculateMatricesAndUpdate() {
     QMutexLocker updateMatrixLocker(&m_updateMatrixMutex);
     ensureInitialization();
@@ -248,6 +275,7 @@ void PercolationSystem::recalculateMatricesAndUpdate() {
     generateLabelMatrix();
     generatePressureMatrix();
     generateImage();
+    calculateTeamAreas();
     QMutexLocker prevImageLocker(&m_prevImageMutex);
     m_prevImage = m_image;
     emit readyToUpdate();

@@ -274,7 +274,9 @@ Item {
 
     ConstructionMenu {
         id: constructionMenu
-        energy: playerTeam ? playerTeam.energy : 0
+        playerTeamName: playerTeam ? playerTeam.name : "Unknown team"
+        playerTeamColor: playerTeam ? playerTeam.color : "purple"
+        teamAreas: percolationSystem.teamAreas
         onPauseClicked: {
             pause()
         }
@@ -576,21 +578,6 @@ Item {
         gameScene: serverScene
         gameView: gameViewRoot
         percolationSystem: serverPercolationSystem
-    }
-
-    Rectangle {
-        anchors {
-            left: parent.left
-            top: parent.top
-        }
-        height: entityManager.ticksSinceTurn / 10 * parent.height
-        width: 20
-        Behavior on height {
-            NumberAnimation {
-                duration: 400
-                easing.type: Easing.InOutQuad
-            }
-        }
     }
 
     Rectangle {
