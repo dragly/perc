@@ -336,7 +336,7 @@ Item {
             serverEntityManager.teams.push(team);
             nextTeamId += 1;
 
-            var playerSpawnSite = Logic.randomSiteOnLargestCluster(percolationSystem)
+            var playerSpawnSite = Logic.randomSiteOnLargestCluster(serverPercolationSystem)
             var properties = {
                 team: team,
                 row: playerSpawnSite.row,

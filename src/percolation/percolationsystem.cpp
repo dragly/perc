@@ -32,10 +32,10 @@ PercolationSystem::PercolationSystem(QQuickPaintedItem *parent) :
     m_columnCount(0),
     m_occupationTreshold(0.5),
     m_isFinishedUpdating(true),
-    m_nClusters(0),
+    m_clusterCount(0),
     m_imageType(OccupationImage),
     m_isInitialized(false),
-    m_random(time(NULL))
+    m_random(-94)
 {
     connect(this, SIGNAL(readyToUpdate()), this, SLOT(update()));
     connect(this, SIGNAL(imageTypeChanged(ImageType)), this, SLOT(requestRecalculation()));
@@ -110,7 +110,7 @@ void PercolationSystem::initialize() {
 }
 
 void PercolationSystem::generatePressureMatrix() {
-    m_pressures = arma::vec(m_nClusters);
+    m_pressures = arma::vec(m_clusterCount);
     for(QObject* pressureSource : m_pressureSources) {
         int row = pressureSource->property("row").toInt();
         int col = pressureSource->property("col").toInt();
@@ -293,11 +293,12 @@ uint PercolationSystem::area(int row, int col)
 
 uint PercolationSystem::maxLabel()
 {
-    return m_nClusters - 1;
+    return m_clusterCount - 1;
 }
 
 uint PercolationSystem::maxArea()
 {
+    qDebug() << "Requested max area on" << objectName() << m_areaMatrix.max();
     return m_areaMatrix.max();
 }
 
@@ -310,24 +311,15 @@ double PercolationSystem::maxFlow()
 
 void PercolationSystem::generateLabelMatrix() {
     qDebug() << "Generating label matrix on" << objectName();
-    m_visitDirections = arma::zeros<arma::imat>(4,2);
-    m_visitDirections(0,0) = -1;
-    m_visitDirections(1,1) = 1;
-    m_visitDirections(2,0) = 1;
-    m_visitDirections(3,1) = -1;
 
     m_labelMatrix = arma::zeros<arma::imat>(m_rowCount, m_columnCount);
     int currentLabel = 1;
-    arma::imat directions(4,2);
-    directions(0,1) = -1;
-    directions(1,0) = -1;
+    int clusterCount = 1;
 
     QVector<QPoint> searchQueue;
 
     QVector<int> tmpAreas;
     tmpAreas.push_back(0); // areas[0] = 0
-
-    cerr << "m_visitDirections" << m_visitDirections;
 
     for(int i = 0; i < m_rowCount; i++) {
         for(int j = 0; j < m_columnCount; j++) {
@@ -338,29 +330,47 @@ void PercolationSystem::generateLabelMatrix() {
                 int row = target.x();
                 int column = target.y();
                 searchQueue.pop_back();
-                if(!(row < m_rowCount && column < m_columnCount)) {
+                if(!m_labelMatrix.in_range(row, column)) {
                     continue;
                 }
-                if(m_labelMatrix(row,column) > 0 || m_movementCostMatrix(row, column) < 1) {
+                if(m_labelMatrix(row,column) > 0 || movementCost(row, column) < 1.0) {
                     // Site already visited or not occupied, nothing to do here
                     continue;
                 }
                 area += 1;
                 m_labelMatrix(row, column) = currentLabel;
-                for(uint d = 0; d < m_visitDirections.n_rows; d++) {
-                    int nextRow = row + m_visitDirections(d,0);
-                    int nextColumn = column + m_visitDirections(d,1);
-                    searchQueue.push_back(QPoint(nextRow, nextColumn));
+                for(int di = -1; di < 2; di++) {
+                    for(int dj = -1; dj < 2; dj++) {
+                        if(abs(di) + abs(dj) != 1) {
+                            continue;
+                        }
+                        int nextRow = row + di;
+                        int nextColumn = column + dj;
+                        searchQueue.push_back(QPoint(nextRow, nextColumn));
+                    }
                 }
             }
+            // pick a new random label
             currentLabel += 1;
             tmpAreas.push_back(area);
+
+            clusterCount += 1;
         }
     }
-    m_nClusters = currentLabel;
-    m_areas = arma::vec(m_nClusters);
-    for(int i = 0; i < m_nClusters; i++) {
+    m_clusterCount = clusterCount;
+    m_areas = arma::vec(m_clusterCount);
+    for(int i = 0; i < m_clusterCount; i++) {
         m_areas(i) = tmpAreas.at(i);
+    }
+    for(int i = 0; i < m_rowCount; i++) {
+        for(int j = 0; j < m_columnCount; j++) {
+            m_areaMatrix(i,j) = m_areas(m_labelMatrix(i,j));
+        }
+    }
+
+    // generate random labels
+    if(m_labelMatrix.max() != m_randomLabelMap.n_elem) {
+        m_randomLabelMap = arma::randn(m_labelMatrix.max());
     }
 }
 
@@ -448,11 +458,11 @@ void PercolationSystem::generateImage() {
         break;
     }
     case LabelImage: {
-        double minValue = m_labelMatrix.min();
-        double maxValue = m_labelMatrix.max();
+        double minValue = m_randomLabelMap.min();
+        double maxValue = m_randomLabelMap.max();
         for(int i = 0; i < m_rowCount; i++) {
             for(int j = 0; j < m_columnCount; j++) {
-                m_image.setPixel(j, i, colorize(i, j, m_labelMatrix(i, j), minValue, maxValue));
+                m_image.setPixel(j, i, colorize(i, j, m_randomLabelMap(m_labelMatrix(i, j)), minValue, maxValue));
             }
         }
         break;
@@ -510,11 +520,11 @@ void PercolationSystem::generateImage() {
 
 void PercolationSystem::generateAreaMatrix() {
     qDebug() << "Generating area matrix" << objectName();
-    for(int i = 0; i < m_rowCount; i++) {
-        for(int j = 0; j < m_columnCount; j++) {
-            m_areaMatrix(i,j) = m_areas(label(i,j));
-        }
-    }
+//    for(int i = 0; i < m_rowCount; i++) {
+//        for(int j = 0; j < m_columnCount; j++) {
+//            m_areaMatrix(i,j) = m_areas(label(i,j));
+//        }
+//    }
     qDebug() << "Largest area:" << m_areaMatrix.max();
 }
 

@@ -162,7 +162,7 @@ protected:
     // members
     int m_rowCount;
     int m_columnCount;
-    int m_nClusters;
+    int m_clusterCount;
     double m_occupationTreshold;
 
     arma::mat m_valueMatrix;
@@ -175,10 +175,11 @@ protected:
     arma::mat m_flowMatrix;
     arma::imat m_teamMatrix;
 
-    arma::imat m_visitDirections;
-
     arma::vec m_areas;
     arma::vec m_pressures;
+
+    arma::vec m_randomLabelMap;
+
     QList<QObject*> m_pressureSources;
 
     QImage m_image;
