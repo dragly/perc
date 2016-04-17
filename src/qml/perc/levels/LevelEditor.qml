@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
-import org.dragly.perc 1.0
+import Perc 1.0
 
 import "../hud"
 import ".."

@@ -46,13 +46,10 @@ class PercolationSystem : public QQuickPaintedItem
     Q_PROPERTY(double occupationTreshold READ occupationTreshold WRITE setOccupationTreshold NOTIFY occupationTresholdChanged)
     Q_PROPERTY(ImageType imageType READ imageType WRITE setImageType NOTIFY imageTypeChanged)
     Q_PROPERTY(QList<QObject*> pressureSources READ pressureSources WRITE setPressureSources NOTIFY pressureSourcesChanged)
+    Q_PROPERTY(QVariantMap teamColors READ teamColors WRITE setTeamColors NOTIFY teamColorsChanged)
 
-    void normalizedValue(double value, double minValue, double maxValue);
-    QRgb colorize(int i, int j, double value, double minValue = 1, double maxValue = 0);
-    QColor mixColors(QColor color1, QColor color2, double factor = 0.5);
 public:
     PercolationSystem(QQuickPaintedItem *parent = 0);
-    //    void setPercolationSystemGraphics(PercolationSystemGraphics* graphics);
 
     enum ImageType {
         ValueImage,
@@ -83,19 +80,13 @@ public:
     void paint(QPainter *painter);
     bool isSite(int row, int col);
     Q_INVOKABLE int label(int row, int col);
-    double occupationTreshold() const
-    {
-        return m_occupationTreshold;
-    }
+    double occupationTreshold() const;
 
     void ensureInitialization();
 
 //    Q_INVOKABLE void addPressureSource(QObject *pressureSource);
 //    Q_INVOKABLE void clearPressureSources();
-    ImageType imageType() const
-    {
-        return m_imageType;
-    }
+    ImageType imageType() const;
 
     Q_INVOKABLE void unlockUpdates();
     Q_INVOKABLE bool tryLockUpdates();
@@ -103,10 +94,9 @@ public:
 
     ~PercolationSystem();
     Q_INVOKABLE void randomizeValueMatrix();
-    QList<QObject*> pressureSources() const
-    {
-        return m_pressureSources;
-    }
+    QList<QObject*> pressureSources() const;
+
+    QVariantMap teamColors() const;
 
 public slots:
     int team(int row, int column);
@@ -118,28 +108,16 @@ public slots:
     void setOccupationTreshold(double arg);
     void requestRecalculation();
 
-    void setcolumnCount(int arg)
-    {
-        if (m_columnCount != arg) {
-            m_columnCount = arg;
-            m_analyzed = false;
-            emit columnCountChanged(arg);
-        }
-    }
+    void setcolumnCount(int arg);
 
-    void setrowCount(int arg)
-    {
-        if (m_rowCount != arg) {
-            m_rowCount = arg;
-            m_analyzed = false;
-            emit rowCountChanged(arg);
-        }
-    }
+    void setrowCount(int arg);
     void setPressureSources(const QList<QObject *> &pressureSources);
 
     void setImageType(ImageType arg);    
     bool inBounds(int row, int column) const;
     void teamTag(int team, int row, int column);
+
+    void setTeamColors(QVariantMap teamColors);
 
 signals:
     void rowCountChanged(int arg);
@@ -152,6 +130,8 @@ signals:
     void readyToUpdate();
 
     void pressureSourcesChanged(QList<QObject*> arg);
+
+    void teamColorsChanged(QVariantMap teamColors);
 
 protected:
     void generateImage();
@@ -203,6 +183,12 @@ protected:
     bool m_analyzed = false;
 
     QElapsedTimer m_timer;
+
+private:
+    void normalizedValue(double value, double minValue, double maxValue);
+    QRgb colorize(int i, int j, double value, double minValue = 1, double maxValue = 0);
+    QColor mixColors(QColor color1, QColor color2, double factor = 0.5);
+    QVariantMap m_teamColors;
 };
 
 inline const arma::mat& PercolationSystem::occupationMatrix() {

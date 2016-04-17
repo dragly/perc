@@ -5,7 +5,7 @@ import QtQuick.Particles 2.0
 import ".."
 import "../defaults.js" as Defaults
 
-EntityBase {
+BaseEntity {
     id: pressureSourceRoot
 
 //    signal requestSelect(var object)

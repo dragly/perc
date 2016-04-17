@@ -4,7 +4,7 @@ import ".."
 Mover {
     property var path: []
     property var grid: []
-    property EntityBase target: null
+    property BaseEntity target: null
 
     onPercolationSystemChanged: {
         // TODO: Do this when number of rows or columns change too

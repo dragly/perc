@@ -108,6 +108,16 @@ void PercolationSystem::randomizeValueMatrix() {
     }
 }
 
+QList<QObject *> PercolationSystem::pressureSources() const
+{
+    return m_pressureSources;
+}
+
+QVariantMap PercolationSystem::teamColors() const
+{
+    return m_teamColors;
+}
+
 int PercolationSystem::team(int row, int column)
 {
     if(m_teamMatrix.in_range(row, column)) {
@@ -126,6 +136,15 @@ void PercolationSystem::teamTag(int team, int row, int column)
     if(m_teamMatrix.in_range(row, column)) {
         m_teamMatrix(row, column) = team;
     }
+}
+
+void PercolationSystem::setTeamColors(QVariantMap teamColors)
+{
+    if (m_teamColors == teamColors)
+            return;
+
+        m_teamColors = teamColors;
+        emit teamColorsChanged(teamColors);
 }
 
 void PercolationSystem::initialize() {
@@ -204,6 +223,24 @@ void PercolationSystem::requestRecalculation() {
     }
 }
 
+void PercolationSystem::setcolumnCount(int arg)
+{
+    if (m_columnCount != arg) {
+        m_columnCount = arg;
+        m_analyzed = false;
+        emit columnCountChanged(arg);
+    }
+}
+
+void PercolationSystem::setrowCount(int arg)
+{
+    if (m_rowCount != arg) {
+        m_rowCount = arg;
+        m_analyzed = false;
+        emit rowCountChanged(arg);
+    }
+}
+
 void PercolationSystem::recalculateMatricesAndUpdate() {
     QMutexLocker updateMatrixLocker(&m_updateMatrixMutex);
     ensureInitialization();
@@ -230,6 +267,11 @@ int PercolationSystem::label(int row, int column)
     } else {
         return -1;
     }
+}
+
+double PercolationSystem::occupationTreshold() const
+{
+    return m_occupationTreshold;
 }
 
 void PercolationSystem::setFinishedUpdating() {
@@ -297,6 +339,11 @@ void PercolationSystem::ensureInitialization()
     if(!m_isInitialized || m_valueMatrix.n_rows < m_rowCount || m_valueMatrix.n_cols < m_columnCount) {
         initialize();
     }
+}
+
+PercolationSystem::ImageType PercolationSystem::imageType() const
+{
+    return m_imageType;
 }
 
 double PercolationSystem::movementCost(int row, int col)
@@ -543,22 +590,8 @@ void PercolationSystem::generateImage() {
         for(int j = 0; j < m_columnCount; j++) {
             if(movementCost(i,j)) {
                 int team = m_teamMatrix(i, j);
-                bool foundTeam = true;
-                switch(team) {
-                case 1:
-                    color = QColor("pink");
-                    break;
-                case 2:
-                    color = QColor("lightgreen");
-                    break;
-                case 3:
-                    color = QColor("lightblue");
-                    break;
-                default:
-                    foundTeam = false;
-                    break;
-                }
-                if(foundTeam) {
+                if(m_teamColors.contains(QString::number(team))) {
+                    color = m_teamColors[QString::number(team)].value<QColor>();
                     m_image.setPixel(j, i, mixColors(QColor(m_image.pixel(j, i)), color).rgba());
                 }
             }

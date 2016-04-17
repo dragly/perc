@@ -5,7 +5,7 @@ import ".."
 Rectangle {
     id: selectionMenuRoot
     property Team playerTeam: null
-    property list<EntityBase> selectedObjects
+    property list<BaseEntity> selectedObjects
     anchors.right: parent.right
     anchors.bottom: parent.bottom
 
@@ -40,7 +40,7 @@ Rectangle {
                 if(selectedObjects.length > 1) {
                     return selectedObjects.length + " items selected"
                 } else if (selectedObjects.length === 1) {
-                    return selectedObjects[0].informationText
+                    return selectedObjects[0].team.name + "\n" + selectedObjects[0].informationText
                 } else {
                     return "None selected"
                 }

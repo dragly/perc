@@ -18,7 +18,8 @@ SOURCES += main.cpp \
     game/game.cpp \
     percolation/percolationsystem.cpp \
     simplematerial.cpp \
-    random.cpp
+    random.cpp \
+    percobject.cpp
 
 LIBS += -L/home/svenni/apps/armadillo/armadillo-5.200.1 -lblas -llapack -larmadillo
 INCLUDEPATH += /home/svenni/apps/armadillo/armadillo-5.200.1/include
@@ -34,6 +35,7 @@ HEADERS += \
     game/game.h \
     percolation/percolationsystem.h \
     simplematerial.h \
-    random.h
+    random.h \
+    percobject.h
 
 TARGET = perc

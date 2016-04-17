@@ -1,9 +1,9 @@
 import QtQuick 2.0
-import org.dragly.perc 1.0
+import Perc 1.0
 
 import "defaults.js" as Defaults
 
-Item {
+PercObject {
     id: entityRoot
 
     signal requestSelection(var object)
@@ -13,8 +13,8 @@ Item {
     signal killed(var object)
 
     property int entityId: -1
-    property string objectName: "EntityBase"
-    property string filename: "EntityBase.qml"
+    property string objectName: "BaseEntity"
+    property string filename: "BaseEntity.qml"
     property int row: 0
     property int col: 0
     property string informationText: "Not set"
@@ -37,7 +37,7 @@ Item {
         killed(entityRoot)
     }
 
-    property QtObject properties: QtObject {
+    persistentProperties: QtObject {
         property alias row: entityRoot.row
         property alias column: entityRoot.col
         property alias filename: entityRoot.filename
@@ -49,8 +49,8 @@ Item {
     property Component controls
 
     Component.onCompleted: {
-        if(filename === "EntityBase.qml" || objectName === "EntityBase") {
-            throw("You need to set the objectName and filename if you inherit from EntityBase.")
+        if(filename === "BaseEntity.qml" || objectName === "BaseEntity") {
+            throw("You need to set the objectName and filename if you inherit from BaseEntity.")
         }
     }
 

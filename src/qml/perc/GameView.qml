@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import Qt.WebSockets 1.0
 
-import org.dragly.perc 1.0
+import Perc 1.0
 
 import "hud"
 import "menus"
@@ -41,6 +41,56 @@ Item {
 
     function winGame() {
         winGameDialog.visible = true
+    }
+
+    function applyProperties(object, properties) {
+        if(!object){
+            console.warn("WARNING: apply properties got missing object: " + object);
+            return;
+        }
+
+        for(var i in properties) {
+            var prop = properties[i];
+            if(!object.hasOwnProperty("persistentProperties")) {
+                console.warn("WARNING: Object " + object + " is missing persistentProperties property.");
+                continue;
+            }
+            var found = false;
+            for(var j in object.persistentProperties) {
+                var propertyGroup = object.persistentProperties[j];
+                if(!propertyGroup.hasOwnProperty(i)) {
+                    continue;
+                }
+                found = true;
+                if(typeof(prop) === "object" && typeof(propertyGroup[i]) == "object") {
+                    applyProperties(propertyGroup[i], prop);
+                } else {
+                    propertyGroup[i] = prop;
+                }
+            }
+            if(!found) {
+                console.warn("WARNING: Cannot assign to " + i + " on savedProperties of " + object);
+            }
+        }
+    }
+
+    function generateProperties(entity) {
+        if(!entity) {
+            return undefined;
+        }
+        var result = {};
+        for(var i in entity.persistentProperties) {
+            var properties = entity.persistentProperties[i];
+            for(var name in properties) {
+                var prop = properties[name];
+                if(typeof(prop) === "object") {
+                    result[name] = generateProperties(prop);
+                } else {
+                    result[name] = prop;
+                }
+            }
+        }
+        return result;
     }
 
     onPause: {
@@ -286,12 +336,12 @@ Item {
             var entities = [];
             for(var j in serverEntityManager.entities) {
                 var entity = serverEntityManager.entities[j];
-                entities.push(entity.properties);
+                entities.push(generateProperties(entity));
             }
             var teams = [];
             for(var j in serverEntityManager.teams) {
                 var team = serverEntityManager.teams[j];
-                teams.push(team.properties);
+                teams.push(generateProperties(team));
             }
 
             var state = {
@@ -338,7 +388,7 @@ Item {
                 }
             }
 
-            webSocket.sendTextMessage(JSON.stringify({type: "welcome", team: clientTeam.properties}));
+            webSocket.sendTextMessage(JSON.stringify({type: "welcome", team: generateProperties(clientTeam)}));
 
             webSocket.onTextMessageReceived.connect(function(message) {
                 var parsed = JSON.parse(message);
@@ -365,8 +415,8 @@ Item {
             });
             webSocket.onStatusChanged.connect(function(status) {
                 if(status === WebSocket.Closed) {
+                    serverEntityManager.removeTeamAndEntities(clientTeam);
                     if(clients) {
-
                         clients.splice(clients.indexOf(client), 1);
                     }
                 }
@@ -384,10 +434,11 @@ Item {
         onTextMessageReceived: {
             var parsed = JSON.parse(message);
             if(parsed.type === "welcome") {
+                console.log("Got welcome message from server!");
+                console.log(message);
                 playerTeam = entityManager.createTeam({teamId: parsed.team.teamId});
-                for(var j in parsedTeam) {
-                    playerTeam.properties[j] = parsedTeam[j];
-                }
+                applyProperties(playerTeam, parsed.team);
+                console.log("We are team", playerTeam.teamId);
             }
             if(parsed.type === "state") {
                 percolationSystem.occupationTreshold = parsed.percolationSystem.occupationThreshold;
@@ -401,7 +452,11 @@ Item {
                     entity.toBeDeleted = true;
                 }
 
-                // TODO delete teams no longer found on server
+                for(var i in entityManager.teams) {
+                    var team = entityManager.teams;
+                    team.toBeDeleted = true;
+                }
+
                 for(var i in parsed.teams) {
                     var parsedTeam = parsed.teams[i];
                     var foundTeam = false;
@@ -416,10 +471,17 @@ Item {
                     if(!foundTeam) {
                         team = entityManager.createTeam({teamId: parsedTeam.teamId});
                     }
-                    for(var j in parsedTeam) {
-                        team.properties[j] = parsedTeam[j];
-                    }
+                    team.toBeDeleted = false;
+                    applyProperties(team, parsedTeam);
                 }
+
+                // inform percolationSystem about teams
+                var teamColors = {};
+                for(var i in entityManager.teams) {
+                    var team = entityManager.teams[i];
+                    teamColors[team.teamId] = team.color;
+                }
+                percolationSystem.teamColors = teamColors;
 
                 for(var i in parsed.entities) {
                     var parsedEntity = parsed.entities[i];
@@ -450,9 +512,7 @@ Item {
                     if(!foundEntity) {
                         entity = entityManager.createEntityFromUrl(parsedEntity.filename, {entityId: parsedEntity.entityId, team: parsedEntityTeam});
                     }
-                    for(var j in parsedEntity) {
-                        entity.properties[j] = parsedEntity[j];
-                    }
+                    applyProperties(entity, parsedEntity);
                     entity.team = parsedEntityTeam;
                     entity.toBeDeleted = false;
                 }
@@ -461,6 +521,14 @@ Item {
                     var entity = entityManager.entities[i];
                     if(entity.toBeDeleted) {
                         entityManager.killLater(entity);
+                    }
+                }
+
+                for(var i in entityManager.teams) {
+                    var team = entityManager.teams[i];
+                    if(team.toBeDeleted) {
+                        console.log("Removing team", team);
+                        entityManager.removeTeamAndEntities(team);
                     }
                 }
 
@@ -489,6 +557,8 @@ Item {
                     entities: strategyEntities
                 };
                 socket.sendTextMessage(JSON.stringify(strategy));
+
+                entityManager.clearDeadItems();
             }
         }
         onStatusChanged: {

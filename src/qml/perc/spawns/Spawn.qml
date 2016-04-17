@@ -4,7 +4,7 @@ import QtQuick.Controls 1.4
 import ".."
 import "../defaults.js" as Defaults
 
-EntityBase {
+BaseEntity {
     id: spawnRoot
     objectName: "Spawn"
     filename: "spawns/Spawn.qml"
@@ -22,8 +22,6 @@ EntityBase {
         ["Target walker", "../walkers/TargetWalker.qml"],
         ["Random walker", "../walkers/RandomWalker.qml"],
     ]
-
-    property double _colorValue: Math.max(0, Math.min(100, healthPoints)) / 100
 
     informationText: "Spawn. " + ticksUntilSpawn + " ticks until spawn."
 
@@ -55,23 +53,14 @@ EntityBase {
         anchors.centerIn: parent
         width: parent.width * 1.2
         height: parent.height * 1.2
-        Rectangle {
-            anchors.fill: parent
-            opacity: _colorValue
-            color: "#b2df8a"
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            opacity: 1 - _colorValue
-            color: "#e31a1c"
-        }
 
         Rectangle {
             anchors.centerIn: parent
             width: parent.width * 0.8
             height: parent.height * 0.8
-            color: team.lightColor
+            color: Qt.lighter(team.color, 1.5)
+            border.width: width * 0.1
+            border.color: Qt.darker(team.color, 1.5)
         }
     }
 

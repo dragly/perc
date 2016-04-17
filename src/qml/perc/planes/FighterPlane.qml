@@ -4,7 +4,7 @@ import QtGraphicalEffects 1.0
 import ".."
 import "../defaults.js" as Defaults
 
-EntityBase {
+BaseEntity {
     id: fighterPlaneRoot
     width: Defaults.GRID_SIZE * 0.5
     height: Defaults.GRID_SIZE * 0.7

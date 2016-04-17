@@ -4,7 +4,7 @@ import ".."
 import "../movement"
 import "../defaults.js" as Defaults
 
-EntityBase {
+BaseEntity {
     signal chooseStrategy
 
     property string strategy: "none"
@@ -83,7 +83,7 @@ EntityBase {
         color: team.color
         anchors.centerIn: parent
         border.width: width * 0.1
-        border.color: "white"
+        border.color: Qt.darker(team.color, 1.5)
 
         width: Defaults.GRID_SIZE * 0.7
         height: Defaults.GRID_SIZE * 0.7

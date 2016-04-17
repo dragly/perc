@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import org.dragly.perc 1.0
+import Perc 1.0
 
 import "logic.js" as Logic
 import "defaults.js" as Defaults
@@ -14,7 +14,7 @@ Item {
 
     property PercolationSystem percolationSystem: null
     property var entityManager: null // TODO should be EntityManager
-    property list<EntityBase> selectedObjects
+    property list<BaseEntity> selectedObjects
     property real targetScale: scale
     readonly property alias currentScale: scaleTransform.yScale
     property alias scaleOriginX: scaleTransform.origin.x

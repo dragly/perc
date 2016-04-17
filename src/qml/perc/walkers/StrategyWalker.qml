@@ -4,7 +4,7 @@ import ".."
 import "../movement"
 import "../defaults.js" as Defaults
 
-EntityBase {
+BaseEntity {
     filename: "walkers/StrategyWalker.qml"
 
     width: Defaults.GRID_SIZE

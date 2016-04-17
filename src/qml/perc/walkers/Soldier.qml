@@ -3,7 +3,7 @@ import ".."
 import "../movement"
 import "../defaults.js" as Defaults
 
-EntityBase {
+BaseEntity {
     property alias target: astar.target
     objectName: "Soldier"
     filename: "walkers/Soldier.qml"

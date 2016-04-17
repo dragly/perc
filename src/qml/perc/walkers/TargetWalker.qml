@@ -14,23 +14,29 @@ BaseWalker {
     property var target: {
         return {row: -1, col: -1}
     }
-    property var defaultStrategy: "construct"
+    property var modes: [
+        "construct",
+        "destruct",
+        "target"
+    ]
+    property int modeIndex: 0
+    readonly property string currentMode: modes[modeIndex]
 
     objectName: "TargetWalker"
     filename: "walkers/TargetWalker.qml"
-    informationText: "Target walker. Right-click to move.\nCurrent strategy: " + strategy
+    informationText: "Target walker. Right-click to move.\n" +
+                     "Mode:" + modeIndex + "\n" +
+                     "Strategy: " + strategy
 
     controls: Item {
         Button {
-            text: "Mode: " + defaultStrategy
+            text: "Mode: " + modes[modeIndex]
             onClicked: {
-                if(defaultStrategy === "none") {
-                    defaultStrategy = "construct";
-                } else if(defaultStrategy === "construct") {
-                    defaultStrategy = "destruct";
-                } else if(defaultStrategy === "destruct") {
-                    defaultStrategy = "none";
+                var nextMode = modeIndex + 1;
+                if(nextMode > modes.length - 1) {
+                    nextMode = 0;
                 }
+                modeIndex = nextMode;
             }
         }
     }
@@ -147,32 +153,63 @@ BaseWalker {
     }
 
     onChooseStrategy: {
-        if(!target) {
-            strategy = defaultStrategy;
-            return;
-        }
-        if(!targetEnabled) {
-            strategy = defaultStrategy;
-            return;
-        }
+        switch(currentMode) {
+        case "construct":
+            var randomIndex = parseInt(Math.random() * directions.length);
+            var found = false;
+            var result = moveResult(randomIndex);
+            if(moveAcceptable(randomIndex) && percolationSystem.team(result.row, result.column) === team.teamId) {
+                moveStrategy = randomIndex;
+                strategy = "move";
+            } else {
+                strategy = "construct";
+            }
+            break;
+        case "destruct":
+            var randomIndex = parseInt(Math.random() * directions.length);
+            var found = false;
+            var result = moveResult(randomIndex);
+            if(moveAcceptable(randomIndex)) {
+                moveStrategy = randomIndex;
+                strategy = "move";
+            } else if (percolationSystem.team(row, col) !== team.teamId) {
+                strategy = "destruct";
+            } else {
+                strategy = "none";
+            }
+            break;
+        case "target":
+            if(!target) {
+                strategy = currentMode;
+                return;
+            }
+            if(!targetEnabled) {
+                strategy = currentMode;
+                return;
+            }
 
-        console.log("Rows:", target.row, root.row, target.col, root.col);
-        if(target.row === root.row && target.col === root.col) {
-            strategy = defaultStrategy;
-            targetEnabled = false;
-            return;
-        }
-        console.log("Path length:", path.length);
-        if(path.length === 0) {
-            path = findPath(Qt.point(root.row, root.col), Qt.point(target.row, target.col));
-        }
-        var next = path.pop();
-        console.log("Next:", next);
-        moveStrategy = changeToDirection(next.x - root.row, next.y - root.col);
-        if(moveStrategy > -1) {
-            strategy = "move";
-        } else {
+            console.log("Rows:", target.row, root.row, target.col, root.col);
+            if(target.row === root.row && target.col === root.col) {
+                strategy = currentMode;
+                targetEnabled = false;
+                return;
+            }
+            console.log("Path length:", path.length);
+            if(path.length === 0) {
+                path = findPath(Qt.point(root.row, root.col), Qt.point(target.row, target.col));
+            }
+            var next = path.pop();
+            console.log("Next:", next);
+            moveStrategy = changeToDirection(next.x - root.row, next.y - root.col);
+            if(moveStrategy > -1) {
+                strategy = "move";
+            } else {
+                strategy = "none";
+            }
+            break;
+        default:
             strategy = "none";
+            break
         }
     }
 

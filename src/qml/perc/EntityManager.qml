@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import org.dragly.perc 1.0
+import Perc 1.0
 
 Item {
     id: entityManagerRoot
@@ -10,10 +10,12 @@ Item {
     property var components: []
     property var entities: []
     property var deadEntities: []
+    property var deadTeams: []
     property double moveInterval: 100
     property double lastTime: Date.now()
     property int nextEntityId: 1
     property int nextTeamId: 1
+    property var colors: ["red", "green", "blue", "yellow", "purple", "pink", "orange", "cyan", "lightblue", "steelblue"]
     property var teams: []
 
     function addInteraction(interaction) {
@@ -29,6 +31,10 @@ Item {
             properties.name = "Team " + nextTeamId;
         }
 
+        if(properties.color === undefined) {
+            properties.color = colors[nextTeamId % colors.length];
+        }
+
         if(properties.teamId === undefined) {
             properties.teamId = nextTeamId;
             nextTeamId += 1;
@@ -36,8 +42,18 @@ Item {
 
         var teamComponent = Qt.createComponent("Team.qml");
         var team = teamComponent.createObject(entityManagerRoot, properties);
-        entityManagerRoot.teams.push(team);
+        teams.push(team);
         return team;
+    }
+
+    function removeTeamAndEntities(team) {
+        for(var i in entities) {
+            var entity = entities[i];
+            if(entity.teamId === team.teamId) {
+                deadEntities.push(entity)
+            }
+        }
+        deadTeams.push(team);
     }
 
     function createEntityFromUrl(url, properties) {
@@ -90,18 +106,32 @@ Item {
         deadEntities.push(entity)
     }
 
-    function advance(currentUpdateTime) {
-        // remove dead entities
+    function removeEntity(entity) {
+        entities.splice(entities.indexOf(entity), 1);
+        entity.destroy(100);
+    }
+
+    function removeTeam(team) {
+        teams.splice(teams.indexOf(team), 1);
+        team.destroy(100);
+    }
+
+    function clearDeadItems() {
         for(var i in deadEntities) {
             var deadEntity = deadEntities[i]
-            var index = entities.indexOf(deadEntity)
-            if(index !== -1) {
-                entities.splice(index, 1)
-            }
-            deadEntity.destroy(100)
+            removeEntity(deadEntity);
         }
-
         deadEntities = []
+
+        for(var i in deadTeams) {
+            var deadTeam = deadTeams[i];
+            removeTeam(deadTeam);
+        }
+        deadTeams = [];
+    }
+
+    function advance(currentUpdateTime) {
+        clearDeadItems();
 
         var interval = currentUpdateTime - lastTime
         if(interval > moveInterval) {
