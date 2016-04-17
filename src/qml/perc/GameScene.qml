@@ -13,6 +13,7 @@ Item {
     default property alias containerChildren: entityContainer.children
 
     property PercolationSystem percolationSystem: null
+    property var entityManager: null // TODO should be EntityManager
     property list<EntityBase> selectedObjects
     property real targetScale: scale
     readonly property alias currentScale: scaleTransform.yScale
@@ -21,10 +22,8 @@ Item {
     property alias lightSource: lightSource
 
     Component.onCompleted: {
-        if(percolationSystem === null) {
-            console.log("Error: PercolationSystem must be set in GameScene")
-            Qt.quit()
-            return
+        if(percolationSystem === null || entityManager === null) {
+            throw("Error: PercolationSystem and entityManager must be set in GameScene")
         }
     }
 
@@ -106,6 +105,17 @@ Item {
         drag.target: parent
     }
 
+    NMapLightSource {
+        id: lightSource
+        z: 10
+        lightIntensity: 0.5
+        anchors.centerIn: parent
+    }
+
+    Item {
+        id: entityContainer
+    }
+
     Rectangle {
         id: selectionRectangle
         border.width: 1
@@ -116,18 +126,5 @@ Item {
         width: 0
         height: 0
         visible: mainMouseArea.isDragging
-
-        z: 99999
-    }
-
-    NMapLightSource {
-        id: lightSource
-        z: 10
-        lightIntensity: 0.5
-        anchors.centerIn: parent
-    }
-
-    Item {
-        id: entityContainer
     }
 }

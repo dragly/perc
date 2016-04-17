@@ -86,6 +86,7 @@ Item {
 
     PercolationSystem {
         id: percolationSystem
+        objectName: "clientPercolationSystem"
         width: columnCount
         height: rowCount
         imageType: constructionMenu.imageType
@@ -117,6 +118,7 @@ Item {
 
         width: percolationSystem.width * Defaults.GRID_SIZE
         height: percolationSystem.height * Defaults.GRID_SIZE
+        entityManager: entityManager
 
         objectName: "gameScene"
         targetScale: 0.2
@@ -469,34 +471,23 @@ Item {
 
         PercolationSystem {
             id: serverPercolationSystem
+            objectName: "serverPercolationSystem"
             width: columnCount
             height: rowCount
-            rowCount: 10
-            columnCount: 10
+            rowCount: 64
+            columnCount: 64
 
             occupationTreshold: 0.6
             imageType: constructionMenu.imageType
             smooth: false
         }
 
-        PercolationSystemShader {
-            id: serverPercolationSystemShader
-            source: serverPercolationSystem
-
+        ShaderEffectSource {
+            id: effectSource
+            sourceItem: serverPercolationSystem
+            hideSource: true
+            mipmap: false
             anchors.fill: parent
-
-            lightIntensity: 10 * serverScene.targetScale
-
-            smooth: false
-            samples: 32 * Math.sqrt(serverScene.targetScale)
-
-            function updateSourceRect() {
-                var newRect = gameViewRoot.mapToItem(serverScene,0,0,300,300)
-                sourceRect = Qt.rect(newRect.x / (Defaults.GRID_SIZE),
-                                     newRect.y / (Defaults.GRID_SIZE),
-                                     newRect.width / (Defaults.GRID_SIZE),
-                                     newRect.height / (Defaults.GRID_SIZE))
-            }
         }
 
         GameScene {
@@ -505,6 +496,8 @@ Item {
             property real scala: serverPercolationSystem.width / (serverPercolationSystem.rowCount * Defaults.GRID_SIZE)
 
             anchors.fill: parent
+
+            entityManager: serverEntityManager
             scale: 0.2
             targetScale: 0.2
             onScalaChanged: console.log("scala", scala)

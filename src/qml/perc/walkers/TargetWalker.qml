@@ -9,9 +9,9 @@ BaseWalker {
 
     property var path: []
     property var grid: []
-    property bool targetEnabled: true
+    property bool targetEnabled: false
     property var target: {
-        return {row: 4, col: 4}
+        return {row: -1, col: -1}
     }
 
     objectName: "TargetWalker"
