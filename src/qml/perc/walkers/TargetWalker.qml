@@ -17,6 +17,7 @@ BaseWalker {
     property var modes: [
         "construct",
         "destruct",
+        "attack",
         "none"
     ]
     property int modeIndex: 0
@@ -171,7 +172,6 @@ BaseWalker {
             switch(currentMode) {
             case "construct":
                 var randomIndex = parseInt(Math.random() * directions.length);
-                var found = false;
                 var result = moveResult(randomIndex);
                 if(Math.random() < 0.5 && moveAcceptable(randomIndex) && percolationSystem.team(result.row, result.column) === team.teamId) {
                     moveStrategy = randomIndex;
@@ -182,7 +182,6 @@ BaseWalker {
                 break;
             case "destruct":
                 var randomIndex = parseInt(Math.random() * directions.length);
-                var found = false;
                 var result = moveResult(randomIndex);
                 if(Math.random() < 0.5 && moveAcceptable(randomIndex)) {
                     moveStrategy = randomIndex;
@@ -191,6 +190,16 @@ BaseWalker {
                     strategy = "destruct";
                 } else {
                     strategy = "none";
+                }
+                break;
+            case "attack":
+                var randomIndex = parseInt(Math.random() * directions.length);
+                var result = moveResult(randomIndex);
+                if(Math.random() < 0.5 && moveAcceptable(randomIndex)) {
+                    moveStrategy = randomIndex;
+                    strategy = "move";
+                } else {
+                    strategy = "attack";
                 }
                 break;
             default:

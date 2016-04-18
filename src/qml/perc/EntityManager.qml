@@ -162,6 +162,8 @@ Item {
                                 percolationSystem.lowerValue(0.002, row, column);
                             }
                         }
+                        break;
+                    case "attack":
                         var entity1 = entity;
                         for(var j in entities) {
                             var entity2 = entities[j];
