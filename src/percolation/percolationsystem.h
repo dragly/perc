@@ -67,8 +67,8 @@ public:
     int rowCount() const;
     int columnCount() const;
 
-    Q_INVOKABLE QString serialize(ImageType matrixType);
-    Q_INVOKABLE void deserialize(ImageType matrixType, QString data);
+    Q_INVOKABLE QVariantList serialize(ImageType matrixType);
+    Q_INVOKABLE void deserialize(ImageType matrixType, QVariantList data);
     Q_INVOKABLE double movementCost(int row, int col);
 
     Q_INVOKABLE double value(int row, int col);

@@ -51,33 +51,52 @@ int PercolationSystem::columnCount() const
     return m_columnCount;
 }
 
-QString PercolationSystem::serialize(ImageType matrixType) {
-    stringstream stream;
+QVariantList PercolationSystem::serialize(ImageType matrixType) {
+    ensureInitialization();
+    QVariantList list;
     switch(matrixType) {
     case ValueImage:
-        m_valueMatrix.save(stream, arma::arma_ascii);
+        for(int i = 0; i < m_rowCount; i++) {
+            for(int j = 0; j < m_columnCount; j++) {
+                list.append(m_valueMatrix(i, j));
+            }
+        }
         break;
     case TeamImage:
-        m_teamMatrix.save(stream, arma::arma_ascii);
+        for(int i = 0; i < m_rowCount; i++) {
+            for(int j = 0; j < m_columnCount; j++) {
+                list.append(m_teamMatrix(i, j));
+            }
+        }
         break;
     default:
         qWarning() << "ERROR: Cannot serialize image of type" << matrixType;
         break;
     }
-    return QString::fromStdString(stream.str());
+    return list;
 }
 
-void PercolationSystem::deserialize(ImageType matrixType, QString data)
+void PercolationSystem::deserialize(ImageType matrixType, QVariantList data)
 {
-    stringstream stream;
-    stream << data.toStdString();
     ensureInitialization();
+    if(data.count() < m_rowCount * m_columnCount) {
+        qWarning() << "Cannot deserialize data of size" << data.size() << "vs" << m_rowCount * m_columnCount;
+        return;
+    }
     switch(matrixType) {
     case ValueImage:
-        m_valueMatrix.load(stream, arma::arma_ascii);
+        for(int i = 0; i < m_rowCount; i++) {
+            for(int j = 0; j < m_columnCount; j++) {
+                m_valueMatrix(i, j) = data[i * m_columnCount + j].toDouble();
+            }
+        }
         break;
     case TeamImage:
-        m_teamMatrix.load(stream, arma::arma_ascii);
+        for(int i = 0; i < m_rowCount; i++) {
+            for(int j = 0; j < m_columnCount; j++) {
+                m_teamMatrix(i, j) = data[i * m_columnCount + j].toInt();
+            }
+        }
         break;
     default:
         qWarning() << "ERROR: Cannot deserialize image of type" << matrixType;

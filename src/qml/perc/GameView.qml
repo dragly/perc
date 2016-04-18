@@ -432,6 +432,7 @@ Item {
         id: socket
         active: false
         onTextMessageReceived: {
+            console.log(message);
             var parsed = JSON.parse(message);
             if(parsed.type === "welcome") {
                 console.log("Got welcome message from server!");
