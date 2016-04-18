@@ -690,7 +690,7 @@ Item {
             text: "Connect"
             onClicked: {
                 socket.url = clientTextField.text;
-                socket.active = !socket.active;
+//                socket.active = !socket.active;
             }
         }
     }

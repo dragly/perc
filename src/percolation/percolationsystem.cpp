@@ -55,29 +55,29 @@ QString PercolationSystem::serialize(ImageType matrixType) {
     stringstream stream;
     switch(matrixType) {
     case ValueImage:
-        m_valueMatrix.save(stream, arma::arma_binary);
+        m_valueMatrix.save(stream, arma::arma_ascii);
         break;
     case TeamImage:
-        m_teamMatrix.save(stream, arma::arma_binary);
+        m_teamMatrix.save(stream, arma::arma_ascii);
         break;
     default:
         qWarning() << "ERROR: Cannot serialize image of type" << matrixType;
         break;
     }
-    return QString::fromLatin1(QByteArray::fromStdString(stream.str()).toBase64());
+    return QString::fromStdString(stream.str());
 }
 
 void PercolationSystem::deserialize(ImageType matrixType, QString data)
 {
     stringstream stream;
-    stream << QByteArray::fromBase64(data.toLatin1()).toStdString();
+    stream << data.toStdString();
     ensureInitialization();
     switch(matrixType) {
     case ValueImage:
-        m_valueMatrix.load(stream, arma::arma_binary);
+        m_valueMatrix.load(stream, arma::arma_ascii);
         break;
     case TeamImage:
-        m_teamMatrix.load(stream, arma::arma_binary);
+        m_teamMatrix.load(stream, arma::arma_ascii);
         break;
     default:
         qWarning() << "ERROR: Cannot deserialize image of type" << matrixType;
