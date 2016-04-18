@@ -20,12 +20,12 @@
 #include <armadillo>
 #endif
 
-#include <eigen3/Eigen/Eigen>
-#include <eigen3/Eigen/IterativeLinearSolvers>
-#include <eigen3/Eigen/QR>
-#include <eigen3/Eigen/SparseCholesky>
+//#include <eigen3/Eigen/Eigen>
+//#include <eigen3/Eigen/IterativeLinearSolvers>
+//#include <eigen3/Eigen/QR>
+//#include <eigen3/Eigen/SparseCholesky>
 
-using namespace Eigen;
+//using namespace Eigen;
 
 #include <QElapsedTimer>
 #include <iostream>
@@ -181,7 +181,7 @@ protected:
     QMutex m_prevImageMutex;
     Random m_random;
 
-    ConjugateGradient<SparseMatrix<double>, Upper> m_solver;
+//    ConjugateGradient<SparseMatrix<double>, Upper> m_solver;
 //    SimplicialLLT<SparseMatrix<double> > m_solver;
 
     bool m_analyzed = false;

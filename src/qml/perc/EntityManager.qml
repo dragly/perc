@@ -148,7 +148,7 @@ Item {
                                     var row = entity.row + di;
                                     var column = entity.col + dj;
                                     percolationSystem.teamTag(entity.team.teamId, row, column);
-                                    percolationSystem.raiseValue(0.01, row, column);
+                                    percolationSystem.raiseValue(0.002, row, column);
                                 }
                             }
                         }
@@ -159,7 +159,7 @@ Item {
                                 var row = entity.row + di;
                                 var column = entity.col + dj;
                                 percolationSystem.teamTag(0, row, column);
-                                percolationSystem.lowerValue(0.01, row, column);
+                                percolationSystem.lowerValue(0.002, row, column);
                             }
                         }
                         var entity1 = entity;

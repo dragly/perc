@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.4
 import Qt.WebSockets 1.0
+import Qt.labs.settings 1.0
 
 import Perc 1.0
 
@@ -429,8 +430,7 @@ Item {
 
     WebSocket {
         id: socket
-        url: "ws://localhost:44789"
-        active: true
+        active: false
         onTextMessageReceived: {
             var parsed = JSON.parse(message);
             if(parsed.type === "welcome") {
@@ -677,7 +677,7 @@ Item {
             onClicked: {
                 server.host = serverTextField.text;
                 server.port = parseInt(serverPortTextField.text);
-                server.listen = true;
+                server.listen = !server.listen;
             }
         }
 
@@ -689,10 +689,15 @@ Item {
         Button {
             text: "Connect"
             onClicked: {
-                socket.active = false;
                 socket.url = clientTextField.text;
-                socket.active = true;
+                socket.active = !socket.active;
             }
         }
+    }
+
+    Settings {
+        property alias serverHost: serverTextField.text
+        property alias serverPort: serverPortTextField.text
+        property alias socketUrl: clientTextField.text
     }
 }

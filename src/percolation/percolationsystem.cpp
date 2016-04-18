@@ -9,8 +9,8 @@
 #include <sstream>
 #include <vector>
 #include <QtConcurrent/QtConcurrent>
-#include <eigen3/Eigen/IterativeLinearSolvers>
-#include <eigen3/Eigen/SparseCholesky>
+//#include <eigen3/Eigen/IterativeLinearSolvers>
+//#include <eigen3/Eigen/SparseCholesky>
 
 //#ifdef Q_OS_ANDROID
 //#include </home/svenni/apps/armadillo/armadillo>
