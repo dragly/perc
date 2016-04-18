@@ -160,9 +160,6 @@ Item {
                                 var column = entity.col + dj;
                                 percolationSystem.teamTag(0, row, column);
                                 percolationSystem.lowerValue(0.01, row, column);
-                                console.log("Lower value");
-
-                                // TODO attack other entities
                             }
                         }
                         var entity1 = entity;

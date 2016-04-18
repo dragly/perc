@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import QtQuick.Controls 1.4
 import Qt.WebSockets 1.0
 
 import Perc 1.0
@@ -330,7 +331,7 @@ Item {
         property int nextTeamId: 1
 
         host: "192.168.2.2"
-        port: 44789
+        port: 44790
         accept: true
         listen: true
 
@@ -585,8 +586,8 @@ Item {
             objectName: "serverPercolationSystem"
             width: columnCount
             height: rowCount
-            rowCount: 64
-            columnCount: 64
+            rowCount: 48
+            columnCount: 48
 
             occupationTreshold: 0.6
             imageType: constructionMenu.imageType
@@ -654,6 +655,35 @@ Item {
             }
 
             server.notifyClients();
+        }
+    }
+    Column {
+        anchors {
+            bottom: parent.bottom
+            left: parent.left
+            right: parent.right
+        }
+
+        Text {
+            text: "Server: " + server.url
+        }
+
+        TextField {
+            id: serverTextField
+            anchors {
+                left: parent.left
+                right: parent.rigt
+                margins: 16
+            }
+            text: "ws://192.168.2.2:44789"
+            width: 300
+        }
+
+        Button {
+            text: "Connect"
+            onClicked: {
+                socket.url = serverTextField.text;
+            }
         }
     }
 }

@@ -35,7 +35,7 @@ PercolationSystem::PercolationSystem(QQuickPaintedItem *parent) :
     m_clusterCount(0),
     m_imageType(OccupationImage),
     m_isInitialized(false),
-    m_random(-94)
+    m_random(time(NULL))
 {
     connect(this, SIGNAL(readyToUpdate()), this, SLOT(update()));
     connect(this, SIGNAL(imageTypeChanged(ImageType)), this, SLOT(requestRecalculation()));
