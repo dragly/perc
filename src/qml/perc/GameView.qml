@@ -330,10 +330,10 @@ Item {
         property var clients: []
         property int nextTeamId: 1
 
-        host: "192.168.2.2"
-        port: 44790
+        host: "127.0.0.1"
+        port: 44789
         accept: true
-        listen: true
+        listen: false
 
         function notifyClients() {
             var entities = [];
@@ -429,7 +429,7 @@ Item {
 
     WebSocket {
         id: socket
-        url: "ws://192.168.2.2:44789"
+        url: "ws://localhost:44789"
         active: true
         onTextMessageReceived: {
             var parsed = JSON.parse(message);
@@ -657,32 +657,41 @@ Item {
             server.notifyClients();
         }
     }
-    Column {
+    Row {
         anchors {
             bottom: parent.bottom
-            left: parent.left
-            right: parent.right
-        }
-
-        Text {
-            text: "Server: " + server.url
         }
 
         TextField {
             id: serverTextField
-            anchors {
-                left: parent.left
-                right: parent.rigt
-                margins: 16
+            text: "127.0.0.1"
+        }
+
+        TextField {
+            id: serverPortTextField
+            text: "44790"
+        }
+
+        Button {
+            text: "Serve"
+            onClicked: {
+                server.host = serverTextField.text;
+                server.port = parseInt(serverPortTextField.text);
+                server.listen = true;
             }
-            text: "ws://192.168.2.2:44789"
-            width: 300
+        }
+
+        TextField {
+            id: clientTextField
+            text: "ws://127.0.0.1:44790"
         }
 
         Button {
             text: "Connect"
             onClicked: {
-                socket.url = serverTextField.text;
+                socket.active = false;
+                socket.url = clientTextField.text;
+                socket.active = true;
             }
         }
     }
